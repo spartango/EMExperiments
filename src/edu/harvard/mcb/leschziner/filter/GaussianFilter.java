@@ -9,8 +9,8 @@ public class GaussianFilter implements ParticleFilter {
 
     private Kernel kernel;
 
-    public GaussianFilter(int size) {
-        kernel = generateKernel(size);
+    public GaussianFilter(int radius) {
+        kernel = generateKernel(radius);
     }
 
     @Override
