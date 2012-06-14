@@ -5,10 +5,20 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class CircularMask implements ParticleFilter {
     private static final int BLACK = 0;
-    
-    private int radius; // in px
-    private int xOffset; 
-    private int yOffset;
+
+    private int              radius;   // in px
+    private int              xOffset;
+    private int              yOffset;
+
+    public CircularMask(int radius) {
+        this(radius, 0, 0);
+    }
+
+    public CircularMask(int radius, int xOffset, int yOffset) {
+        this.radius = radius;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
+    }
 
     @Override
     public Particle filter(Particle target) {
@@ -25,7 +35,7 @@ public class CircularMask implements ParticleFilter {
                 double yShift = (size / 2.0) + yOffset;
                 double distanceSquared = (x - xShift) * (x - xShift)
                                          + (y - yShift) * (y - yShift);
-                if (distanceSquared < (radius * radius)) {
+                if (distanceSquared > (radius * radius)) {
                     filteredParticle.setPixel(x, y, BLACK);
                 }
             }

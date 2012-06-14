@@ -14,7 +14,7 @@ public class Shifter implements ParticleFilter {
     }
 
     private static AffineTransform generateTransform(double x, double y) {
-        return new AffineTransform(1, 0, 1, 0, x, y);
+        return AffineTransform.getTranslateInstance(x, y);
     }
 
     @Override

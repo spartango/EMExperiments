@@ -15,9 +15,7 @@ public class Rotator implements ParticleFilter {
 
     private static AffineTransform generateTransform(double angle) {
         double radianAngle = Math.toRadians(angle);
-        double cos = Math.cos(radianAngle);
-        double sin = Math.sin(radianAngle);
-        return new AffineTransform(cos, sin, -sin, cos, 0, 0);
+        return AffineTransform.getRotateInstance(radianAngle);
     }
 
     @Override
