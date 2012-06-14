@@ -18,7 +18,7 @@ public class GaussianFilter implements ParticleFilter {
         return Particle.convolve(target, kernel);
     }
 
-    private Kernel generateKernel(int radius) {
+    private static Kernel generateKernel(int radius) {
         // Build kernel
         int rCeil = (int) Math.ceil(radius);
         int rows = rCeil * 2 + 1;
