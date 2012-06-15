@@ -49,10 +49,12 @@ public class Main {
         // ParticleFilter shift = new Shifter(-32, -32);
         ParticleFilter mask = new CircularMask(80);
         ParticleFilter gauss = new GaussianFilter(3);
+        ParticleFilter rotator = new Rotator(45);
         ParticleFilter reCenter = new MassCenterer();
 
         Particle processed = mask.filter(target);
         processed = gauss.filter(processed);
+        processed = rotator.filter(processed);
         processed = reCenter.filter(processed);
 
         return processed;

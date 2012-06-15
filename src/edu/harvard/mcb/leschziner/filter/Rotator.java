@@ -7,19 +7,19 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class Rotator implements ParticleFilter {
 
-    private AffineTransform transform;
+    private double radianAngle;
 
     public Rotator(double angle) { // Degrees
-        transform = generateTransform(angle);
+        radianAngle = Math.toRadians(angle);
     }
 
-    private static AffineTransform generateTransform(double angle) {
-        double radianAngle = Math.toRadians(angle);
-        return AffineTransform.getRotateInstance(radianAngle);
+    private static AffineTransform generateTransform(double angle, int size) {
+        return AffineTransform.getRotateInstance(angle, size / 2.0, size / 2.0);
     }
 
     @Override
     public Particle filter(Particle target) {
+        AffineTransform transform = generateTransform(radianAngle, target.getSize());
         return Particle.transform(target, transform);
     }
 
