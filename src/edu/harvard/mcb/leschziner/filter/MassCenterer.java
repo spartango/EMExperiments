@@ -17,11 +17,11 @@ public class MassCenterer implements ParticleFilter {
 
         int maxMassX = 0;
         for (int i = 0; i < target.getSize(); i++) {
-            int mass = MatrixUtils.sum(target.getColumn(i));
+            int mass = MatrixUtils.sum(ColorUtils.extractRed(target.getColumn(i)) );
             if (mass > maxMassX) {
                 maxMassX = mass;
                 massCenterX = i;
-                System.out.println("[MassCenterer]: X Sum(" + i + ") = " + mass);
+                //System.out.println("[MassCenterer]: X Sum(" + i + ") = " + mass);
             }
         }
 
@@ -33,7 +33,7 @@ public class MassCenterer implements ParticleFilter {
             if (mass > maxMassY) {
                 maxMassY = mass;
                 massCenterY = j;
-                System.out.println("[MassCenterer]: Y Sum(" + j + ") = " + mass);
+                //System.out.println("[MassCenterer]: Y Sum(" + j + ") = " + mass);
             }
         }
 
