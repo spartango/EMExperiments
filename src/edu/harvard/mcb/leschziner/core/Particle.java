@@ -19,47 +19,44 @@ public class Particle {
     private BufferedImage image;
 
     // Dimensions (in px)
-    private int           size;
 
     // Constructor
     public Particle(BufferedImage image) {
         this.image = image;
-        size = image.getHeight();
     }
 
     public int getSize() {
-        return size;
+        return image.getHeight();
     }
 
     // I/O methods
 
     public int getPixel(int x, int y) {
-        // TODO caching layer
         return image.getRGB(x, y);
     }
 
     public int[] getRow(int y) {
-        return image.getRGB(0, y, size, 1, null, 0, size);
+        return image.getRGB(0, y, getSize(), 1, null, 0, getSize());
     }
 
     public int[] getColumn(int x) {
-        return image.getRGB(x, 0, 1, size, null, 0, size);
+        return image.getRGB(x, 0, 1, getSize(), null, 0, getSize());
     }
 
     public int[][] getRegion(int x, int y, int width, int height) {
         int[] flat = new int[width * height];
-        image.getRGB(x, y, width, height, flat, 0, size);
+        image.getRGB(x, y, width, height, flat, 0, getSize());
         return MatrixUtils.unflatten(flat, width, height);
     }
 
     public void setPixel(int x, int y, int value) {
-        // TODO buffering layer
         image.setRGB(x, y, value);
     }
 
     // Object handling
     public Particle clone() {
-        BufferedImage newImage = new BufferedImage(size, size, image.getType());
+        BufferedImage newImage = new BufferedImage(getSize(), getSize(),
+                                                   image.getType());
         image.copyData(newImage.getRaster());
         return new Particle(newImage);
     }
@@ -115,8 +112,9 @@ public class Particle {
     private static Particle applyOperation(Particle target,
                                            BufferedImageOp operation) {
         // Create a destination
-        BufferedImage dest = operation.createCompatibleDestImage(target.image,
-                                                                 target.image.getColorModel());
+        BufferedImage dest = new BufferedImage(target.getSize(),
+                                               target.getSize(),
+                                               target.image.getType());
 
         // Apply the op
         operation.filter(target.image, dest);
