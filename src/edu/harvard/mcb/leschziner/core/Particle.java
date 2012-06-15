@@ -44,9 +44,13 @@ public class Particle {
     }
 
     public int[][] getRegion(int x, int y, int width, int height) {
-        int[] flat = new int[width * height];
-        image.getRGB(x, y, width, height, flat, 0, getSize());
+        int[] flat = image.getRGB(x, y, width, height, null, 0, getSize());
         return MatrixUtils.unflatten(flat, width, height);
+    }
+    
+    public int[][] getPixels() {
+        // TODO make this efficient
+        return getRegion(0, 0, getSize(), getSize());
     }
 
     public void setPixel(int x, int y, int value) {

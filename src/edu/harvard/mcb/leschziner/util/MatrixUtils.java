@@ -13,7 +13,7 @@ public class MatrixUtils {
         }
         return flattened;
     }
-    
+
     public static int[] flatten(int[][] matrix) {
         int matrixHeight = matrix.length;
         int matrixWidth = matrix[0].length;
@@ -29,26 +29,44 @@ public class MatrixUtils {
 
     public static float[][] unflatten(float[] matrix, int width, int height) {
         float[][] unflattened = new float[height][width];
-        for(int i = 0; i < height; i++) {
-            System.arraycopy(matrix, i*width, unflattened[i], 0, width);
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(matrix, i * width, unflattened[i], 0, width);
         }
         return unflattened;
     }
-    
+
     public static int[][] unflatten(int[] matrix, int width, int height) {
         int[][] unflattened = new int[height][width];
-        for(int i = 0; i < height; i++) {
-            System.arraycopy(matrix, i*width, unflattened[i], 0, width);
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(matrix, i * width, unflattened[i], 0, width);
         }
         return unflattened;
     }
-    
+
     public static int sum(int[] array) {
         int sum = 0;
-        for(int i = 0; i<array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             sum += array[i];
         }
         return sum;
+    }
+
+    public static int sum(int[][] array) {
+        int sum = 0;
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[0].length; j++) {
+                sum += array[i][j];
+            }
+        }
+        return sum;
+    }
+
+    public static double average(int[] array) {
+        return sum(array) / array.length;
+    }
+
+    public static double average(int[][] matrix) {
+        return sum(matrix) / (matrix.length * matrix[0].length);
     }
 
 }

@@ -2,13 +2,13 @@ package edu.harvard.mcb.leschziner.deploy;
 
 import java.io.IOException;
 
+import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.filter.CircularMask;
 import edu.harvard.mcb.leschziner.filter.GaussianFilter;
 import edu.harvard.mcb.leschziner.filter.MassCenterer;
 import edu.harvard.mcb.leschziner.filter.Rotator;
-import edu.harvard.mcb.leschziner.filter.Shifter;
 
 public class Main {
 
@@ -53,11 +53,16 @@ public class Main {
             System.out.println("[Main]: Completed Rotations in " + deltaTime
                                + "ms");
 
-            System.out.println("[Main]: Writing rotated particle");
+            System.out.println("[Main]: Writing rotated particles");
             // Write the particle
             for (int i = 0; i < rotated.length; i++) {
                 rotated[i].toFile("processed/rib15r_" + i + ".png");
             }
+
+            double correlation = CrossCorrelator.compare(rotated[0],
+                                                         rotated[4]);
+            System.out.println("[Main]: Autocorrelation " + correlation);
+
             System.out.println("[Main]: Complete");
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,7 +77,7 @@ public class Main {
 
         // Seed the rotation set with the unrotated particle
         rotated[0] = newParticle.clone();
-        
+
         for (int i = 1; i < rotations; i++) {
             // Rotate relative to prev
             ParticleFilter rotator = new Rotator(deltaTheta * i);
