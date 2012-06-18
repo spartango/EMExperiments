@@ -5,10 +5,10 @@ import java.io.IOException;
 import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.filter.CircularMask;
-import edu.harvard.mcb.leschziner.filter.LowPassFilter;
-import edu.harvard.mcb.leschziner.filter.MassCenterer;
-import edu.harvard.mcb.leschziner.filter.Rotator;
+import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
+import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
+import edu.harvard.mcb.leschziner.particlefilter.MassCenterer;
+import edu.harvard.mcb.leschziner.particlefilter.Rotator;
 
 public class Main {
 
