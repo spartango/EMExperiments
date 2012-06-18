@@ -7,18 +7,33 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class GaussianFilter implements ParticleFilter {
 
-    private Kernel kernel;
+    private Kernel xKernel;
+    private Kernel yKernel;
 
     public GaussianFilter(int radius) {
-        kernel = generateKernel(radius);
+        xKernel = generateXKernel(radius);
+        yKernel = generateYKernel(radius);
     }
 
     @Override
     public Particle filter(Particle target) {
-        return Particle.convolve(target, kernel);
+        // Apply each 1D filter
+        Particle filtered = Particle.convolve(target, xKernel);
+        filtered = Particle.convolve(filtered, yKernel);
+        return filtered;
     }
 
-    private static Kernel generateKernel(int radius) {
+    private static Kernel generateXKernel(int radius) {
+        float[] xDistribution = generateGaussian(radius);
+        return new Kernel(xDistribution.length, 1, xDistribution);
+    }
+
+    private static Kernel generateYKernel(int radius) {
+        float[] yDistribution = generateGaussian(radius);
+        return new Kernel(1, yDistribution.length, yDistribution);
+    }
+
+    private static float[] generateGaussian(int radius) {
         // Build kernel
         int rCeil = (int) Math.ceil(radius);
         int rows = rCeil * 2 + 1;
@@ -45,9 +60,6 @@ public class GaussianFilter implements ParticleFilter {
             basis[i] /= total;
         }
 
-        // TODO fix for 2D
-
-        throw new RuntimeException("Not implemented properly yet");
-        // return new Kernel(rows, 1, basis);
+        return basis;
     }
 }
