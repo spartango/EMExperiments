@@ -6,7 +6,7 @@ import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.filter.CircularMask;
-import edu.harvard.mcb.leschziner.filter.GaussianFilter;
+import edu.harvard.mcb.leschziner.filter.LowPassFilter;
 import edu.harvard.mcb.leschziner.filter.MassCenterer;
 import edu.harvard.mcb.leschziner.filter.Rotator;
 
@@ -59,9 +59,8 @@ public class Main {
                 rotated[i].toFile("processed/rib15r_" + i + ".png");
             }
 
-            double correlation = CrossCorrelator.compare(rotated[0],
-                                                         rotated[4]);
-            System.out.println("[Main]: Autocorrelation " + correlation);
+            double correlation = CrossCorrelator.compare(rotated[0], rotated[4]);
+            System.out.println("[Main]: Correlation " + correlation);
 
             System.out.println("[Main]: Complete");
         } catch (IOException e) {
@@ -89,15 +88,15 @@ public class Main {
     private static Particle processParticle(Particle target) {
         // ParticleFilter shift = new Shifter(-32, -32);
         ParticleFilter mask = new CircularMask(80);
-        ParticleFilter gauss = new GaussianFilter(3);
+        ParticleFilter lowpass = new LowPassFilter(3);
         ParticleFilter reCenter = new MassCenterer();
 
         Particle processed = target;
 
         // Apply filters
         processed = mask.filter(processed);
-        processed = gauss.filter(processed);
-        processed = reCenter.filter(processed);
+        processed = lowpass.filter(processed);
+        //processed = reCenter.filter(processed);
 
         return processed;
     }

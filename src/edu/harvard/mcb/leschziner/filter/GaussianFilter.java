@@ -45,6 +45,9 @@ public class GaussianFilter implements ParticleFilter {
             basis[i] /= total;
         }
 
-        return new Kernel(rows, 1, basis);
+        // TODO fix for 2D
+
+        throw new RuntimeException("Not implemented properly yet");
+        // return new Kernel(rows, 1, basis);
     }
 }
