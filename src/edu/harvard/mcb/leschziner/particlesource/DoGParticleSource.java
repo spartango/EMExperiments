@@ -13,6 +13,7 @@ import edu.harvard.mcb.leschziner.core.ParticleSource;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
+import edu.harvard.mcb.leschziner.particlesource.extract.BlobExtractor;
 
 public class DoGParticleSource implements ParticleSource {
 
@@ -24,7 +25,7 @@ public class DoGParticleSource implements ParticleSource {
     private ParticleFilter                 highFilter;
     private ParticleFilter                 thresholdFilter;
 
-    private int                            particleSize;
+    private BlobExtractor                  blobExtractor;
 
     private Vector<ParticleSourceListener> listeners;
 
@@ -37,7 +38,6 @@ public class DoGParticleSource implements ParticleSource {
                              int lowRadius,
                              int highRadius,
                              int threshold) {
-        this.particleSize = particleSize;
 
         lowFilter = new GaussianFilter(lowRadius);
         highFilter = new GaussianFilter(highRadius);
@@ -85,7 +85,7 @@ public class DoGParticleSource implements ParticleSource {
 
     @Override
     public void processMicrograph(final BufferedImage image) {
-        // Queueing a request to pick particles
+        // Queuing a request to pick particles
         micrographTasks.add(new Runnable() {
             @Override
             public void run() {

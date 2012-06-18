@@ -47,7 +47,7 @@ public class Particle {
         int[] flat = image.getRGB(x, y, width, height, null, 0, getSize());
         return MatrixUtils.unflatten(flat, width, height);
     }
-    
+
     public int[][] getPixels() {
         // TODO make this efficient
         return getRegion(0, 0, getSize(), getSize());
@@ -63,6 +63,10 @@ public class Particle {
                                                    image.getType());
         image.copyData(newImage.getRaster());
         return new Particle(newImage);
+    }
+
+    public Particle subParticle(int x, int y, int width, int height) {
+        return new Particle(image.getSubimage(x, y, width, height));
     }
 
     // Serialization

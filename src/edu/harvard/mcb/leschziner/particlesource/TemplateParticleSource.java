@@ -7,6 +7,8 @@ import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
 public class TemplateParticleSource implements ParticleSource {
 
+    
+    
     @Override
     public void addListener(ParticleSourceListener p) {
         // TODO Auto-generated method stub
