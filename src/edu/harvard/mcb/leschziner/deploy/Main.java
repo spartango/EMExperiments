@@ -1,14 +1,19 @@
 package edu.harvard.mcb.leschziner.deploy;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
-import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
+import javax.imageio.ImageIO;
+
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlefilter.MassCenterer;
 import edu.harvard.mcb.leschziner.particlefilter.Rotator;
+import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
 
 public class Main {
 
@@ -18,49 +23,42 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Load the particle
-            System.out.println("[Main]: Loading particle");
-            Particle testParticle = Particle.fromFile("particles/rib15.png");
+            System.out.println("[Main]: Loading Image");
+            BufferedImage micrograph = ImageIO.read(new File(
+                                                             "raw/sub_rib_10fold_49kx_15.png"));
 
-            System.out.println("[Main]: Processing particle");
+            // Setup the Particle Builder
+            DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
+                                                             180, 200);
 
-            // Start timing
-            long startTime = System.currentTimeMillis();
+            picker.addListener(new ParticleSourceListener() {
 
-            // Process the particle
-            Particle newParticle = processParticle(testParticle);
+                @Override
+                public void onNewParticle(final Particle p) {
+                    System.out.println("[ParticleListener]: New particle "
+                                       + p.hashCode());
+                    Thread t = new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                Particle newParticle = processParticle(p);
 
-            // Stop Timing
-            long deltaTime = System.currentTimeMillis() - startTime;
+                                newParticle.toFile("processed/rib_"
+                                                   + newParticle.hashCode()
+                                                   + ".png");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
 
-            System.out.println("[Main]: Completed Processing in " + deltaTime
-                               + "ms");
+                    t.start();
+                }
+            });
 
-            System.out.println("[Main]: Writing particle");
-            // Write the particle
-            newParticle.toFile("processed/rib15_p.png");
+            System.out.println("[Main]: Processing Micrograph");
 
-            System.out.println("[Main]: Rotating particle");
-
-            // Start timing
-            startTime = System.currentTimeMillis();
-
-            // Process the particle
-            Particle[] rotated = rotateParticle(newParticle, 20);
-
-            // Stop Timing
-            deltaTime = System.currentTimeMillis() - startTime;
-
-            System.out.println("[Main]: Completed Rotations in " + deltaTime
-                               + "ms");
-
-            System.out.println("[Main]: Writing rotated particles");
-            // Write the particle
-            for (int i = 0; i < rotated.length; i++) {
-                rotated[i].toFile("processed/rib15r_" + i + ".png");
-            }
-
-            double correlation = CrossCorrelator.compare(rotated[0], rotated[4]);
-            System.out.println("[Main]: Correlation " + correlation);
+            // Process the Micrograph
+            picker.processMicrograph(micrograph);
 
             System.out.println("[Main]: Complete");
         } catch (IOException e) {
@@ -88,16 +86,23 @@ public class Main {
     private static Particle processParticle(Particle target) {
         // ParticleFilter shift = new Shifter(-32, -32);
         ParticleFilter mask = new CircularMask(80);
-        ParticleFilter lowpass = new LowPassFilter(3);
+        ParticleFilter lowpass = new LowPassFilter(5);
         ParticleFilter reCenter = new MassCenterer();
 
         Particle processed = target;
+        // Start timing
+        long startTime = System.currentTimeMillis();
 
         // Apply filters
         processed = mask.filter(processed);
         processed = lowpass.filter(processed);
-        //processed = reCenter.filter(processed);
+        // processed = reCenter.filter(processed);
 
+        // Stop Timing
+        long deltaTime = System.currentTimeMillis() - startTime;
+
+        System.out.println("[Main " + Thread.currentThread()
+                           + "]: Completed Processing in " + deltaTime + "ms");
         return processed;
     }
 

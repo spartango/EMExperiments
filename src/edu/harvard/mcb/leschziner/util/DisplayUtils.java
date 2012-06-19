@@ -7,11 +7,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import edu.harvard.mcb.leschziner.core.Particle;
+
 public class DisplayUtils {
-    
+
+    public static void displayParticle(Particle target) {
+        displayImage(target.asBufferedImage());
+    }
+
     public static void displayImage(BufferedImage target) {
         JFrame canvas = new JFrame("Image");
-        canvas.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel panel = new JPanel();
         JLabel icon = new JLabel(new ImageIcon(target));
         panel.add(icon);
@@ -19,5 +24,5 @@ public class DisplayUtils {
         canvas.pack();
         canvas.setVisible(true);
     }
-    
+
 }

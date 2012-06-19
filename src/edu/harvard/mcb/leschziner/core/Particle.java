@@ -47,17 +47,17 @@ public class Particle {
         int[] flat = image.getRGB(x, y, width, height, null, 0, getSize());
         return MatrixUtils.unflatten(flat, width, height);
     }
-    
+
     // Provides a flat region buffer
     public int[] getRegionBuffer(int x, int y, int width, int height) {
-        return image.getRGB(x, y, width, height, null, 0, getSize());
+        return image.getRGB(x, y, width, height, null, 0, width);
     }
 
     public int[][] getPixels() {
         // TODO make this efficient
         return getRegion(0, 0, getSize(), getSize());
     }
-    
+
     public int[] getPixelBuffer() {
         return getRegionBuffer(0, 0, getSize(), getSize());
     }
@@ -74,8 +74,12 @@ public class Particle {
         return new Particle(newImage);
     }
 
-    public Particle subParticle(int x, int y, int width, int height) {
-        return new Particle(image.getSubimage(x, y, width, height));
+    public Particle subParticle(int x, int y, int size) {
+        return new Particle(image.getSubimage(x, y, size, size));
+    }
+
+    public BufferedImage asBufferedImage() {
+        return image;
     }
 
     // Serialization

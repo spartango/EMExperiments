@@ -2,6 +2,7 @@ package edu.harvard.mcb.leschziner.particlesource.extract;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.core.Particle;
@@ -19,7 +20,8 @@ public class BlobExtractor {
 
     // The expected size of the particle we're finding in pixels
     private int              targetSize;
-    // Amount of variability allowed in the particles chosen (+/- epsillon pixels)
+    // Amount of variability allowed in the particles chosen (+/- epsillon
+    // pixels)
     private int              epsillon;
 
     public BlobExtractor(int size, int epsillon) {
@@ -32,117 +34,113 @@ public class BlobExtractor {
         int size = target.getSize();
 
         // This will hold labels as they're generated
-        Particle labeled = new Particle(
-                                        new BufferedImage(
-                                                          size,
-                                                          size,
-                                                          BufferedImage.TYPE_INT_RGB));
+        int[][] labelBuffer = new int[size][size];
 
         int currentLabel = 1; // Labeling starts at 1.
 
         // Pass 1: Region labeling
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        System.out.println("[BlobExtractor]: Starting Blob Extraction Pass 1");
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
                 int xPixel = target.getPixel(x, y);
+                // System.out.print(xPixel + " ");
 
                 // Pixel is in foreground
                 if (xPixel != ColorUtils.BLACK) {
                     int[] labelKernel;
-                    // If we aren't at a border
-                    if (x > 0 && x < size - 1 && y > 0 && y < size - 1) {
-                        // Pull out the 8-connectivity kernel region
-                        labelKernel = labeled.getRegionBuffer(x, y, 3, 2);
-                    } else {
-                        // Edge region case
-                        labelKernel = new int[6];
-                        labelKernel[SECTOR_A] = (x > 0 && y > 0 ? labeled.getPixel(x - 1,
-                                                                                   y - 1)
-                                                               : UNLABELED);
-                        labelKernel[SECTOR_B] = (y > 0 ? labeled.getPixel(x,
-                                                                          y - 1)
-                                                      : UNLABELED);
-                        labelKernel[SECTOR_C] = (x < size - 1 && y > 0 ? labeled.getPixel(x + 1,
-                                                                                          y - 1)
-                                                                      : UNLABELED);
-                        labelKernel[SECTOR_D] = (x > 0 ? labeled.getPixel(x - 1,
-                                                                          y)
-                                                      : UNLABELED);
 
-                    }
+                    labelKernel = new int[6];
+                    labelKernel[SECTOR_A] = (x > 0 && y > 0 ? labelBuffer[y - 1][x - 1]
+                                                           : UNLABELED);
+                    labelKernel[SECTOR_B] = (y > 0 ? labelBuffer[y - 1][x]
+
+                    : UNLABELED);
+                    labelKernel[SECTOR_C] = (x < size - 1 && y > 0 ? labelBuffer[y - 1][x + 1]
+
+                                                                  : UNLABELED);
+                    labelKernel[SECTOR_D] = (x > 0 ? labelBuffer[y][x - 1]
+                                                  : UNLABELED);
 
                     if (labelKernel[SECTOR_A] == UNLABELED
                         && labelKernel[SECTOR_B] == UNLABELED
                         && labelKernel[SECTOR_C] == UNLABELED
                         && labelKernel[SECTOR_D] == UNLABELED) {
                         // Assign a new label
-                        labeled.setPixel(x, y, currentLabel);
+                        labelBuffer[y][x] = currentLabel;
                         currentLabel++;
                     } else {
+
                         // Find the lowest label > 0
                         // Assign all sectors that value
                         int minLabel = currentLabel;
-                        for (int i = SECTOR_A; i < SECTOR_X; i++) {
-                            if (labelKernel[i] != UNLABELED
+                        for (int i = SECTOR_A; i <= SECTOR_D; i++) {
+                            if (labelKernel[i] > UNLABELED
                                 && labelKernel[i] < minLabel) {
                                 minLabel = labelKernel[i];
                             }
                         }
 
                         // Label the target
-                        labeled.setPixel(x, y, minLabel);
+                        labelBuffer[y][x] = minLabel;
 
                         if (labelKernel[SECTOR_A] != UNLABELED) {
-                            labeled.setPixel(x - 1, y - 1, minLabel);
+                            labelBuffer[y - 1][x - 1] = minLabel;
                         }
                         if (labelKernel[SECTOR_B] != UNLABELED) {
-                            labeled.setPixel(x, y - 1, minLabel);
-
+                            labelBuffer[y - 1][x] = minLabel;
                         }
                         if (labelKernel[SECTOR_C] != UNLABELED) {
-                            labeled.setPixel(x + 1, y - 1, minLabel);
-
+                            labelBuffer[y - 1][x + 1] = minLabel;
                         }
                         if (labelKernel[SECTOR_D] != UNLABELED) {
-                            labeled.setPixel(x - 1, y, minLabel);
+                            labelBuffer[y][x - 1] = minLabel;
                         }
                     }
                 }
             }
+
         }
 
         // Pass 2: Region aggregation & Bounds
-
+        System.out.println("[BlobExtractor]: Starting Blob Extraction Pass 2, finding "
+                           + currentLabel + " labels");
         // Preallocate a vector to hold our rectangles
         Rectangle[] rects = new Rectangle[currentLabel - 1];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                int labelPixel = labeled.getPixel(x, y);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int labelPixel = labelBuffer[y][x];
                 if (labelPixel != UNLABELED) {
-                    if (rects[labelPixel] == null) {
+                    if (rects[labelPixel - 1] == null) {
                         // Create a new bounding box if none exists
-                        rects[labelPixel] = new Rectangle(x, y, 1, 1);
-                    } else if (!rects[labelPixel].contains(x, y)) {
+                        rects[labelPixel - 1] = new Rectangle(x, y, 1, 1);
+                    } else if (!rects[labelPixel - 1].contains(x, y)) {
                         // Adjust the bounding box to include this pixel
-                        rects[labelPixel].add(x, y);
+                        rects[labelPixel - 1].add(x, y);
                     }
                 }
             }
+
         }
         // Filtering by size
+        System.out.println("[BlobExtractor]: Filtering Blobs from "
+                           + rects.length + " Candidate regions");
         Vector<Rectangle> filteredBounds = new Vector<Rectangle>();
         for (Rectangle rect : rects) {
             // Make the rectangle a square, as we use square boxes
-            if (rect.getWidth() != rect.getHeight()) {
+            if (rect != null && rect.getWidth() != rect.getHeight()) {
                 int maxBound = (int) Math.max(rect.getWidth(), rect.getHeight());
                 rect.setSize(maxBound, maxBound);
-            }
 
-            // Check the side-length against the target side length +/- epsillon
-            if (Math.abs(rect.getWidth() - targetSize) <= epsillon) {
+            }
+            // Check the side-length against the target side length +/-
+            // epsillon
+            // Also excludes particles extending beyond the frame {TODO}
+            if (rect != null
+                && Math.abs(rect.getWidth() - targetSize) <= epsillon) {
                 filteredBounds.add(rect);
             }
         }
 
-        return (Rectangle[]) filteredBounds.toArray();
+        return filteredBounds.toArray(new Rectangle[filteredBounds.size()]);
     }
 }

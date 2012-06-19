@@ -1,8 +1,10 @@
 package edu.harvard.mcb.leschziner.util;
 
+import java.awt.Color;
+
 public class ColorUtils {
-    public static final int WHITE = 0xFFFFFF;
-    public static final int BLACK = 0;
+    public static final int WHITE = Color.WHITE.getRGB();
+    public static final int BLACK = Color.BLACK.getRGB();
 
     public static int extractRed(int target) {
         // Protected against ARGB data
