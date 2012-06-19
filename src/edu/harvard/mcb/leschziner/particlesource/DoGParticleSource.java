@@ -1,5 +1,6 @@
 package edu.harvard.mcb.leschziner.particlesource;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
@@ -69,12 +70,17 @@ public class DoGParticleSource implements ParticleSource {
         Particle filtered = thresholdFilter.filter(highFilter.filter(lowFilter.filter(temp)));
 
         // Find Blobs
-        // TODO
-        // Build blob bounding box
-        // TODO
+        Rectangle[] blobs = blobExtractor.extract(filtered);
+
         // Extract Particles from target micrograph
-        // TODO
-        // Notify listeners
+        for (Rectangle boundingBox : blobs) {
+            Particle extracted = temp.subParticle(boundingBox.x, boundingBox.y,
+                                                  boundingBox.width,
+                                                  boundingBox.height);
+
+            // Notify listeners
+            notifyListeners(extracted);
+        }
     }
 
     private void notifyListeners(Particle processed) {

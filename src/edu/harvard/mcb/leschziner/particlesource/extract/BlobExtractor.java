@@ -17,7 +17,9 @@ public class BlobExtractor {
     private static final int SECTOR_X  = 3;
     private static final int SECTOR_D  = 4;
 
+    // The expected size of the particle we're finding in pixels
     private int              targetSize;
+    // Amount of variability allowed in the particles chosen (+/- epsillon pixels)
     private int              epsillon;
 
     public BlobExtractor(int size, int epsillon) {
