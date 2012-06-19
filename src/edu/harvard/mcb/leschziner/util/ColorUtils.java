@@ -1,6 +1,9 @@
 package edu.harvard.mcb.leschziner.util;
 
 public class ColorUtils {
+    public static final int WHITE = 0xFFFFFF;
+    public static final int BLACK = 0;
+
     public static int extractRed(int target) {
         // Protected against ARGB data
         return (target >> 16) & 0xFF;

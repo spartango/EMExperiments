@@ -2,13 +2,12 @@ package edu.harvard.mcb.leschziner.particlefilter;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class CircularMask implements ParticleFilter {
-    private static final int BLACK = 0;
-
-    private int              radius;   // in px
-    private int              xOffset;
-    private int              yOffset;
+    private int radius; // in px
+    private int xOffset;
+    private int yOffset;
 
     public CircularMask(int radius) {
         this(radius, 0, 0);
@@ -36,7 +35,7 @@ public class CircularMask implements ParticleFilter {
                 double distanceSquared = (x - xShift) * (x - xShift)
                                          + (y - yShift) * (y - yShift);
                 if (distanceSquared > (radius * radius)) {
-                    filteredParticle.setPixel(x, y, BLACK);
+                    filteredParticle.setPixel(x, y, ColorUtils.BLACK);
                 }
             }
         }

@@ -2,11 +2,9 @@ package edu.harvard.mcb.leschziner.particlefilter;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class ThresholdFilter implements ParticleFilter {
-
-    private static final int BLACK = 0;
-    private static final int WHITE = 0xFFFFFF;
 
     private int              threshold;
 
@@ -26,9 +24,9 @@ public class ThresholdFilter implements ParticleFilter {
                 int pixel = filteredParticle.getPixel(x, y);
                 // Threshold Check
                 if (pixel >= threshold) {
-                    filteredParticle.setPixel(x, y, BLACK);
+                    filteredParticle.setPixel(x, y, ColorUtils.BLACK);
                 } else {
-                    filteredParticle.setPixel(x, y, WHITE);
+                    filteredParticle.setPixel(x, y, ColorUtils.WHITE);
                 }
             }
         }
