@@ -25,7 +25,7 @@ public class Main {
             // Load the particle
             System.out.println("[Main]: Loading Image");
             BufferedImage micrograph = ImageIO.read(new File(
-                                                             "raw/sub_rib_10fold_49kx_15.png"));
+                                                             "raw/rib_10fold_49kx_15.png"));
 
             // Setup the Particle Builder
             DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
@@ -85,7 +85,7 @@ public class Main {
 
     private static Particle processParticle(Particle target) {
         // ParticleFilter shift = new Shifter(-32, -32);
-        ParticleFilter mask = new CircularMask(80);
+        ParticleFilter mask = new CircularMask(82);
         ParticleFilter lowpass = new LowPassFilter(5);
         ParticleFilter reCenter = new MassCenterer();
 
@@ -96,7 +96,7 @@ public class Main {
         // Apply filters
         processed = mask.filter(processed);
         processed = lowpass.filter(processed);
-        // processed = reCenter.filter(processed);
+        //processed = reCenter.filter(processed);
 
         // Stop Timing
         long deltaTime = System.currentTimeMillis() - startTime;
