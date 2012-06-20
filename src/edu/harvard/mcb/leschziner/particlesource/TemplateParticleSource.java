@@ -11,7 +11,9 @@ import java.util.concurrent.TimeUnit;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleSource;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
+import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.util.DisplayUtils;
+import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class TemplateParticleSource implements ParticleSource {
 
@@ -39,6 +41,7 @@ public class TemplateParticleSource implements ParticleSource {
         threadPool = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
                                             TimeUnit.MILLISECONDS,
                                             micrographTasks);
+        templates = new Vector<Particle>();
     }
 
     public void addTemplate(Particle template) {
@@ -66,13 +69,23 @@ public class TemplateParticleSource implements ParticleSource {
             // Build a kernel for the template
             int templateSize = template.getSize();
             float[] basis = new float[templateSize * templateSize];
-            System.arraycopy(template.getPixelBuffer(), 0, basis, 0,
-                             templateSize);
+            int[] pixelBuffer = template.getPixelBuffer();
+            double pixelAverage = MatrixUtils.average(pixelBuffer);
+
+            for (int i = 0; i < basis.length; i++) {
+                // Normalize against the average
+                basis[i] = (float) (pixelBuffer[i] / pixelAverage);
+            }
+
+            System.out.println("[TemplatePicker]: Template size "
+                               + templateSize);
             Kernel templateKernel = new Kernel(templateSize, templateSize,
                                                basis);
             // Convolve the micrograph with the template
-            Particle convolved = Particle.convolve(micrograph, templateKernel);
+            Particle convolved = new LowPassFilter(120).filter(micrograph); // Particle.convolve(micrograph,
+                                                                            // templateKernel);
 
+            // Debug
             DisplayUtils.displayParticle(convolved);
             // Pick blobs
 
