@@ -113,6 +113,7 @@ public class CrossCorClassifier implements ParticleClassifier,
     @Override
     public void onNewParticle(Particle p) {
         // Try to classify incoming particles
+        
     }
 
 }

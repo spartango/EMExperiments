@@ -36,7 +36,7 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java classname="Main" classpath="bin/" />
+		<java classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/" />
 	</target>
 
 	<target name="help">
