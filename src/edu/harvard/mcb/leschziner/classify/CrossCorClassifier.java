@@ -78,6 +78,9 @@ public class CrossCorClassifier implements ParticleClassifier,
         }
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
+            System.out.println("[CrossCorClassifier " + Thread.currentThread()
+                               + "]: Classifying " + target.hashCode()
+                               + " with " + bestTemplate.hashCode());
             addToClass(bestTemplate, target);
         }
     }
@@ -113,7 +116,7 @@ public class CrossCorClassifier implements ParticleClassifier,
     @Override
     public void onNewParticle(Particle p) {
         // Try to classify incoming particles
-        
+        classify(p);
     }
 
 }

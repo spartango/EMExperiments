@@ -6,11 +6,13 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
+import edu.harvard.mcb.leschziner.particlefilter.MassCenterer;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
 
 public class Main {
@@ -29,10 +31,19 @@ public class Main {
             DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
                                                              180, 200);
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
+            processor.addStage(new MassCenterer());
             processor.addStage(new CircularMask(80));
             processor.addStage(new GaussianFilter(5));
-            picker.addListener(processor);
 
+            CrossCorClassifier classifier = new CrossCorClassifier();
+            
+            // Load up templates
+            for (int i = 15; i < 20; i++) {
+                classifier.addTemplate(Particle.fromFile("templates/rib"+i+".png"));
+            }
+
+            picker.addListener(processor);
+            processor.addListener(classifier);
             processor.addListener(new ParticleSourceListener() {
 
                 @Override
