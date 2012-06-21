@@ -1,0 +1,52 @@
+<project name="EMExperiments" default="help" basedir=".">
+
+	<target name="clearresults">
+		<delete dir="processed"/>
+		<mkdir dir="processed" />
+	</target>
+
+	<target name="clean" depends="clearresults">
+	    <delete dir="bin" />
+	</target>
+
+	<target name="javadoc">
+	    <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
+
+	        <packageset dir="src" defaultexcludes="yes">
+	            <include name="edu/**" />
+	        </packageset>
+
+	        <doctitle>
+	            <![CDATA[<h1>EMExperiments Javadoc</h1>]]></doctitle>
+	    <bottom>
+	    </bottom>
+
+		</javadoc>
+	</target>
+
+	<target name="compile">
+	    <mkdir dir="bin/" />
+	    <javac srcdir="src" destdir="bin" classpath="lib/"/>
+	</target>
+
+	<target name="jar" depends="compile">
+	    <mkdir dir="jar" />
+	    <jar destfile="jar/EMExperiments.jar" basedir="bin">
+	    </jar>
+	</target>
+
+	<target name="run" depends="compile">
+		<java classname="Main" classpath="bin/" />
+	</target>
+
+	<target name="help">
+	    <echo> - EMExperiments Project Build System - ${line.separator}</echo>
+	    <echo>ant help: Get this list ${line.separator}</echo>
+	    <echo>ant compile: Compile the project ${line.separator}</echo>
+	    <echo>ant clearresults: clear the processed results ${line.separator}</echo>
+	    <echo>ant clean: clear the compiled class files ${line.separator}</echo>
+	    <echo>ant run: run the image test ${line.separator}</echo>
+	    <echo>ant jar: create a jar with the compiled classes ${line.separator}</echo>
+	    <echo>ant javadoc: generate a javadoc for this project</echo>
+	</target>
+</project>

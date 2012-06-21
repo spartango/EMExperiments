@@ -12,8 +12,10 @@ import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleClassifier;
+import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
-public class CrossCorClassifier implements ParticleClassifier {
+public class CrossCorClassifier implements ParticleClassifier,
+                               ParticleSourceListener {
     public static int                                                    CORE_POOL  = 2;
     public static int                                                    MAX_POOL   = 8;
     public static int                                                    KEEP_ALIVE = 1000;
@@ -26,7 +28,16 @@ public class CrossCorClassifier implements ParticleClassifier {
     private ThreadPoolExecutor                                           threadPool;
     private BlockingQueue<Runnable>                                      classifyQueue;
 
+    // Gates classification with a minimum correlation
+    private double                                                       matchThreshold;
+
+    // Defaults to trying to classify all particles
     public CrossCorClassifier() {
+        this(0.0);
+    }
+
+    public CrossCorClassifier(double minimumCorrelation) {
+        matchThreshold = minimumCorrelation;
         classes = new ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>>();
         classAverages = new ConcurrentHashMap<Particle, Particle>();
         classifyQueue = new LinkedBlockingQueue<Runnable>();
@@ -65,8 +76,10 @@ public class CrossCorClassifier implements ParticleClassifier {
 
             }
         }
-        // Add to closest match
-        addToClass(bestTemplate, target);
+        // Add to closest match, if there is one at all
+        if (bestTemplate != null && bestCorrelation >= matchThreshold) {
+            addToClass(bestTemplate, target);
+        }
     }
 
     @Override
@@ -95,6 +108,11 @@ public class CrossCorClassifier implements ParticleClassifier {
     @Override
     public Collection<Particle> getTemplates() {
         return classes.keySet();
+    }
+
+    @Override
+    public void onNewParticle(Particle p) {
+        // Try to classify incoming particles
     }
 
 }
