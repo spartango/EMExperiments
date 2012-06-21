@@ -23,7 +23,7 @@ public class Main {
             // Load the particle
             System.out.println("[Main]: Loading Image");
             BufferedImage micrograph = ImageIO.read(new File(
-                                                             "raw/sub_rib_10fold_49kx_15.png"));
+                                                             "raw/rib_10fold_49kx_15.png"));
 
             // Setup the Particle Builder
             DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
@@ -31,6 +31,7 @@ public class Main {
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
             processor.addStage(new CircularMask(80));
             processor.addStage(new GaussianFilter(5));
+            picker.addListener(processor);
 
             processor.addListener(new ParticleSourceListener() {
 
@@ -38,6 +39,7 @@ public class Main {
                 public void onNewParticle(final Particle p) {
                     System.out.println("[ParticleListener]: New particle "
                                        + p.hashCode());
+
                     try {
                         p.toFile("processed/rib_" + p.hashCode() + ".png");
                     } catch (IOException e) {
@@ -53,6 +55,14 @@ public class Main {
             picker.processMicrograph(micrograph);
 
             System.out.println("[Main]: Complete");
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
