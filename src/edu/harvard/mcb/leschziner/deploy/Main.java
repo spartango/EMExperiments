@@ -7,12 +7,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
-import edu.harvard.mcb.leschziner.particlefilter.MassCenterer;
-import edu.harvard.mcb.leschziner.particlefilter.Rotator;
+import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
 
 public class Main {
@@ -30,27 +28,22 @@ public class Main {
             // Setup the Particle Builder
             DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
                                                              180, 200);
-            picker.addListener(new ParticleSourceListener() {
+            ParticleProcessingPipe processor = new ParticleProcessingPipe();
+            processor.addStage(new CircularMask(80));
+            processor.addStage(new GaussianFilter(5));
+
+            processor.addListener(new ParticleSourceListener() {
 
                 @Override
                 public void onNewParticle(final Particle p) {
                     System.out.println("[ParticleListener]: New particle "
                                        + p.hashCode());
-                    Thread t = new Thread(new Runnable() {
-                        public void run() {
-                            try {
-                                Particle newParticle = processParticle(p);
+                    try {
+                        p.toFile("processed/rib_" + p.hashCode() + ".png");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-                                newParticle.toFile("processed/rib_"
-                                                   + newParticle.hashCode()
-                                                   + ".png");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    t.start();
                 }
             });
 
@@ -64,45 +57,6 @@ public class Main {
             e.printStackTrace();
         }
 
-    }
-
-    private static Particle[] rotateParticle(Particle newParticle,
-                                             double deltaTheta) {
-        int rotations = (int) (360 / deltaTheta);
-        Particle[] rotated = new Particle[rotations];
-
-        // Seed the rotation set with the unrotated particle
-        rotated[0] = newParticle.clone();
-
-        for (int i = 1; i < rotations; i++) {
-            // Rotate relative to prev
-            ParticleFilter rotator = new Rotator(deltaTheta * i);
-            rotated[i] = rotator.filter(newParticle);
-        }
-        return rotated;
-    }
-
-    private static Particle processParticle(Particle target) {
-        // ParticleFilter shift = new Shifter(-32, -32);
-        ParticleFilter mask = new CircularMask(82);
-        ParticleFilter lowpass = new LowPassFilter(5);
-        ParticleFilter reCenter = new MassCenterer();
-
-        Particle processed = target;
-        // Start timing
-        long startTime = System.currentTimeMillis();
-
-        // Apply filters
-        processed = mask.filter(processed);
-        // processed = lowpass.filter(processed);
-        // processed = reCenter.filter(processed);
-
-        // Stop Timing
-        long deltaTime = System.currentTimeMillis() - startTime;
-
-        System.out.println("[Main " + Thread.currentThread()
-                           + "]: Completed Processing in " + deltaTime + "ms");
-        return processed;
     }
 
 }

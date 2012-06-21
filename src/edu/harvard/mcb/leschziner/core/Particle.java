@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 
@@ -127,6 +128,16 @@ public class Particle {
         // Build a ConvolveOp
         ConvolveOp operation = new ConvolveOp(kernel);
 
+        return applyOperation(target, operation);
+    }
+
+    public static Particle scale(Particle target, float scaleFactor) {
+        RescaleOp operation = new RescaleOp(scaleFactor, 0, null);
+        return applyOperation(target, operation);
+    }
+
+    public static Particle addScalar(Particle target, float offset) {
+        RescaleOp operation = new RescaleOp(1, offset, null);
         return applyOperation(target, operation);
     }
 

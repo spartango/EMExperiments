@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.core;
 
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -11,17 +12,16 @@ public class ParticleProcessingPipe implements ParticleSourceListener {
     public static int                      KEEP_ALIVE = 1000;
 
     private ThreadPoolExecutor             threadPool;
-    private LinkedBlockingQueue<Runnable>  particleQueue;
+    private BlockingQueue<Runnable>        particleQueue;
 
     private Vector<ParticleFilter>         stages;
 
     private Vector<ParticleSourceListener> listeners;
 
     public ParticleProcessingPipe() {
-        particleQueue = new LinkedBlockingQueue<Runnable>();
         stages = new Vector<ParticleFilter>();
         listeners = new Vector<ParticleSourceListener>();
-
+        particleQueue = new LinkedBlockingQueue<Runnable>();
         threadPool = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
                                             TimeUnit.MILLISECONDS,
                                             particleQueue);
@@ -60,7 +60,7 @@ public class ParticleProcessingPipe implements ParticleSourceListener {
     }
 
     public void processParticle(final Particle particle) {
-        // Queuing a request to pick particles
+        // Queuing a request 
         threadPool.execute(new Runnable() {
             @Override
             public void run() {

@@ -68,5 +68,4 @@ public class MatrixUtils {
     public static double average(int[][] matrix) {
         return sum(matrix) / (matrix.length * matrix[0].length);
     }
-
 }

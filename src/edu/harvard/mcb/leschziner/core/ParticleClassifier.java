@@ -1,17 +1,16 @@
 package edu.harvard.mcb.leschziner.core;
 
-import java.util.Vector;
+import java.util.Collection;
 
 public interface ParticleClassifier {
-    public int countClasses();
 
-    public Vector<Particle> getClass(int i);
+    public Collection<Particle> getClassForTemplate(Particle template);
 
-    public Particle getClassAverage(int i);
+    public Particle getAverageForTemplate(Particle template);
 
-    public Vector<Particle>[] getClasses();
+    public Collection<Particle> getTemplates();
 
-    public Particle[] getClassAverages();
-    
-    public int classify(Particle target);
+    public void classify(Particle target);
+
+    public void addTemplate(Particle template);
 }
