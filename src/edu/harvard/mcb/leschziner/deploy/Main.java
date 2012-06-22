@@ -26,24 +26,22 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Load the particle
-            System.out.println("[Main]: Loading Image");
-            BufferedImage micrograph = ImageIO.read(new File(
-                                                             "raw/rib_10fold_49kx_15.png"));
+            System.out.println("[Main]: Preparing pipeline");
             RotationGenerator templateRotator = new RotationGenerator(10);
 
             // Setup the Particle Builder
-            DoGParticleSource picker = new DoGParticleSource(60, 20, 22, 30,
+            DoGParticleSource picker = new DoGParticleSource(80, 20, 22, 30,
                                                              181, 200);
 
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
             processor.addStage(new CircularMask(80));
             processor.addStage(new LowPassFilter(3));
-            // processor.addStage(new GaussianFilter(5));
+            processor.addStage(new GaussianFilter(3));
 
-            CrossCorClassifier classifier = new CrossCorClassifier();
+            CrossCorClassifier classifier = new CrossCorClassifier(.961);
 
             // Load up templates
-            for (int i = 17; i <= 18; i++) {
+            for (int i = 16; i <= 19; i++) {
                 classifier.addTemplates(templateRotator.generate(Particle.fromFile("templates/rib_"
                                                                                    + i
                                                                                    + ".png")));
@@ -51,32 +49,29 @@ public class Main {
 
             picker.addListener(processor);
             processor.addListener(classifier);
-            processor.addListener(new ParticleSourceListener() {
 
-                @Override
-                public void onNewParticle(final Particle p) {
-                    System.out.println("[ParticleListener]: New particle "
-                                       + p.hashCode());
-
-                    try {
-                        p.toFile("processed/rib_" + p.hashCode() + ".png");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
-
-            System.out.println("[Main]: Processing Micrograph");
-
-            // Process the Micrograph
-            picker.processMicrograph(micrograph);
-
-            try {
-                Thread.sleep(35000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            System.out.println("[Main]: Loading Images");
+            for (int i = 14; i <= 16; i++) {
+                BufferedImage micrograph = ImageIO.read(new File(
+                                                                 "/Volumes/allab/agupta/Raw/rib_10fold_49kx_"
+                                                                         + i
+                                                                         + ".png"));
+                System.out.println("[Main]: Processing Micrograph "
+                                   + micrograph.hashCode());
+                picker.processMicrograph(micrograph);
             }
+
+            do {
+                System.out.println("[Main]: " + picker.getPendingCount()
+                                   + " micrographs and "
+                                   + classifier.getPendingCount()
+                                   + " unclassified particles waiting");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } while (picker.isActive() || classifier.isActive());
 
             System.out.println("[Main]: Writing Class Averages");
             for (Particle template : classifier.getTemplates()) {
@@ -88,8 +83,9 @@ public class Main {
                                        + template.hashCode() + " -> "
                                        + average.hashCode() + " with "
                                        + matches);
-                    average.toFile("processed/avg" + average.hashCode() + "_"
-                                   + matches + ".png");
+                    if (matches > 3)
+                        average.toFile("processed/avg" + average.hashCode()
+                                       + "_" + matches + ".png");
                 }
             }
 

@@ -1,4 +1,4 @@
-package edu.harvard.mcb.leschziner.particlesource.extract;
+package edu.harvard.mcb.leschziner.analyze;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;

@@ -2,26 +2,26 @@ package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.core.ParticleSource;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
-import edu.harvard.mcb.leschziner.particlesource.extract.BlobExtractor;
-import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class DoGParticleSource implements ParticleSource {
 
-    public static int                      CORE_POOL  = 2;
+    public static int                      CORE_POOL  = 8;
     public static int                      MAX_POOL   = 8;
-    public static int                      KEEP_ALIVE = 1000;
+    public static int                      KEEP_ALIVE = 250;
 
     private int                            boxSize;
 
@@ -133,5 +133,13 @@ public class DoGParticleSource implements ParticleSource {
 
     public void stop() {
         threadPool.shutdown();
+    }
+
+    public boolean isActive() {
+        return threadPool.getActiveCount() > 0;
+    }
+
+    public int getPendingCount() {
+        return micrographTasks.size();
     }
 }

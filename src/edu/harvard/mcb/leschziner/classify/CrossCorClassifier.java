@@ -16,7 +16,7 @@ import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
 public class CrossCorClassifier implements ParticleClassifier,
                                ParticleSourceListener {
-    public static int                                                    CORE_POOL  = 4;
+    public static int                                                    CORE_POOL  = 8;
     public static int                                                    MAX_POOL   = 8;
     public static int                                                    KEEP_ALIVE = 1000;
 
@@ -79,10 +79,11 @@ public class CrossCorClassifier implements ParticleClassifier,
         }
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
-            System.out.println("[CrossCorClassifier " + Thread.currentThread()
-                               + "]: Classifying " + target.hashCode()
-                               + " with " + bestTemplate.hashCode() + " -> "
-                               + bestCorrelation);
+            // System.out.println("[CrossCorClassifier " +
+            // Thread.currentThread()
+            // + "]: Classifying " + target.hashCode()
+            // + " with " + bestTemplate.hashCode() + " -> "
+            // + bestCorrelation);
             addToClass(bestTemplate, target);
         }
     }
@@ -129,4 +130,15 @@ public class CrossCorClassifier implements ParticleClassifier,
         classify(p);
     }
 
+    public void stop() {
+        threadPool.shutdown();
+    }
+
+    public int getPendingCount() {
+        return classifyQueue.size();
+    }
+
+    public boolean isActive() {
+        return threadPool.getActiveCount() > 0;
+    }
 }

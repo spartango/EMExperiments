@@ -35,7 +35,7 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java fork="yes" maxmemory="2048m" classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/">
+		<java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/">
 		</java>
 	</target>
 
