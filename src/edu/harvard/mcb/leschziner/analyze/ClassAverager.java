@@ -28,10 +28,10 @@ public class ClassAverager {
             for (; iter.hasNext(); particle = iter.next()) {
                 // Get the pixels (RGB) from the image
                 int[] pixelBuffer = particle.getPixelBuffer();
-                for (int i = 0; i < pixelBuffer.length; i++) {
+                for (int i = 0; i < sums.length - 3; i += 3) {
                     // For each pixel
                     // Extract each color and add it to the sums
-                    int pixel = pixelBuffer[i];
+                    int pixel = pixelBuffer[i / 3];
                     sums[i + RED_OFFSET] += ColorUtils.extractRed(pixel);
                     sums[i + GREEN_OFFSET] += ColorUtils.extractGreen(pixel);
                     sums[i + BLUE_OFFSET] += ColorUtils.extractBlue(pixel);
@@ -40,12 +40,13 @@ public class ClassAverager {
 
             // Divide sums by the number of images
             int[] avgBuffer = new int[size * size];
-            for (int i = 0; i < sums.length; i += 3) {
-                avgBuffer[i] = ColorUtils.buildColor((int) (sums[i + RED_OFFSET] / particleCount),
-                                                     (int) (sums[i
-                                                                 + GREEN_OFFSET] / particleCount),
-                                                     (int) (sums[i
-                                                                 + BLUE_OFFSET] / particleCount));
+            for (int i = 0; i < sums.length - 3; i += 3) {
+                avgBuffer[i / 3] = ColorUtils.buildColor((int) (sums[i
+                                                                     + RED_OFFSET] / particleCount),
+                                                         (int) (sums[i
+                                                                     + GREEN_OFFSET] / particleCount),
+                                                         (int) (sums[i
+                                                                     + BLUE_OFFSET] / particleCount));
             }
 
             BufferedImage avgImage = new BufferedImage(

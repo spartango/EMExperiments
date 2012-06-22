@@ -16,7 +16,7 @@ import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
 public class CrossCorClassifier implements ParticleClassifier,
                                ParticleSourceListener {
-    public static int                                                    CORE_POOL  = 2;
+    public static int                                                    CORE_POOL  = 4;
     public static int                                                    MAX_POOL   = 8;
     public static int                                                    KEEP_ALIVE = 1000;
 
@@ -59,7 +59,9 @@ public class CrossCorClassifier implements ParticleClassifier,
         } else {
             // Otherwise calculates a new one, which is a bit costly
             Particle average = ClassAverager.average(classes.get(template));
-            classAverages.put(template, average);
+            if (average != null) {
+                classAverages.put(template, average);
+            }
             return average;
         }
     }
@@ -73,14 +75,16 @@ public class CrossCorClassifier implements ParticleClassifier,
             if (score > bestCorrelation) {
                 bestCorrelation = score;
                 bestTemplate = template;
-
             }
+            System.out.print(score + " ");
         }
+        System.out.println();
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
             System.out.println("[CrossCorClassifier " + Thread.currentThread()
                                + "]: Classifying " + target.hashCode()
-                               + " with " + bestTemplate.hashCode());
+                               + " with " + bestTemplate.hashCode() + " -> "
+                               + bestCorrelation);
             addToClass(bestTemplate, target);
         }
     }
@@ -105,6 +109,8 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     @Override
     public void addTemplate(Particle template) {
+        System.out.println("[CrossCorClassifier]: Added Template "
+                           + template.hashCode());
         classes.put(template, new ConcurrentLinkedQueue<Particle>());
     }
 

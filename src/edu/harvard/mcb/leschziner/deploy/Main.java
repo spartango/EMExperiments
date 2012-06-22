@@ -12,7 +12,9 @@ import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
+import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlefilter.MassCenterer;
+import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
 
 public class Main {
@@ -25,21 +27,23 @@ public class Main {
             // Load the particle
             System.out.println("[Main]: Loading Image");
             BufferedImage micrograph = ImageIO.read(new File(
-                                                             "raw/rib_10fold_49kx_15.png"));
+                                                             "raw/sub_rib_10fold_49kx_15.png"));
 
             // Setup the Particle Builder
-            DoGParticleSource picker = new DoGParticleSource(60, 20, 20, 30,
-                                                             180, 200);
+            DoGParticleSource picker = new DoGParticleSource(60, 20, 22, 30,
+                                                             181, 200);
+
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
-            processor.addStage(new MassCenterer());
             processor.addStage(new CircularMask(80));
-            processor.addStage(new GaussianFilter(5));
+            processor.addStage(new LowPassFilter(3));
+            //processor.addStage(new GaussianFilter(5));
 
             CrossCorClassifier classifier = new CrossCorClassifier();
-            
+
             // Load up templates
-            for (int i = 15; i < 20; i++) {
-                classifier.addTemplate(Particle.fromFile("templates/rib"+i+".png"));
+            for (int i = 15; i <= 20; i++) {
+                classifier.addTemplate(Particle.fromFile("templates/rib_" + i
+                                                         + ".png"));
             }
 
             picker.addListener(processor);
@@ -65,19 +69,29 @@ public class Main {
             // Process the Micrograph
             picker.processMicrograph(micrograph);
 
-            System.out.println("[Main]: Complete");
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            try {
+                Thread.sleep(5500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+            System.out.println("[Main]: Writing Class Averages");
+            for (Particle template : classifier.getTemplates()) {
+                Particle average = classifier.getAverageForTemplate(template);
+                if (average != null)
+                    average.toFile("processed/avg"
+                                   + average.hashCode()
+                                   + "_"
+                                   + classifier.getClassForTemplate(template)
+                                               .size() + ".png");
+            }
+
+            System.out.println("[Main]: Complete");
+            System.exit(0);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
-
 }

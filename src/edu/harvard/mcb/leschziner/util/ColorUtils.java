@@ -12,11 +12,11 @@ public class ColorUtils {
     }
 
     public static int extractGreen(int target) {
-        return ((target & 0x00FF00) >> 8);
+        return (target >> 8) & 0xFF;
     }
 
     public static int extractBlue(int target) {
-        return target & 0x0000FF;
+        return target & 0xFF;
     }
 
     public static int[] extractRed(int[] target) {
@@ -42,9 +42,33 @@ public class ColorUtils {
         }
         return extracted;
     }
-    
+
+    public static int[][] extractRed(int[][] target) {
+        int[][] extracted = new int[target.length][target[0].length];
+        for (int i = 0; i < target.length; i++) {
+            extracted[i] = extractRed(target[i]);
+        }
+        return extracted;
+    }
+
+    public static int[][] extractBlue(int[][] target) {
+        int[][] extracted = new int[target.length][target[0].length];
+        for (int i = 0; i < target.length; i++) {
+            extracted[i] = extractBlue(target[i]);
+        }
+        return extracted;
+    }
+
+    public static int[][] extractGreen(int[][] target) {
+        int[][] extracted = new int[target.length][target[0].length];
+        for (int i = 0; i < target.length; i++) {
+            extracted[i] = extractGreen(target[i]);
+        }
+        return extracted;
+    }
+
     public static int buildColor(int red, int green, int blue) {
-        return (red << 16) & (green << 8) & blue;
+        return new Color(red, green, blue).getRGB();
     }
 
 }
