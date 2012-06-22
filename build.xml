@@ -1,5 +1,4 @@
 <project name="EMExperiments" default="help" basedir=".">
-
 	<target name="clearresults">
 		<delete dir="processed"/>
 		<mkdir dir="processed" />
@@ -36,7 +35,8 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/" />
+		<java fork="yes" maxmemory="2048m" classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/">
+		</java>
 	</target>
 
 	<target name="help">
