@@ -20,7 +20,7 @@ import edu.harvard.mcb.leschziner.util.DisplayUtils;
 public class DoGParticleSource implements ParticleSource {
 
     public static int                      CORE_POOL  = 2;
-    public static int                      MAX_POOL   = 4;
+    public static int                      MAX_POOL   = 8;
     public static int                      KEEP_ALIVE = 1000;
 
     private int                            boxSize;

@@ -76,9 +76,7 @@ public class CrossCorClassifier implements ParticleClassifier,
                 bestCorrelation = score;
                 bestTemplate = template;
             }
-            System.out.print(score + " ");
         }
-        System.out.println();
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
             System.out.println("[CrossCorClassifier " + Thread.currentThread()
@@ -112,6 +110,12 @@ public class CrossCorClassifier implements ParticleClassifier,
         System.out.println("[CrossCorClassifier]: Added Template "
                            + template.hashCode());
         classes.put(template, new ConcurrentLinkedQueue<Particle>());
+    }
+
+    public void addTemplates(Collection<Particle> templates) {
+        for (Particle template : templates) {
+            addTemplate(template);
+        }
     }
 
     @Override
