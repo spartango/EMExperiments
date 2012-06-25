@@ -16,20 +16,20 @@ import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
 public class CrossCorClassifier implements ParticleClassifier,
                                ParticleSourceListener {
-    public static int                                                    CORE_POOL  = 8;
-    public static int                                                    MAX_POOL   = 8;
-    public static int                                                    KEEP_ALIVE = 1000;
+    public static int                                                          CORE_POOL  = 8;
+    public static int                                                          MAX_POOL   = 8;
+    public static int                                                          KEEP_ALIVE = 1000;
 
-    private ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes;
+    private final ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes;
 
     // This is a cache of calculated classAverages
-    private ConcurrentHashMap<Particle, Particle>                        classAverages;
+    private final ConcurrentHashMap<Particle, Particle>                        classAverages;
 
-    private ThreadPoolExecutor                                           threadPool;
-    private BlockingQueue<Runnable>                                      classifyQueue;
+    private final ThreadPoolExecutor                                           threadPool;
+    private final BlockingQueue<Runnable>                                      classifyQueue;
 
     // Gates classification with a minimum correlation
-    private double                                                       matchThreshold;
+    private final double                                                       matchThreshold;
 
     // Defaults to trying to classify all particles
     public CrossCorClassifier() {
@@ -108,8 +108,8 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     @Override
     public void addTemplate(Particle template) {
-        System.out.println("[CrossCorClassifier]: Added Template "
-                           + template.hashCode());
+        // System.out.println("[CrossCorClassifier]: Added Template "
+        // + template.hashCode());
         classes.put(template, new ConcurrentLinkedQueue<Particle>());
     }
 

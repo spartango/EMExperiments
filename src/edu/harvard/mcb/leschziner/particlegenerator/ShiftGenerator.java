@@ -14,8 +14,8 @@ public class ShiftGenerator implements ParticleGenerator {
     public ShiftGenerator(int maxShift, int deltaShift) {
         shifters = new Vector<Shifter>();
 
-        for (int x = -maxShift; x < maxShift; x += deltaShift) {
-            for (int y = -maxShift; y < maxShift; y += deltaShift) {
+        for (int x = -maxShift; x <= maxShift; x += deltaShift) {
+            for (int y = -maxShift; y <= maxShift; y += deltaShift) {
                 shifters.add(new Shifter(x, y));
             }
         }

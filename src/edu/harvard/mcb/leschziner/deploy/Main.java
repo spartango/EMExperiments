@@ -23,7 +23,7 @@ public class Main {
         try {
             // Load the particle
             System.out.println("[Main]: Preparing pipeline");
-            RotationGenerator templateRotator = new RotationGenerator(5);
+            RotationGenerator templateRotator = new RotationGenerator(10);
             ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
             // Setup the Particle Builder
@@ -38,7 +38,7 @@ public class Main {
             CrossCorClassifier classifier = new CrossCorClassifier(.961);
 
             // Load up templates
-            for (int i = 16; i <= 19; i++) {
+            for (int i = 16; i <= 17; i++) {
                 classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/rib_"
                                                                                                             + i
                                                                                                             + ".png"))));
@@ -48,7 +48,7 @@ public class Main {
             processor.addListener(classifier);
 
             System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 10; i++) {
+            for (int i = 1; i <= 20; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
                                                                  "/Volumes/allab/agupta/Raw/rib_10fold_49kx_"
                                                                          + i
