@@ -9,9 +9,11 @@ import edu.harvard.mcb.leschziner.particlefilter.Shifter;
 
 public class ShiftGenerator implements ParticleGenerator {
 
-    private Vector<Shifter> shifters;
+    private final Vector<Shifter> shifters;
 
     public ShiftGenerator(int maxShift, int deltaShift) {
+        shifters = new Vector<Shifter>();
+
         for (int x = -maxShift; x < maxShift; x += deltaShift) {
             for (int y = -maxShift; y < maxShift; y += deltaShift) {
                 shifters.add(new Shifter(x, y));

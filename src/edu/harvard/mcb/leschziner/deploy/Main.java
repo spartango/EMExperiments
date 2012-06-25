@@ -10,9 +10,8 @@ import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
-import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
 
 public class Main {
@@ -25,6 +24,7 @@ public class Main {
             // Load the particle
             System.out.println("[Main]: Preparing pipeline");
             RotationGenerator templateRotator = new RotationGenerator(5);
+            ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
             // Setup the Particle Builder
             DoGParticleSource picker = new DoGParticleSource(80, 20, 22, 30,
@@ -32,23 +32,23 @@ public class Main {
 
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
             processor.addStage(new CircularMask(80));
-            //processor.addStage(new LowPassFilter(3));
-            //processor.addStage(new GaussianFilter(3));
+            // processor.addStage(new LowPassFilter(3));
+            // processor.addStage(new GaussianFilter(3));
 
             CrossCorClassifier classifier = new CrossCorClassifier(.961);
 
             // Load up templates
             for (int i = 16; i <= 19; i++) {
-                classifier.addTemplates(templateRotator.generate(Particle.fromFile("templates/rib_"
-                                                                                   + i
-                                                                                   + ".png")));
+                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/rib_"
+                                                                                                            + i
+                                                                                                            + ".png"))));
             }
 
             picker.addListener(processor);
             processor.addListener(classifier);
 
             System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 20; i++) {
+            for (int i = 1; i <= 10; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
                                                                  "/Volumes/allab/agupta/Raw/rib_10fold_49kx_"
                                                                          + i
