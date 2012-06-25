@@ -27,4 +27,14 @@ public class RotationGenerator implements ParticleGenerator {
         }
         return rotated;
     }
+
+    @Override
+    public Collection<Particle> generate(Collection<Particle> seeds) {
+        Vector<Particle> rotated = new Vector<Particle>(seeds.size()
+                                                        * rotators.size());
+        for (Particle seed : seeds) {
+            rotated.addAll(generate(seed));
+        }
+        return rotated;
+    }
 }
