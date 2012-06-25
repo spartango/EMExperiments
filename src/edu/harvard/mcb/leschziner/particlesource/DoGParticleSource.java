@@ -2,9 +2,9 @@ package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -19,24 +19,24 @@ import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
 
 public class DoGParticleSource implements ParticleSource {
 
-    public static int                      CORE_POOL  = 8;
-    public static int                      MAX_POOL   = 8;
-    public static int                      KEEP_ALIVE = 250;
+    public static int                            CORE_POOL  = 8;
+    public static int                            MAX_POOL   = 8;
+    public static int                            KEEP_ALIVE = 250;
 
-    private int                            boxSize;
+    private final int                            boxSize;
 
-    private ParticleFilter                 lowFilter;
-    private ParticleFilter                 highFilter;
-    private ParticleFilter                 thresholdFilter;
+    private final ParticleFilter                 lowFilter;
+    private final ParticleFilter                 highFilter;
+    private final ParticleFilter                 thresholdFilter;
 
-    private BlobExtractor                  blobExtractor;
+    private final BlobExtractor                  blobExtractor;
 
-    private Vector<ParticleSourceListener> listeners;
+    private final Vector<ParticleSourceListener> listeners;
 
     // Queue of micrographs to be processed
-    private BlockingQueue<Runnable>        micrographTasks;
+    private final BlockingQueue<Runnable>        micrographTasks;
 
-    private ThreadPoolExecutor             threadPool;
+    private final ExecutorService                executor;
 
     public DoGParticleSource(int particleSize,
                              int particleEpsillon,
@@ -57,7 +57,7 @@ public class DoGParticleSource implements ParticleSource {
         listeners = new Vector<ParticleSourceListener>();
 
         // Spin up threadpool
-        threadPool = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
+        executor = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
                                             TimeUnit.MILLISECONDS,
                                             micrographTasks);
     }
@@ -116,7 +116,7 @@ public class DoGParticleSource implements ParticleSource {
     @Override
     public void processMicrograph(final BufferedImage image) {
         // Queuing a request to pick particles
-        threadPool.execute(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 // Start timing
@@ -132,11 +132,11 @@ public class DoGParticleSource implements ParticleSource {
     }
 
     public void stop() {
-        threadPool.shutdown();
+        executor.shutdown();
     }
 
     public boolean isActive() {
-        return threadPool.getActiveCount() > 0;
+        return !executor.isShutdown();
     }
 
     public int getPendingCount() {

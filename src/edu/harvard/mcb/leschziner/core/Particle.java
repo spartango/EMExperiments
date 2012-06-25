@@ -10,16 +10,22 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
-public class Particle {
+public class Particle implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long      serialVersionUID = 8805574980503468420L;
 
     // Image
-    private BufferedImage          image;
+    private final BufferedImage    image;
 
     // Operation stack
     private Stack<AffineTransform> transforms;
@@ -101,6 +107,7 @@ public class Particle {
     }
 
     // Object handling
+    @Override
     public Particle clone() {
         BufferedImage newImage = new BufferedImage(getSize(), getSize(),
                                                    image.getType());

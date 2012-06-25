@@ -1,9 +1,9 @@
 package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +25,7 @@ public class CrossCorClassifier implements ParticleClassifier,
     // This is a cache of calculated classAverages
     private final ConcurrentHashMap<Particle, Particle>                        classAverages;
 
-    private final ThreadPoolExecutor                                           threadPool;
-    private final BlockingQueue<Runnable>                                      classifyQueue;
+    private final ExecutorService                                              executor;
 
     // Gates classification with a minimum correlation
     private final double                                                       matchThreshold;
@@ -40,10 +39,9 @@ public class CrossCorClassifier implements ParticleClassifier,
         matchThreshold = minimumCorrelation;
         classes = new ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>>();
         classAverages = new ConcurrentHashMap<Particle, Particle>();
-        classifyQueue = new LinkedBlockingQueue<Runnable>();
-        threadPool = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
-                                            TimeUnit.MILLISECONDS,
-                                            classifyQueue);
+        executor = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
+                                          TimeUnit.MILLISECONDS,
+                                          new LinkedBlockingQueue<Runnable>());
     }
 
     @Override
@@ -91,7 +89,7 @@ public class CrossCorClassifier implements ParticleClassifier,
     @Override
     public void classify(final Particle target) {
         // Do this asynchronously
-        threadPool.execute(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 handleParticle(target);
@@ -131,14 +129,14 @@ public class CrossCorClassifier implements ParticleClassifier,
     }
 
     public void stop() {
-        threadPool.shutdown();
+        executor.shutdown();
     }
 
     public int getPendingCount() {
-        return classifyQueue.size();
+        return -1;
     }
 
     public boolean isActive() {
-        return threadPool.getActiveCount() > 0;
+        return !executor.isTerminated();
     }
 }
