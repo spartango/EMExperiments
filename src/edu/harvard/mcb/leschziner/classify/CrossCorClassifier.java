@@ -9,7 +9,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
-import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleClassifier;
 import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
@@ -64,37 +63,11 @@ public class CrossCorClassifier implements ParticleClassifier,
         }
     }
 
-    private void handleParticle(Particle target) {
-        // Iterate through the templates, scoring pearson correlation.
-        double bestCorrelation = 0;
-        Particle bestTemplate = null;
-        for (Particle template : classes.keySet()) {
-            double score = PearsonCorrelator.compare(target, template);
-            if (score > bestCorrelation) {
-                bestCorrelation = score;
-                bestTemplate = template;
-            }
-        }
-        // Add to closest match, if there is one at all
-        if (bestTemplate != null && bestCorrelation >= matchThreshold) {
-            // System.out.println("[CrossCorClassifier " +
-            // Thread.currentThread()
-            // + "]: Classifying " + target.hashCode()
-            // + " with " + bestTemplate.hashCode() + " -> "
-            // + bestCorrelation);
-            addToClass(bestTemplate, target);
-        }
-    }
-
     @Override
     public void classify(final Particle target) {
         // Do this asynchronously
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                handleParticle(target);
-            }
-        });
+        executor.execute(new CrossCorClassifierJob(target, matchThreshold,
+                                                   classes, classAverages));
 
     }
 
