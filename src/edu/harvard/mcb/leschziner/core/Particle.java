@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.core;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -9,6 +10,7 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
@@ -17,13 +19,15 @@ import edu.harvard.mcb.leschziner.util.MatrixUtils;
 public class Particle {
 
     // Image
-    private BufferedImage image;
+    private BufferedImage          image;
 
-    // Dimensions (in px)
+    // Operation stack
+    private Stack<AffineTransform> transforms;
 
     // Constructor
     public Particle(BufferedImage image) {
         this.image = image;
+        transforms = new Stack<AffineTransform>();
     }
 
     public int getSize() {
@@ -67,12 +71,42 @@ public class Particle {
         image.setRGB(x, y, value);
     }
 
+    // Transform stack ops
+    public void pushTransform(AffineTransform t) {
+        // Push a transform that was just executed
+        transforms.push(t);
+    }
+
+    public Particle untransformed() {
+        Particle result = this.clone();
+
+        // Pop off each transform
+        Stack<AffineTransform> operationStack = (Stack<AffineTransform>) this.transforms.clone();
+        while (!operationStack.isEmpty()) {
+            // Invert it if possible,
+            try {
+                AffineTransform transform = operationStack.pop()
+                                                          .createInverse();
+                // Apply it to the target
+                result = transform(result, transform);
+            } catch (NoninvertibleTransformException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Wipe the target's history clean
+        result.transforms = operationStack;
+        return result;
+
+    }
+
     // Object handling
     public Particle clone() {
         BufferedImage newImage = new BufferedImage(getSize(), getSize(),
                                                    image.getType());
         image.copyData(newImage.getRaster());
-        return new Particle(newImage);
+        Particle result = new Particle(newImage);
+        return result;
     }
 
     public Particle subParticle(int x, int y, int size) {
@@ -109,8 +143,9 @@ public class Particle {
         AffineTransformOp operation = new AffineTransformOp(
                                                             xform,
                                                             AffineTransformOp.TYPE_BICUBIC);
-
-        return applyOperation(target, operation);
+        Particle result = applyOperation(target, operation);
+        result.pushTransform(xform);
+        return result;
     }
 
     public static Particle convolve(Particle target, float[][] kernel) {

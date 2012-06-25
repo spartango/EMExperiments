@@ -19,7 +19,14 @@ public class Rotator implements ParticleFilter {
 
     @Override
     public Particle filter(Particle target) {
-        AffineTransform transform = generateTransform(radianAngle, target.getSize());
+        AffineTransform transform = generateTransform(radianAngle,
+                                                      target.getSize());
+        return Particle.transform(target, transform);
+    }
+
+    public Particle reverseFilter(Particle target) {
+        AffineTransform transform = generateTransform(-radianAngle,
+                                                      target.getSize());
         return Particle.transform(target, transform);
     }
 
