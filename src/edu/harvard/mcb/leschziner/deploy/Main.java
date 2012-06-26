@@ -8,11 +8,11 @@ import javax.imageio.ImageIO;
 
 import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
 import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
-import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
+import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
+import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
 public class Main {
 
@@ -27,7 +27,7 @@ public class Main {
             ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
             // Setup the Particle Builder
-            DoGParticleSource picker = new DoGParticleSource(80, 20, 22, 30,
+            DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
                                                              181, 200);
 
             ParticleProcessingPipe processor = new ParticleProcessingPipe();

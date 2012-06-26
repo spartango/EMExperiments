@@ -10,7 +10,12 @@ import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
-public class DoGPickingJob implements Runnable, Serializable {
+public class DoGPickingTask implements Runnable, Serializable {
+
+    /**
+     * 
+     */
+    private static final long    serialVersionUID = 1262983259390203636L;
 
     private final Particle       target;
     private final ParticleFilter lowFilter;
@@ -21,14 +26,14 @@ public class DoGPickingJob implements Runnable, Serializable {
     private final String         executorName;
     private final String         particleQueueName;
 
-    public DoGPickingJob(Particle target,
-                         ParticleFilter lowFilter,
-                         ParticleFilter highFilter,
-                         ParticleFilter thresholdFilter,
-                         BlobExtractor blobExtractor,
-                         int boxSize,
-                         String particleQueueName,
-                         String executorName) {
+    public DoGPickingTask(Particle target,
+                          ParticleFilter lowFilter,
+                          ParticleFilter highFilter,
+                          ParticleFilter thresholdFilter,
+                          BlobExtractor blobExtractor,
+                          int boxSize,
+                          String particleQueueName,
+                          String executorName) {
         this.target = target;
         this.lowFilter = lowFilter;
         this.highFilter = highFilter;

@@ -10,7 +10,7 @@ import com.hazelcast.core.MultiMap;
 import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 
-public class CrossCorClassifierJob implements Serializable, Runnable {
+public class CrossCorClassifierTask implements Serializable, Runnable {
 
     private static final long serialVersionUID = -5350862097468663627L;
     private final Particle    target;
@@ -21,7 +21,7 @@ public class CrossCorClassifierJob implements Serializable, Runnable {
     private final String      templateSetName;
     private final String      executorName;
 
-    public CrossCorClassifierJob(Particle target,
+    public CrossCorClassifierTask(Particle target,
                                  double matchThreshold,
                                  String classMapName,
                                  String averagesMapName,

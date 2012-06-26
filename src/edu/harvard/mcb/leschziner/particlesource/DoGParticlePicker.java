@@ -10,15 +10,11 @@ import com.hazelcast.core.Hazelcast;
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.core.ParticleSource;
+import edu.harvard.mcb.leschziner.core.ParticlePicker;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
 
-public class DoGParticleSource implements ParticleSource {
-
-    public static int                     CORE_POOL  = 8;
-    public static int                     MAX_POOL   = 8;
-    public static int                     KEEP_ALIVE = 250;
+public class DoGParticlePicker implements ParticlePicker {
 
     // Size of area picked around particle
     private final int                     boxSize;
@@ -39,7 +35,7 @@ public class DoGParticleSource implements ParticleSource {
     private final ExecutorService         executor;
     private final AtomicNumber            pendingCount;
 
-    public DoGParticleSource(int particleSize,
+    public DoGParticlePicker(int particleSize,
                              int particleEpsillon,
                              int lowRadius,
                              int highRadius,
@@ -69,7 +65,7 @@ public class DoGParticleSource implements ParticleSource {
         // Queuing a request to pick particles
         Particle target = new Particle(image);
         pendingCount.incrementAndGet();
-        executor.execute(new DoGPickingJob(target, lowFilter, highFilter,
+        executor.execute(new DoGPickingTask(target, lowFilter, highFilter,
                                            thresholdFilter, blobExtractor,
                                            boxSize, particleQueueName,
                                            executorName));
@@ -87,7 +83,13 @@ public class DoGParticleSource implements ParticleSource {
         return pendingCount.get();
     }
 
+    @Override
     public String getParticleQueueName() {
         return particleQueueName;
+    }
+
+    @Override
+    public BlockingQueue<Particle> getParticleQueue() {
+        return extractedParticles;
     }
 }

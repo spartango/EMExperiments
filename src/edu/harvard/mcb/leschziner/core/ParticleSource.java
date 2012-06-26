@@ -1,8 +1,12 @@
 package edu.harvard.mcb.leschziner.core;
 
-import java.awt.image.BufferedImage;
+import java.util.concurrent.BlockingQueue;
 
 public interface ParticleSource {
 
-    public void processMicrograph(BufferedImage image);
+    // Get Queue in which particles are entered
+    public BlockingQueue<Particle> getParticleQueue();
+
+    // Get name of queue (for distributed access) in which particles are entered
+    public String getParticleQueueName();
 }

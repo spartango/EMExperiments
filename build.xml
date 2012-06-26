@@ -25,7 +25,11 @@
 
 	<target name="compile">
 	    <mkdir dir="bin/" />
-	    <javac srcdir="src" destdir="bin" classpath="lib/"/>
+	    <javac srcdir="src" destdir="bin">
+		    <classpath>
+		        <pathelement path="lib/hazelcast-2.1.2.jar"/>
+		    </classpath>
+	    </javac>
 	</target>
 
 	<target name="jar" depends="compile">
@@ -43,14 +47,24 @@
 		</java>
 	</target>
 
+    <target name="runremote" depends="compile">
+        <java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.remote.RemoteMain">
+            <classpath>
+                <pathelement path="bin/"/>
+                <pathelement path="lib/hazelcast-2.1.2.jar"/>
+            </classpath>
+        </java>
+    </target>	
+	
 	<target name="help">
 	    <echo> - EMExperiments Project Build System - ${line.separator}</echo>
 	    <echo>ant help: Get this list ${line.separator}</echo>
 	    <echo>ant compile: Compile the project ${line.separator}</echo>
-	    <echo>ant clearresults: clear the processed results ${line.separator}</echo>
-	    <echo>ant clean: clear the compiled class files ${line.separator}</echo>
-	    <echo>ant run: run the image test ${line.separator}</echo>
-	    <echo>ant jar: create a jar with the compiled classes ${line.separator}</echo>
-	    <echo>ant javadoc: generate a javadoc for this project</echo>
+	    <echo>ant clearresults: Clear the processed results ${line.separator}</echo>
+	    <echo>ant clean: Clear the compiled class files ${line.separator}</echo>
+	    <echo>ant run: Run the image test ${line.separator}</echo>
+	    <echo>ant jar: Create a jar with the compiled classes ${line.separator}</echo>
+	    <echo>ant javadoc: Generate a javadoc for this project</echo>
+	    <echo>ant runremote: Start a mindless cluster process </echo>
 	</target>
 </project>

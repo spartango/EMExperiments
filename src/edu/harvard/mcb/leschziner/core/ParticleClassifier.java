@@ -2,7 +2,7 @@ package edu.harvard.mcb.leschziner.core;
 
 import java.util.Collection;
 
-public interface ParticleClassifier {
+public interface ParticleClassifier extends ParticleConsumer {
 
     public Collection<Particle> getClassForTemplate(Particle template);
 
