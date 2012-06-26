@@ -1,6 +1,8 @@
 package edu.harvard.mcb.leschziner.core;
 
-public interface ParticleFilter {
-    
+import java.io.Serializable;
+
+public interface ParticleFilter extends Serializable {
+
     public Particle filter(Particle target);
 }

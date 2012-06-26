@@ -1,12 +1,12 @@
 package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.core.Particle;
@@ -15,19 +15,28 @@ import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
 public class CrossCorClassifier implements ParticleClassifier,
                                ParticleSourceListener {
-    public static int                                                          CORE_POOL  = 8;
-    public static int                                                          MAX_POOL   = 8;
-    public static int                                                          KEEP_ALIVE = 1000;
+    public static int                          CORE_POOL  = 8;
+    public static int                          MAX_POOL   = 8;
+    public static int                          KEEP_ALIVE = 1000;
 
-    private final ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes;
+    // A map of the templates -> classes
+    private final String                       classesMapName;
+    private final MultiMap<Particle, Particle> classes;
 
     // This is a cache of calculated classAverages
-    private final ConcurrentHashMap<Particle, Particle>                        classAverages;
+    private final String                       averagesMapName;
+    private final Map<Particle, Particle>      classAverages;
 
-    private final ExecutorService                                              executor;
+    // The set of templates
+    private final String                       templateSetName;
+    private final Set<Particle>                templates;
+
+    // The Cluster Distributed Executor
+    private final String                       executorName;
+    private final ExecutorService              executor;
 
     // Gates classification with a minimum correlation
-    private final double                                                       matchThreshold;
+    private final double                       matchThreshold;
 
     // Defaults to trying to classify all particles
     public CrossCorClassifier() {
@@ -36,11 +45,17 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     public CrossCorClassifier(double minimumCorrelation) {
         matchThreshold = minimumCorrelation;
-        classes = new ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>>();
-        classAverages = new ConcurrentHashMap<Particle, Particle>();
-        executor = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
-                                          TimeUnit.MILLISECONDS,
-                                          new LinkedBlockingQueue<Runnable>());
+        classesMapName = "Classes_" + this.hashCode();
+        classes = Hazelcast.getMultiMap(classesMapName);
+
+        executorName = "Classifier_" + this.hashCode();
+        executor = Hazelcast.getExecutorService(executorName);
+
+        averagesMapName = "Averages_" + this.hashCode();
+        classAverages = Hazelcast.getMap(averagesMapName);
+
+        templateSetName = "ClassTemplates_" + this.hashCode();
+        templates = Hazelcast.getSet(templateSetName);
     }
 
     @Override
@@ -65,23 +80,19 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     @Override
     public void classify(final Particle target) {
-        // Do this asynchronously
+        // Do this asynchronously across the cluster
         executor.execute(new CrossCorClassifierJob(target, matchThreshold,
-                                                   classes, classAverages));
+                                                   classesMapName,
+                                                   averagesMapName,
+                                                   templateSetName));
 
-    }
-
-    private void addToClass(Particle template, Particle target) {
-        classes.get(template).add(target);
-        // Invalidates class average cache
-        classAverages.remove(template);
     }
 
     @Override
     public void addTemplate(Particle template) {
         // System.out.println("[CrossCorClassifier]: Added Template "
         // + template.hashCode());
-        classes.put(template, new ConcurrentLinkedQueue<Particle>());
+        templates.add(template);
     }
 
     public void addTemplates(Collection<Particle> templates) {

@@ -1,58 +1,62 @@
 package edu.harvard.mcb.leschziner.classify;
 
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.Set;
+
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 
 public class CrossCorClassifierJob implements Serializable, Runnable {
 
-    private static final long                                                  serialVersionUID = -5350862097468663627L;
-    private final Particle                                                     target;
-    private final double                                                       matchThreshold;
+    private static final long serialVersionUID = -5350862097468663627L;
+    private final Particle    target;
+    private final double      matchThreshold;
 
-    private final ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes;
-    private final ConcurrentHashMap<Particle, Particle>                        classAverages;
+    private final String      classMapName;
+    private final String      averagesMapName;
+    private final String      templateSetName;
 
     public CrossCorClassifierJob(Particle target,
                                  double matchThreshold,
-                                 ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes,
-                                 ConcurrentHashMap<Particle, Particle> classAverages) {
-        super();
+                                 String classMapName,
+                                 String averagesMapName,
+                                 String templateSetName) {
         this.target = target;
         this.matchThreshold = matchThreshold;
-        this.classes = classes;
-        this.classAverages = classAverages;
+        this.classMapName = classMapName;
+        this.averagesMapName = averagesMapName;
+        this.templateSetName = templateSetName;
     }
 
     @Override
     public void run() {
+        // Pull up distributed maps
+        MultiMap<Particle, Particle> classes = Hazelcast.getMultiMap(classMapName);
+        Map<Particle, Particle> classAverages = Hazelcast.getMap(averagesMapName);
+        Set<Particle> templates = Hazelcast.getSet(templateSetName);
+
         // Iterate through the templates, scoring pearson correlation.
         double bestCorrelation = 0;
         Particle bestTemplate = null;
-        for (Particle template : classes.keySet()) {
+        for (Particle template : templates) {
             double score = PearsonCorrelator.compare(target, template);
             if (score > bestCorrelation) {
                 bestCorrelation = score;
                 bestTemplate = template;
             }
         }
+
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
-            // System.out.println("[CrossCorClassifier " +
-            // Thread.currentThread()
-            // + "]: Classifying " + target.hashCode()
-            // + " with " + bestTemplate.hashCode() + " -> "
-            // + bestCorrelation);
-            addToClass(bestTemplate, target);
+            // Add to class
+            classes.put(bestTemplate, target);
+            // Invalidate the class average cache
+            classAverages.remove(bestTemplate);
         }
     }
 
-    private void addToClass(Particle template, Particle target) {
-        classes.get(template).add(target);
-        // Invalidates class average cache
-        classAverages.remove(template);
-    }
 }

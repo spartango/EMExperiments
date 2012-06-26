@@ -22,13 +22,14 @@ public class Particle implements Serializable {
     /**
      * 
      */
-    private static final long      serialVersionUID = 8805574980503468420L;
+    private static final long             serialVersionUID = 8805574980503468420L;
 
     // Image
-    private final BufferedImage    image;
+    // Can't be serialized
+    private transient final BufferedImage image;
 
     // Operation stack
-    private Stack<AffineTransform> transforms;
+    private Stack<AffineTransform>        transforms;
 
     // Constructor
     public Particle(BufferedImage image) {
