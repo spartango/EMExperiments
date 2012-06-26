@@ -66,9 +66,9 @@ public class DoGParticlePicker implements ParticlePicker {
         Particle target = new Particle(image);
         pendingCount.incrementAndGet();
         executor.execute(new DoGPickingTask(target, lowFilter, highFilter,
-                                           thresholdFilter, blobExtractor,
-                                           boxSize, particleQueueName,
-                                           executorName));
+                                            thresholdFilter, blobExtractor,
+                                            boxSize, particleQueueName,
+                                            executorName));
     }
 
     public void stop() {
@@ -83,7 +83,6 @@ public class DoGParticlePicker implements ParticlePicker {
         return pendingCount.get();
     }
 
-    @Override
     public String getParticleQueueName() {
         return particleQueueName;
     }

@@ -1,5 +1,6 @@
 package edu.harvard.mcb.leschziner.pipe;
 
+import java.util.Queue;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -62,10 +63,12 @@ public class ParticleProcessingPipe implements ItemListener<Particle>,
 
     @Override
     public void itemAdded(ItemEvent<Particle> e) {
-        // A particle is ready for processing
-
-        // Take from the queue and create a processing job
-
+        if (e.getSource() instanceof Queue) {
+            Particle target = ((BlockingQueue<Particle>) e.getSource()).poll();
+            if (target != null) {
+                processParticle(target);
+            }
+        }
     }
 
     @Override
@@ -78,7 +81,6 @@ public class ParticleProcessingPipe implements ItemListener<Particle>,
         return processedParticles;
     }
 
-    @Override
     public String getParticleQueueName() {
         return processedQueueName;
     }
@@ -95,7 +97,8 @@ public class ParticleProcessingPipe implements ItemListener<Particle>,
     public void addParticleSource(ParticleSource p) {
         particleSources.add(p);
         // Attach as listener
-        ICollection<Particle> sourceQueue = Hazelcast.getQueue(p.getParticleQueueName());
-        sourceQueue.addItemListener(this, true);
+        if (p.getParticleQueue() instanceof ICollection)
+            ((ICollection<Particle>) p.getParticleQueue()).addItemListener(this,
+                                                                           true);
     }
 }

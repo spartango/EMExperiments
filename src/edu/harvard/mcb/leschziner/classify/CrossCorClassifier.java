@@ -2,8 +2,10 @@ package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
 import com.hazelcast.core.AtomicNumber;
@@ -136,15 +138,20 @@ public class CrossCorClassifier implements ParticleClassifier,
     @Override
     public void addParticleSource(ParticleSource p) {
         particleSources.add(p);
-        // Attach as a listener
-        ICollection<Particle> sourceQueue = Hazelcast.getQueue(p.getParticleQueueName());
-        sourceQueue.addItemListener(this, true);
+        // Attach as listener
+        if (p.getParticleQueue() instanceof ICollection)
+            ((ICollection<Particle>) p.getParticleQueue()).addItemListener(this,
+                                                                           true);
     }
 
     @Override
-    public void itemAdded(ItemEvent<Particle> arg0) {
-        // TODO Auto-generated method stub
-
+    public void itemAdded(ItemEvent<Particle> e) {
+        if (e.getSource() instanceof Queue) {
+            Particle target = ((BlockingQueue<Particle>) e.getSource()).poll();
+            if (target != null) {
+                classify(target);
+            }
+        }
     }
 
     @Override
