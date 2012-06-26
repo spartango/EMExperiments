@@ -10,6 +10,8 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Stack;
 
@@ -22,14 +24,14 @@ public class Particle implements Serializable {
     /**
      * 
      */
-    private static final long             serialVersionUID = 8805574980503468420L;
+    private static final long       serialVersionUID = 8805574980503468420L;
 
     // Image
-    // Can't be serialized
-    private transient final BufferedImage image;
+    // Can't be serialized, will be transferred manually
+    private transient BufferedImage image;
 
     // Operation stack
-    private Stack<AffineTransform>        transforms;
+    private Stack<AffineTransform>  transforms;
 
     // Constructor
     public Particle(BufferedImage image) {
@@ -115,6 +117,19 @@ public class Particle implements Serializable {
         image.copyData(newImage.getRaster());
         Particle result = new Particle(newImage);
         return result;
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        // write buff with imageIO to out
+        ImageIO.write(image, "png", out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException,
+                                                 ClassNotFoundException {
+        in.defaultReadObject();
+        // read buff with imageIO from in
+        image = ImageIO.read(in);
     }
 
     public Particle subParticle(int x, int y, int size) {

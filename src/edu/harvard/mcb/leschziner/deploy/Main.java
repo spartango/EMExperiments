@@ -35,7 +35,7 @@ public class Main {
             // processor.addStage(new LowPassFilter(3));
             // processor.addStage(new GaussianFilter(3));
 
-            CrossCorClassifier classifier = new CrossCorClassifier(.961);
+            CrossCorClassifier classifier = new CrossCorClassifier(0);
 
             // Load up templates
             for (int i = 16; i <= 17; i++) {

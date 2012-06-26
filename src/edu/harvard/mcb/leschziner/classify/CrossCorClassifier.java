@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
@@ -38,6 +39,9 @@ public class CrossCorClassifier implements ParticleClassifier,
     // Gates classification with a minimum correlation
     private final double                       matchThreshold;
 
+    // Pending count
+    private final AtomicNumber                 pendingCount;
+
     // Defaults to trying to classify all particles
     public CrossCorClassifier() {
         this(0.0);
@@ -56,6 +60,8 @@ public class CrossCorClassifier implements ParticleClassifier,
 
         templateSetName = "ClassTemplates_" + this.hashCode();
         templates = Hazelcast.getSet(templateSetName);
+
+        pendingCount = Hazelcast.getAtomicNumber(executorName);
     }
 
     @Override
@@ -80,11 +86,14 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     @Override
     public void classify(final Particle target) {
+        // Bump the pending counter
+        pendingCount.incrementAndGet();
         // Do this asynchronously across the cluster
         executor.execute(new CrossCorClassifierJob(target, matchThreshold,
                                                    classesMapName,
                                                    averagesMapName,
-                                                   templateSetName));
+                                                   templateSetName,
+                                                   executorName));
 
     }
 
@@ -116,11 +125,11 @@ public class CrossCorClassifier implements ParticleClassifier,
         executor.shutdown();
     }
 
-    public int getPendingCount() {
-        return -1;
+    public long getPendingCount() {
+        return pendingCount.get();
     }
 
     public boolean isActive() {
-        return !executor.isTerminated();
+        return pendingCount.get() > 0;
     }
 }

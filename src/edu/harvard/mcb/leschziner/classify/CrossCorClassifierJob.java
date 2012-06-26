@@ -19,17 +19,20 @@ public class CrossCorClassifierJob implements Serializable, Runnable {
     private final String      classMapName;
     private final String      averagesMapName;
     private final String      templateSetName;
+    private final String      executorName;
 
     public CrossCorClassifierJob(Particle target,
                                  double matchThreshold,
                                  String classMapName,
                                  String averagesMapName,
-                                 String templateSetName) {
+                                 String templateSetName,
+                                 String executorName) {
         this.target = target;
         this.matchThreshold = matchThreshold;
         this.classMapName = classMapName;
         this.averagesMapName = averagesMapName;
         this.templateSetName = templateSetName;
+        this.executorName = executorName;
     }
 
     @Override
@@ -52,11 +55,16 @@ public class CrossCorClassifierJob implements Serializable, Runnable {
 
         // Add to closest match, if there is one at all
         if (bestTemplate != null && bestCorrelation >= matchThreshold) {
+            // System.out.println("[ClassifierJob]: Classifying "
+            // + target.hashCode() + " with "
+            // + bestTemplate.hashCode() + " -> "
+            // + bestCorrelation);
             // Add to class
             classes.put(bestTemplate, target);
             // Invalidate the class average cache
             classAverages.remove(bestTemplate);
         }
-    }
 
+        Hazelcast.getAtomicNumber(executorName).decrementAndGet();
+    }
 }
