@@ -35,7 +35,11 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/">
+		<java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.deploy.Main">
+			<classpath>
+			    <pathelement path="bin/"/>
+				<pathelement path="lib/hazelcast-2.1.2.jar"/>
+			</classpath>
 		</java>
 	</target>
 
