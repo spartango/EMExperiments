@@ -7,16 +7,25 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class GaussianFilter implements ParticleFilter {
 
-    private Kernel xKernel;
-    private Kernel yKernel;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5419594820002104375L;
+
+    private int               radius;
+    private transient Kernel  xKernel;
+    private transient Kernel  yKernel;
 
     public GaussianFilter(int radius) {
-        xKernel = generateXKernel(radius);
-        yKernel = generateYKernel(radius);
+        this.radius = radius;
     }
 
     @Override
     public Particle filter(Particle target) {
+        if (xKernel == null && yKernel == null) {
+            xKernel = generateXKernel(radius);
+            yKernel = generateYKernel(radius);
+        }
         // Apply each 1D filter
         Particle filtered = Particle.convolve(target, xKernel);
         filtered = Particle.convolve(filtered, yKernel);

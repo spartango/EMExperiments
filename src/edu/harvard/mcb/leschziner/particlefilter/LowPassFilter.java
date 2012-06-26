@@ -7,10 +7,15 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class LowPassFilter implements ParticleFilter {
 
-    private Kernel kernel;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5558259888147858661L;
+    private int               size;
+    private transient Kernel  kernel;
 
     public LowPassFilter(int size) {
-        kernel = generateKernel(size);
+        this.size = size;
     }
 
     private static Kernel generateKernel(int size) {
@@ -26,6 +31,9 @@ public class LowPassFilter implements ParticleFilter {
 
     @Override
     public Particle filter(Particle target) {
+        if (kernel == null) {
+            kernel = generateKernel(size);
+        }
         return Particle.convolve(target, kernel);
     }
 
