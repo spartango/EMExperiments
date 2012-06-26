@@ -12,10 +12,8 @@ import com.hazelcast.core.MultiMap;
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleClassifier;
-import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 
-public class CrossCorClassifier implements ParticleClassifier,
-                               ParticleSourceListener {
+public class CrossCorClassifier implements ParticleClassifier {
     public static int                          CORE_POOL  = 8;
     public static int                          MAX_POOL   = 8;
     public static int                          KEEP_ALIVE = 1000;
@@ -113,12 +111,6 @@ public class CrossCorClassifier implements ParticleClassifier,
     @Override
     public Collection<Particle> getTemplates() {
         return classes.keySet();
-    }
-
-    @Override
-    public void onNewParticle(Particle p) {
-        // Try to classify incoming particles
-        classify(p);
     }
 
     public void stop() {

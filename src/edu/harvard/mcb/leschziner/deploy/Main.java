@@ -43,9 +43,6 @@ public class Main {
                                                          + ".png"));
             }
 
-            picker.addListener(processor);
-            processor.addListener(classifier);
-
             System.out.println("[Main]: Loading Images");
             for (int i = 1; i <= 2; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(

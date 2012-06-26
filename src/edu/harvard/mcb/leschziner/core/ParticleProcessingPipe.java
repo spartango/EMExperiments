@@ -3,28 +3,38 @@ package edu.harvard.mcb.leschziner.core;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-public class ParticleProcessingPipe implements ParticleSourceListener {
-    public static int                            CORE_POOL  = 4;
-    public static int                            MAX_POOL   = 8;
-    public static int                            KEEP_ALIVE = 1000;
+import com.hazelcast.core.AtomicNumber;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.ItemEvent;
+import com.hazelcast.core.ItemListener;
 
-    private final ExecutorService                executor;
-    private final BlockingQueue<Runnable>        particleQueue;
+public class ParticleProcessingPipe implements ItemListener<Particle> {
+    public static int                     CORE_POOL  = 4;
+    public static int                     MAX_POOL   = 8;
+    public static int                     KEEP_ALIVE = 1000;
 
-    private final Vector<ParticleFilter>         stages;
+    // Distributed Executor
+    private final String                  executorName;
+    private final ExecutorService         executor;
+    private final AtomicNumber            pendingCount;
 
-    private final Vector<ParticleSourceListener> listeners;
+    // Input Queues being watched
+
+    // Output queue for processed particles
+    private final String                  processedQueueName;
+    private final BlockingQueue<Particle> processedParticles;
+
+    // Filters that are applied
+    private final Vector<ParticleFilter>  stages;
 
     public ParticleProcessingPipe() {
+
         stages = new Vector<ParticleFilter>();
-        listeners = new Vector<ParticleSourceListener>();
-        particleQueue = new LinkedBlockingQueue<Runnable>();
-        executor = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
-                                          TimeUnit.MILLISECONDS, particleQueue);
+
+        executorName = "ProcessingPipe_" + this.hashCode();
+        executor = Hazelcast.getExecutorService(executorName);
+        pendingCount = Hazelcast.getAtomicNumber(executorName);
     }
 
     public void addStage(ParticleFilter filter) {
@@ -36,26 +46,6 @@ public class ParticleProcessingPipe implements ParticleSourceListener {
         // Apply each filter
         for (ParticleFilter stage : stages) {
             processed = stage.filter(processed);
-        }
-        notifyListeners(processed);
-    }
-
-    @Override
-    public void onNewParticle(Particle p) {
-        processParticle(p);
-    }
-
-    public void addListener(ParticleSourceListener p) {
-        listeners.add(p);
-    }
-
-    public void removeListener(ParticleSourceListener p) {
-        listeners.remove(p);
-    }
-
-    private void notifyListeners(Particle processed) {
-        for (ParticleSourceListener listener : listeners) {
-            listener.onNewParticle(processed);
         }
     }
 
@@ -71,5 +61,18 @@ public class ParticleProcessingPipe implements ParticleSourceListener {
 
     public void stop() {
         executor.shutdown();
+    }
+
+    @Override
+    public void itemAdded(ItemEvent<Particle> e) {
+        // A particle is ready for processing
+
+        // Take from the queue and create a processing job
+
+    }
+
+    @Override
+    public void itemRemoved(ItemEvent<Particle> arg0) {
+        // Don't really care when items are removed
     }
 }

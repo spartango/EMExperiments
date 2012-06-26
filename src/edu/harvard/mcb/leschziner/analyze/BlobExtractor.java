@@ -1,14 +1,13 @@
 package edu.harvard.mcb.leschziner.analyze;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.util.ColorUtils;
 
-public class BlobExtractor {
+public class BlobExtractor implements Serializable {
     private static final int UNLABELED = 0;
 
     // Kernel Sectors
@@ -19,10 +18,10 @@ public class BlobExtractor {
     private static final int SECTOR_D  = 4;
 
     // The expected size of the particle we're finding in pixels
-    private int              targetSize;
+    private final int        targetSize;
     // Amount of variability allowed in the particles chosen (+/- epsillon
     // pixels)
-    private int              epsillon;
+    private final int        epsillon;
 
     public BlobExtractor(int size, int epsillon) {
         this.targetSize = size;

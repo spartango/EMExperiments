@@ -1,42 +1,43 @@
 package edu.harvard.mcb.leschziner.particlesource;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+import com.hazelcast.core.AtomicNumber;
+import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.core.ParticleSource;
-import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
 import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlefilter.ThresholdFilter;
 
 public class DoGParticleSource implements ParticleSource {
 
-    public static int                            CORE_POOL  = 8;
-    public static int                            MAX_POOL   = 8;
-    public static int                            KEEP_ALIVE = 250;
+    public static int                     CORE_POOL  = 8;
+    public static int                     MAX_POOL   = 8;
+    public static int                     KEEP_ALIVE = 250;
 
-    private final int                            boxSize;
+    // Size of area picked around particle
+    private final int                     boxSize;
 
-    private final ParticleFilter                 lowFilter;
-    private final ParticleFilter                 highFilter;
-    private final ParticleFilter                 thresholdFilter;
+    // Filters for picking
+    private final ParticleFilter          lowFilter;
+    private final ParticleFilter          highFilter;
+    private final ParticleFilter          thresholdFilter;
 
-    private final BlobExtractor                  blobExtractor;
+    private final BlobExtractor           blobExtractor;
 
-    private final Vector<ParticleSourceListener> listeners;
+    // Queue of particles produced
+    private final String                  particleQueueName;
+    private final BlockingQueue<Particle> extractedParticles;
 
-    // Queue of micrographs to be processed
-    private final BlockingQueue<Runnable>        micrographTasks;
-
-    private final ExecutorService                executor;
+    // Executor for blob extraction tasks
+    private final String                  executorName;
+    private final ExecutorService         executor;
+    private final AtomicNumber            pendingCount;
 
     public DoGParticleSource(int particleSize,
                              int particleEpsillon,
@@ -53,82 +54,25 @@ public class DoGParticleSource implements ParticleSource {
 
         blobExtractor = new BlobExtractor(particleSize, particleEpsillon);
 
-        micrographTasks = new LinkedBlockingQueue<Runnable>();
-        listeners = new Vector<ParticleSourceListener>();
+        // Pull up output queue
+        particleQueueName = "ExtractedParticles_" + this.hashCode();
+        extractedParticles = Hazelcast.getQueue(particleQueueName);
 
-        // Spin up threadpool
-        executor = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
-                                            TimeUnit.MILLISECONDS,
-                                            micrographTasks);
-    }
-
-    @Override
-    public void addListener(ParticleSourceListener p) {
-        listeners.add(p);
-    }
-
-    @Override
-    public void removeListener(ParticleSourceListener p) {
-        listeners.remove(p);
-    }
-
-    private void handleMicrograph(BufferedImage target) {
-        // TODO square crop target
-
-        // Wrap the target in a particle for easy processing
-        Particle temp = new Particle(target);
-
-        // Filter the image with each gaussian and then the threshold
-        Particle filtered = highFilter.filter(lowFilter.filter(temp));
-        Particle thresholded = thresholdFilter.filter(filtered);
-
-        // Debug visualization
-        // DisplayUtils.displayParticle(filtered);
-        // DisplayUtils.displayParticle(thresholded);
-
-        // Find Blobs
-        Rectangle[] blobs = blobExtractor.extract(thresholded);
-        System.out.println("[DoGParticleSource]: Extracted " + blobs.length
-                           + " blobs from " + target.hashCode());
-        // Extract Particles from target micrograph
-        // Pad the particles with a box
-        double padding = boxSize / 2.0;
-        for (Rectangle boundingBox : blobs) {
-            // Check that we can actually extract this particle (Bounds)
-            int xOffset = (int) (boundingBox.getCenterX() - padding);
-            int yOffset = (int) (boundingBox.getCenterY() - padding);
-            if (xOffset + boxSize < temp.getSize()
-                && yOffset + boxSize < temp.getSize() && xOffset > 0
-                && yOffset > 0) {
-                Particle extracted = temp.subParticle(xOffset, yOffset, boxSize);
-                // Notify listeners
-                notifyListeners(extracted);
-            }
-        }
-    }
-
-    private void notifyListeners(Particle processed) {
-        for (ParticleSourceListener listener : listeners) {
-            listener.onNewParticle(processed);
-        }
+        // Spin up distributed executor
+        executorName = "DoGPicker_" + this.hashCode();
+        executor = Hazelcast.getExecutorService(executorName);
+        pendingCount = Hazelcast.getAtomicNumber(executorName);
     }
 
     @Override
     public void processMicrograph(final BufferedImage image) {
         // Queuing a request to pick particles
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                // Start timing
-                long startTime = System.currentTimeMillis();
-                handleMicrograph(image);
-                // Stop Timing
-                long deltaTime = System.currentTimeMillis() - startTime;
-                System.out.println("[DoG " + Thread.currentThread()
-                                   + "]: Completed Processing in " + deltaTime
-                                   + "ms");
-            }
-        });
+        Particle target = new Particle(image);
+        pendingCount.incrementAndGet();
+        executor.execute(new DoGPickingJob(target, lowFilter, highFilter,
+                                           thresholdFilter, blobExtractor,
+                                           boxSize, particleQueueName,
+                                           executorName));
     }
 
     public void stop() {
@@ -136,10 +80,14 @@ public class DoGParticleSource implements ParticleSource {
     }
 
     public boolean isActive() {
-        return !executor.isShutdown();
+        return pendingCount.get() > 0;
     }
 
-    public int getPendingCount() {
-        return micrographTasks.size();
+    public long getPendingCount() {
+        return pendingCount.get();
+    }
+
+    public String getParticleQueueName() {
+        return particleQueueName;
     }
 }
