@@ -37,6 +37,10 @@ public class Main {
 
             CrossCorClassifier classifier = new CrossCorClassifier(0);
 
+            processor.addParticleSource(picker);
+
+            classifier.addParticleSource(processor);
+
             // Load up templates
             for (int i = 16; i <= 17; i++) {
                 classifier.addTemplate(Particle.fromFile("templates/rib_" + i
