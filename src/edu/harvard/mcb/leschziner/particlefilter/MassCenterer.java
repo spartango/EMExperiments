@@ -9,6 +9,10 @@ import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class MassCenterer implements ParticleFilter {
 
+    /**
+     * 
+     */
+    private static final long      serialVersionUID = 3903067451461061220L;
     private Vector<ParticleFilter> preFilters;
 
     public MassCenterer() {

@@ -8,7 +8,11 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class Shifter implements ParticleFilter {
 
-    private AffineTransform transform;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5825325037999113079L;
+    private AffineTransform   transform;
 
     public Shifter(double x, double y) { // Degrees
         transform = generateTransform(x, y);

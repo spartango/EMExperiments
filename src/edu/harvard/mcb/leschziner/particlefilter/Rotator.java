@@ -7,7 +7,11 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class Rotator implements ParticleFilter {
 
-    private double radianAngle;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6677740995143021586L;
+    private double            radianAngle;
 
     public Rotator(double angle) { // Degrees
         radianAngle = Math.toRadians(angle);

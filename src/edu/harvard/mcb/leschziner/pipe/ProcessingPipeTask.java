@@ -11,6 +11,11 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
 public class ProcessingPipeTask implements Runnable, Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2219341028285498238L;
+
     public ProcessingPipeTask(Particle target,
                               Vector<ParticleFilter> stages,
                               String processedQueueName,

@@ -50,14 +50,27 @@ public abstract class DistributedParticleConsumer implements ParticleConsumer,
 
     public abstract void processParticle(final Particle particle);
 
+    private static BlockingQueue<Particle> queueNameFromEvent(ItemEvent<Particle> event) {
+        String sourceName = event.getSource().toString();
+        if (sourceName.startsWith("q:")) {
+
+            String queueName = sourceName.substring(2);
+            return Hazelcast.getQueue(queueName);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void itemAdded(ItemEvent<Particle> e) {
-        BlockingQueue<Particle> sourceQueue = Hazelcast.getQueue(((String) e.getSource()));
-        // TODO drain source queue
+        BlockingQueue<Particle> queue = queueNameFromEvent(e);
+        if (queue != null) {
+            // Queue Draining
+            Particle target = queue.poll();
 
-        Particle target = e.getItem();
-        if (target != null) {
-            processParticle(target);
+            if (target != null) {
+                processParticle(target);
+            }
         }
     }
 

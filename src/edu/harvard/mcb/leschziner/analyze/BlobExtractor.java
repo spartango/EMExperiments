@@ -8,20 +8,25 @@ import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class BlobExtractor implements Serializable {
-    private static final int UNLABELED = 0;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8979444781712887357L;
+
+    private static final int  UNLABELED        = 0;
 
     // Kernel Sectors
-    private static final int SECTOR_A  = 0;
-    private static final int SECTOR_B  = 1;
-    private static final int SECTOR_C  = 2;
-    private static final int SECTOR_X  = 3;
-    private static final int SECTOR_D  = 4;
+    private static final int  SECTOR_A         = 0;
+    private static final int  SECTOR_B         = 1;
+    private static final int  SECTOR_C         = 2;
+    private static final int  SECTOR_X         = 3;
+    private static final int  SECTOR_D         = 4;
 
     // The expected size of the particle we're finding in pixels
-    private final int        targetSize;
+    private final int         targetSize;
     // Amount of variability allowed in the particles chosen (+/- epsillon
     // pixels)
-    private final int        epsillon;
+    private final int         epsillon;
 
     public BlobExtractor(int size, int epsillon) {
         this.targetSize = size;

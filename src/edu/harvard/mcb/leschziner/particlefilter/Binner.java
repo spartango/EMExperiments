@@ -9,7 +9,11 @@ import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class Binner implements ParticleFilter {
 
-    private int binSize;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2597307690489788311L;
+    private int               binSize;
 
     public Binner(int size) {
         binSize = size;

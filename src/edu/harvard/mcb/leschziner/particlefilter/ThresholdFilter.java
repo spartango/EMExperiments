@@ -6,7 +6,11 @@ import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class ThresholdFilter implements ParticleFilter {
 
-    private int threshold;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5385792577940651526L;
+    private int               threshold;
 
     public ThresholdFilter(int threshold) {
         this.threshold = threshold;

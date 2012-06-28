@@ -5,9 +5,13 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class CircularMask implements ParticleFilter {
-    private int radius; // in px
-    private int xOffset;
-    private int yOffset;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3268811096169325679L;
+    private int               radius;                                  // in px
+    private int               xOffset;
+    private int               yOffset;
 
     public CircularMask(int radius) {
         this(radius, 0, 0);
