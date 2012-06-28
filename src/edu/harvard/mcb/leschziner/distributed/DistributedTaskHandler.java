@@ -15,7 +15,8 @@ public abstract class DistributedTaskHandler {
         executorName = this.getClass().getName() + "_" + this.hashCode();
 
         executor = Hazelcast.getExecutorService(executorName);
-        pendingCount = Hazelcast.getAtomicNumber(executorName);
+        pendingCount = Hazelcast.getAtomicNumber(executorName
+                                                 + DistributedProcessingTask.PENDING_SUFFIX);
     }
 
     public void execute(DistributedProcessingTask command) {

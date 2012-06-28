@@ -6,9 +6,9 @@ import com.hazelcast.core.Hazelcast;
 
 public abstract class DistributedProcessingTask implements Serializable,
                                                Runnable {
-    private static final String PENDING_SUFFIX = "_pending";
+    public static final String PENDING_SUFFIX = "_pending";
 
-    private final String        executorName;
+    private final String       executorName;
 
     public DistributedProcessingTask(String executorName) {
         this.executorName = executorName;
