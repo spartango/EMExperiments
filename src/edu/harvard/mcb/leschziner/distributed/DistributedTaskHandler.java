@@ -15,7 +15,12 @@ public abstract class DistributedTaskHandler {
 
     public DistributedTaskHandler() {
         executorName = this.getClass().getName() + "_" + this.hashCode();
-
+        // Configure Hazelcast's threadpool
+        int cpus = Runtime.getRuntime().availableProcessors();
+        Hazelcast.getConfig().getExecutorConfig(executorName)
+                 .setCorePoolSize(cpus);
+        Hazelcast.getConfig().getExecutorConfig(executorName)
+                 .setMaxPoolSize(cpus);
         executor = Hazelcast.getExecutorService(executorName);
         pendingCount = Hazelcast.getAtomicNumber(executorName);
     }
