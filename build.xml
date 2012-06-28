@@ -39,7 +39,7 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.deploy.Main">
+		<java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.deploy.Main">
 			<classpath>
 			    <pathelement path="bin/"/>
 				<pathelement path="lib/hazelcast-2.1.2.jar"/>
@@ -48,7 +48,7 @@
 	</target>
 
     <target name="runremote" depends="compile">
-        <java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.remote.RemoteMain">
+        <java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.remote.RemoteMain">
             <classpath>
                 <pathelement path="bin/"/>
                 <pathelement path="lib/hazelcast-2.1.2.jar"/>

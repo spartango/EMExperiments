@@ -10,7 +10,7 @@ public interface ParticleClassifier extends ParticleConsumer {
 
     public Collection<Particle> getTemplates();
 
-    public void classify(Particle target);
+    public void processParticle(Particle target);
 
     public void addTemplate(Particle template);
 }

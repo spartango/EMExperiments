@@ -3,30 +3,21 @@ package edu.harvard.mcb.leschziner.classify;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 
-import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.ICollection;
-import com.hazelcast.core.ItemEvent;
-import com.hazelcast.core.ItemListener;
 import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleClassifier;
-import edu.harvard.mcb.leschziner.core.ParticleSource;
+import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
 
-public class CrossCorClassifier implements ParticleClassifier,
-                               ItemListener<Particle> {
+public class CrossCorClassifier extends DistributedParticleConsumer implements
+                                                                   ParticleClassifier {
 
     // A map of the templates -> classes
     private final String                       classesMapName;
     private final MultiMap<Particle, Particle> classes;
-
-    private final Vector<ParticleSource>       particleSources;
 
     // This is a cache of calculated classAverages
     private final String                       averagesMapName;
@@ -36,15 +27,8 @@ public class CrossCorClassifier implements ParticleClassifier,
     private final String                       templateSetName;
     private final Set<Particle>                templates;
 
-    // The Cluster Distributed Executor
-    private final String                       executorName;
-    private final ExecutorService              executor;
-
     // Gates classification with a minimum correlation
     private final double                       matchThreshold;
-
-    // Pending count
-    private final AtomicNumber                 pendingCount;
 
     // Defaults to trying to classify all particles
     public CrossCorClassifier() {
@@ -52,23 +36,17 @@ public class CrossCorClassifier implements ParticleClassifier,
     }
 
     public CrossCorClassifier(double minimumCorrelation) {
+        super();
         matchThreshold = minimumCorrelation;
-
-        particleSources = new Vector<ParticleSource>();
 
         classesMapName = "Classes_" + this.hashCode();
         classes = Hazelcast.getMultiMap(classesMapName);
-
-        executorName = "Classifier_" + this.hashCode();
-        executor = Hazelcast.getExecutorService(executorName);
 
         averagesMapName = "Averages_" + this.hashCode();
         classAverages = Hazelcast.getMap(averagesMapName);
 
         templateSetName = "ClassTemplates_" + this.hashCode();
         templates = Hazelcast.getSet(templateSetName);
-
-        pendingCount = Hazelcast.getAtomicNumber(executorName);
     }
 
     @Override
@@ -92,7 +70,7 @@ public class CrossCorClassifier implements ParticleClassifier,
     }
 
     @Override
-    public void classify(final Particle target) {
+    public void processParticle(final Particle target) {
         // Bump the pending counter
         pendingCount.incrementAndGet();
         // Do this asynchronously across the cluster
@@ -119,42 +97,7 @@ public class CrossCorClassifier implements ParticleClassifier,
 
     @Override
     public Collection<Particle> getTemplates() {
-        return classes.keySet();
+        return templates;
     }
 
-    public void stop() {
-        executor.shutdown();
-    }
-
-    public long getPendingCount() {
-        return pendingCount.get();
-    }
-
-    public boolean isActive() {
-        return pendingCount.get() > 0;
-    }
-
-    @Override
-    public void addParticleSource(ParticleSource p) {
-        particleSources.add(p);
-        // Attach as listener
-        ((ICollection<Particle>) p.getParticleQueue()).addItemListener(this,
-                                                                       true);
-    }
-
-    @Override
-    public void itemAdded(ItemEvent<Particle> e) {
-        BlockingQueue<Particle> sourceQueue = Hazelcast.getQueue((String) e.getSource());
-        // TODO drain source queue
-
-        Particle target = e.getItem();
-        if (target != null) {
-            classify(target);
-        }
-    }
-
-    @Override
-    public void itemRemoved(ItemEvent<Particle> arg0) {
-        // Not interested in item removal events
-    }
 }
