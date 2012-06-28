@@ -4,16 +4,32 @@ import java.io.Serializable;
 
 import com.hazelcast.core.Hazelcast;
 
-public abstract class DistributedProcessingTask implements Runnable,
-                                               Serializable {
-    private final String executorName;
+public abstract class DistributedProcessingTask implements Serializable,
+                                               Runnable {
+    private static final String PENDING_SUFFIX = "_pending";
+
+    private final String        executorName;
 
     public DistributedProcessingTask(String executorName) {
         this.executorName = executorName;
     }
 
-    protected void markComplete() {
-        Hazelcast.getAtomicNumber(executorName).decrementAndGet();
+    public abstract void process();
+
+    @Override
+    public void run() {
+        process();
+        markComplete();
+    }
+
+    public void markPending() {
+        Hazelcast.getAtomicNumber(executorName + PENDING_SUFFIX)
+                 .incrementAndGet();
+    }
+
+    private void markComplete() {
+        Hazelcast.getAtomicNumber(executorName + PENDING_SUFFIX)
+                 .decrementAndGet();
     }
 
 }

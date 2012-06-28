@@ -35,7 +35,7 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
     }
 
     @Override
-    public void run() {
+    public void process() {
         // Pull up distributed maps
         MultiMap<Particle, Particle> classes = Hazelcast.getMultiMap(classMapName);
         Map<Particle, Particle> classAverages = Hazelcast.getMap(averagesMapName);
@@ -64,7 +64,5 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
             classAverages.remove(bestTemplate);
         }
 
-        // Notify Complete
-        markComplete();
     }
 }

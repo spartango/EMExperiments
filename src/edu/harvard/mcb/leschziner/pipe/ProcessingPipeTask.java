@@ -28,7 +28,7 @@ public class ProcessingPipeTask extends DistributedProcessingTask {
     }
 
     @Override
-    public void run() {
+    public void process() {
         BlockingQueue<Particle> processedParticles = Hazelcast.getQueue(processedQueueName);
 
         Particle processed = target;
@@ -37,9 +37,6 @@ public class ProcessingPipeTask extends DistributedProcessingTask {
             processed = stage.filter(processed);
         }
         processedParticles.add(processed);
-
-        // Mark Complete
-        markComplete();
     }
 
 }

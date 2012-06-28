@@ -44,7 +44,7 @@ public class DoGPickingTask extends DistributedProcessingTask {
     }
 
     @Override
-    public void run() {
+    public void process() {
         BlockingQueue<Particle> particleQueue = Hazelcast.getQueue(particleQueueName);
 
         // Filter the image with each gaussian and then the threshold
@@ -77,6 +77,5 @@ public class DoGPickingTask extends DistributedProcessingTask {
                 // Mark completed
             }
         }
-        markComplete();
     }
 }
