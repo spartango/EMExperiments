@@ -1,7 +1,6 @@
 package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.Rectangle;
-import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
 import com.hazelcast.core.Hazelcast;
@@ -9,8 +8,9 @@ import com.hazelcast.core.Hazelcast;
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 
-public class DoGPickingTask implements Runnable, Serializable {
+public class DoGPickingTask extends DistributedProcessingTask {
 
     /**
      * 
@@ -23,7 +23,6 @@ public class DoGPickingTask implements Runnable, Serializable {
     private final ParticleFilter thresholdFilter;
     private final BlobExtractor  blobExtractor;
     private final int            boxSize;
-    private final String         executorName;
     private final String         particleQueueName;
 
     public DoGPickingTask(Particle target,
@@ -34,13 +33,13 @@ public class DoGPickingTask implements Runnable, Serializable {
                           int boxSize,
                           String particleQueueName,
                           String executorName) {
+        super(executorName);
         this.target = target;
         this.lowFilter = lowFilter;
         this.highFilter = highFilter;
         this.thresholdFilter = thresholdFilter;
         this.blobExtractor = blobExtractor;
         this.boxSize = boxSize;
-        this.executorName = executorName;
         this.particleQueueName = particleQueueName;
     }
 
@@ -78,6 +77,6 @@ public class DoGPickingTask implements Runnable, Serializable {
                 // Mark completed
             }
         }
-        Hazelcast.getAtomicNumber(executorName).decrementAndGet();
+        markComplete();
     }
 }

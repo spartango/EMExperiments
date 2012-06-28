@@ -35,11 +35,9 @@ public class ParticleProcessingPipe extends DistributedParticleConsumer
 
     @Override
     public void processParticle(final Particle particle) {
-        pendingCount.incrementAndGet();
         // Queuing a request
-        executor.execute(new ProcessingPipeTask(particle, stages,
-                                                processedQueueName,
-                                                executorName));
+        execute(new ProcessingPipeTask(particle, stages, processedQueueName,
+                                       executorName));
     }
 
     @Override

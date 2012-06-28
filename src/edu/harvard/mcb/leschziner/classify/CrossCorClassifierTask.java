@@ -1,6 +1,5 @@
 package edu.harvard.mcb.leschziner.classify;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,8 +8,9 @@ import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 
-public class CrossCorClassifierTask implements Serializable, Runnable {
+public class CrossCorClassifierTask extends DistributedProcessingTask {
 
     private static final long serialVersionUID = -5350862097468663627L;
     private final Particle    target;
@@ -19,20 +19,19 @@ public class CrossCorClassifierTask implements Serializable, Runnable {
     private final String      classMapName;
     private final String      averagesMapName;
     private final String      templateSetName;
-    private final String      executorName;
 
     public CrossCorClassifierTask(Particle target,
-                                 double matchThreshold,
-                                 String classMapName,
-                                 String averagesMapName,
-                                 String templateSetName,
-                                 String executorName) {
+                                  double matchThreshold,
+                                  String classMapName,
+                                  String averagesMapName,
+                                  String templateSetName,
+                                  String executorName) {
+        super(executorName);
         this.target = target;
         this.matchThreshold = matchThreshold;
         this.classMapName = classMapName;
         this.averagesMapName = averagesMapName;
         this.templateSetName = templateSetName;
-        this.executorName = executorName;
     }
 
     @Override
@@ -65,6 +64,7 @@ public class CrossCorClassifierTask implements Serializable, Runnable {
             classAverages.remove(bestTemplate);
         }
 
-        Hazelcast.getAtomicNumber(executorName).decrementAndGet();
+        // Notify Complete
+        markComplete();
     }
 }

@@ -72,13 +72,11 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     @Override
     public void processParticle(final Particle target) {
         // Bump the pending counter
-        pendingCount.incrementAndGet();
         // Do this asynchronously across the cluster
-        executor.execute(new CrossCorClassifierTask(target, matchThreshold,
-                                                    classesMapName,
-                                                    averagesMapName,
-                                                    templateSetName,
-                                                    executorName));
+
+        execute(new CrossCorClassifierTask(target, matchThreshold,
+                                           classesMapName, averagesMapName,
+                                           templateSetName, executorName));
 
     }
 

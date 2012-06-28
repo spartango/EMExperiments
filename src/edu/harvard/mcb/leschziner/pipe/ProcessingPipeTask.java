@@ -1,6 +1,5 @@
 package edu.harvard.mcb.leschziner.pipe;
 
-import java.io.Serializable;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 
@@ -8,29 +7,25 @@ import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 
-public class ProcessingPipeTask implements Runnable, Serializable {
+public class ProcessingPipeTask extends DistributedProcessingTask {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2219341028285498238L;
+    private static final long            serialVersionUID = 2219341028285498238L;
+
+    private final Particle               target;
+    private final Vector<ParticleFilter> stages;
+    private final String                 processedQueueName;
 
     public ProcessingPipeTask(Particle target,
                               Vector<ParticleFilter> stages,
                               String processedQueueName,
                               String executorName) {
-        super();
+        super(executorName);
         this.target = target;
         this.stages = stages;
         this.processedQueueName = processedQueueName;
-        this.executorName = executorName;
     }
-
-    private final Particle               target;
-    private final Vector<ParticleFilter> stages;
-    private final String                 processedQueueName;
-    private final String                 executorName;
 
     @Override
     public void run() {
@@ -42,8 +37,9 @@ public class ProcessingPipeTask implements Runnable, Serializable {
             processed = stage.filter(processed);
         }
         processedParticles.add(processed);
-        Hazelcast.getAtomicNumber(executorName).decrementAndGet();
 
+        // Mark Complete
+        markComplete();
     }
 
 }
