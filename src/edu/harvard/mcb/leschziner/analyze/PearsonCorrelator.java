@@ -6,6 +6,15 @@ import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class PearsonCorrelator {
 
+    /**
+     * Performs a pearson cross correlation between two particles
+     * 
+     * @param first
+     *            Particle
+     * @param second
+     *            Particle
+     * @return the correlation between the two Particles, between 0.0 and 1.0
+     */
     public static double compare(Particle firstParticle, Particle secondParticle) {
 
         int[][] firstImage = firstParticle.getPixels();

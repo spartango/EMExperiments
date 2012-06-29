@@ -16,7 +16,8 @@ public class ClassAverager {
     /**
      * Averages a set of particles to generate an average, summing each pixel
      * location across all particles, then dividing by the number of images.
-     * Average does segregate colorchannels
+     * Average does segregate colorchannels. Returns null if the particle set is
+     * empty
      * 
      * @param particles
      *            : to be averaged
@@ -73,4 +74,5 @@ public class ClassAverager {
             return null;
         }
     }
+
 }
