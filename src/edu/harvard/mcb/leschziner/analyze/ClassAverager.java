@@ -13,6 +13,15 @@ public class ClassAverager {
     private static final int GREEN_OFFSET = 1;
     private static final int BLUE_OFFSET  = 2;
 
+    /**
+     * Averages a set of particles to generate an average, summing each pixel
+     * location across all particles, then dividing by the number of images.
+     * Average does segregate colorchannels
+     * 
+     * @param particles
+     *            : to be averaged
+     * @return A single average particle
+     */
     public static Particle average(Collection<Particle> particles) {
         Iterator<Particle> iter = particles.iterator();
         int particleCount = particles.size();
