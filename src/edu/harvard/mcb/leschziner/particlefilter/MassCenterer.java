@@ -7,18 +7,34 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.util.ColorUtils;
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
+/**
+ * A Filter that finds the center of mass of a particle, and moves that center
+ * to the center of the particle's box
+ * 
+ * @author spartango
+ * 
+ */
 public class MassCenterer implements ParticleFilter {
 
     /**
      * 
      */
     private static final long      serialVersionUID = 3903067451461061220L;
+
+    // List of filters to be applied prior to center-finding
     private Vector<ParticleFilter> preFilters;
 
+    /**
+     * Builds a new centerer, ready to center particles
+     */
     public MassCenterer() {
         preFilters = new Vector<ParticleFilter>();
     }
 
+    /**
+     * Finds a particle's center of mass, and then generates a new particle by
+     * shifting the original to center that point
+     */
     @Override
     public Particle filter(Particle target) {
         // Find center of mass
@@ -65,6 +81,13 @@ public class MassCenterer implements ParticleFilter {
         return shift.filter(target);
     }
 
+    /**
+     * Add filter to be applied to particles that will be centered, so as to
+     * reduce noise/error in center of mass finding
+     * 
+     * @param particle
+     *            filter
+     */
     public void addPreFilter(ParticleFilter p) {
         preFilters.add(p);
     }

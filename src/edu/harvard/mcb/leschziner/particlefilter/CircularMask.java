@@ -4,25 +4,55 @@ import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.util.ColorUtils;
 
+/**
+ * Creates a circular mask that blacks out everything outside of a certain
+ * radius in a particle
+ * 
+ * @author spartango
+ * 
+ */
 public class CircularMask implements ParticleFilter {
     /**
      * 
      */
     private static final long serialVersionUID = -3268811096169325679L;
-    private int               radius;                                  // in px
+
+    // Radius of pixels to preserve
+    private int               radius;
+
+    // Amount to offset the circle from the Particle center
     private int               xOffset;
     private int               yOffset;
 
+    /**
+     * Build a new mask that masks out everything outside of a centered circle
+     * 
+     * @param radius
+     *            of allowed circle
+     */
     public CircularMask(int radius) {
         this(radius, 0, 0);
     }
 
+    /**
+     * Build a new mask that masks out everything outside of an offset circle
+     * 
+     * @param radius
+     *            of allowed circle
+     * @param x
+     *            offset of the circle
+     * @param y
+     *            offset of the circle
+     */
     public CircularMask(int radius, int xOffset, int yOffset) {
         this.radius = radius;
         this.xOffset = xOffset;
         this.yOffset = yOffset;
     }
 
+    /**
+     * Generate a new particle by masking the target
+     */
     @Override
     public Particle filter(Particle target) {
         // Copy the particle

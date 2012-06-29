@@ -5,6 +5,12 @@ import java.awt.image.Kernel;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
+/**
+ * Applies a gaussian filter to a particle
+ * 
+ * @author spartango
+ * 
+ */
 public class GaussianFilter implements ParticleFilter {
 
     /**
@@ -12,14 +18,26 @@ public class GaussianFilter implements ParticleFilter {
      */
     private static final long serialVersionUID = -5419594820002104375L;
 
+    // Radius of the filtering kernel
     private int               radius;
+
+    // Linear gaussian distributions (cannot be serialized)
     private transient Kernel  xKernel;
     private transient Kernel  yKernel;
 
+    /**
+     * Builds a gaussian filter
+     * 
+     * @param radius
+     */
     public GaussianFilter(int radius) {
         this.radius = radius;
     }
 
+    /**
+     * Filters a particle by convolving two 1D gaussian distributions (x and y)
+     * with it
+     */
     @Override
     public Particle filter(Particle target) {
         if (xKernel == null && yKernel == null) {
