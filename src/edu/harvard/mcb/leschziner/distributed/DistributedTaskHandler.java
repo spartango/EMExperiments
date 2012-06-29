@@ -1,27 +1,24 @@
 package edu.harvard.mcb.leschziner.distributed;
 
-import java.util.concurrent.ExecutorService;
-
 import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Hazelcast;
 
 public abstract class DistributedTaskHandler {
     // Distributed Executor
-    protected final String        executorName;
-    private final ExecutorService executor;
-    protected final AtomicNumber  pendingCount;
+    protected final String                  executorName;
+    private final QueuedDistributedExecutor executor;
+    protected final AtomicNumber            pendingCount;
 
     public DistributedTaskHandler() {
         executorName = this.getClass().getName() + "_" + this.hashCode();
-
-        executor = Hazelcast.getExecutorService(executorName);
+        // Use a queued executor to prevent flooding the cluster with tasks
+        executor = new QueuedDistributedExecutor(executorName);
         pendingCount = Hazelcast.getAtomicNumber(executorName
                                                  + DistributedProcessingTask.PENDING_SUFFIX);
     }
 
     public void execute(DistributedProcessingTask command) {
         command.markPending();
-        // TODO queue against available capacity
         executor.execute(command);
     }
 
