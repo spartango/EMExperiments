@@ -42,8 +42,8 @@ public class Main {
             classifier.addParticleSource(processor);
 
             // Load up templates
-            for (int i = 16; i <= 17; i++) {
-                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/rib_"
+            for (int i = 1; i <= 2; i++) {
+                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/template_"
                                                                                                             + i
                                                                                                             + ".png"))));
             }
@@ -51,7 +51,7 @@ public class Main {
             System.out.println("[Main]: Loading Images");
             for (int i = 1; i <= 2; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
-                                                                 "/Volumes/allab/agupta/Raw/rib_10fold_49kx_"
+                                                                 "raw/rib_10fold_49kx_"
                                                                          + i
                                                                          + ".png"));
                 System.out.println("[Main]: Processing Micrograph "
