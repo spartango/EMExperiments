@@ -21,28 +21,33 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            // Load the particle
             System.out.println("[Main]: Preparing pipeline");
+
+            // Setup the Particle picker
+            DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
+                                                             181, 200);
+            // Setup some template generators
             RotationGenerator templateRotator = new RotationGenerator(10);
             ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
-            // Setup the Particle Builder
-            DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
-                                                             181, 200);
-
+            // Setup a pipe full of filters to be applied to picked particles
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
             processor.addStage(new CircularMask(80));
             // processor.addStage(new LowPassFilter(3));
             // processor.addStage(new GaussianFilter(3));
 
+            // Setup a classifier to sort the picked, filtered particles
             CrossCorClassifier classifier = new CrossCorClassifier(.5);
 
+            // Attach the processing pipe to the particle picker
             processor.addParticleSource(picker);
-
+            // Have the classifier get particles from the processing pipe
             classifier.addParticleSource(processor);
 
             // Load up templates
             for (int i = 1; i <= 2; i++) {
+                // Generate many templates that are rotations and shifts from
+                // each template
                 classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/template_"
                                                                                                             + i
                                                                                                             + ".png"))));
@@ -56,9 +61,12 @@ public class Main {
                                                                          + ".png"));
                 System.out.println("[Main]: Processing Micrograph "
                                    + micrograph.hashCode());
+                // Pick particles
                 picker.processMicrograph(micrograph);
             }
 
+            // Wait for the particles to be picked, processed, and finally
+            // classified.
             do {
                 System.out.println("[Main]: " + picker.getPendingCount()
                                    + " micrographs and "
@@ -71,6 +79,7 @@ public class Main {
                 }
             } while (picker.isActive() || classifier.isActive());
 
+            // Get the class averages and write them to files
             System.out.println("[Main]: Writing Class Averages");
             for (Particle template : classifier.getTemplates()) {
                 Particle average = classifier.getAverageForTemplate(template);
@@ -81,6 +90,7 @@ public class Main {
                                        + template.hashCode() + " -> "
                                        + average.hashCode() + " with "
                                        + matches);
+                    // Ignore extremely small classes
                     if (matches > 3)
                         average.toFile("processed/avg" + template.hashCode()
                                        + "_" + matches + ".png");
