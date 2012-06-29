@@ -19,6 +19,14 @@ import javax.imageio.ImageIO;
 
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
+/**
+ * An image of a single particle from an EM image, generally a single
+ * protein/object. The particle is enclosed in a square box, with some of the
+ * surround.
+ * 
+ * @author spartango
+ * 
+ */
 public class Particle implements Serializable {
 
     /**
@@ -26,66 +34,149 @@ public class Particle implements Serializable {
      */
     private static final long       serialVersionUID = 8805574980503468420L;
 
-    // Image
-    // Can't be serialized, will be transferred manually
+    // Image can't be serialized, will be transferred manually
     private transient BufferedImage image;
 
-    // Operation stack
+    // Stack of reversible transformation operations performed on this particle
     private Stack<AffineTransform>  transforms;
 
-    // Constructor
+    /**
+     * Builds a particle from a square image
+     * 
+     * @param image
+     */
     public Particle(BufferedImage image) {
         this.image = image;
         transforms = new Stack<AffineTransform>();
     }
 
+    /**
+     * Gets the size of the particle's box
+     * 
+     * @return particle box size in pixels
+     */
     public int getSize() {
         return image.getHeight();
     }
 
     // I/O methods
 
+    /**
+     * Gets the RGB value of a single pixel
+     * 
+     * @param x
+     *            position
+     * @param y
+     *            position
+     * @return RGB pixel value
+     */
     public int getPixel(int x, int y) {
         return image.getRGB(x, y);
     }
 
+    /**
+     * Gets a single row of pixels
+     * 
+     * @param y
+     *            coordinate of the row
+     * @return the row of RGB pixels
+     */
     public int[] getRow(int y) {
         return image.getRGB(0, y, getSize(), 1, null, 0, getSize());
     }
 
+    /**
+     * Gets a single column of pixels
+     * 
+     * @param x
+     *            coordinate of the column
+     * @return
+     */
     public int[] getColumn(int x) {
         return image.getRGB(x, 0, 1, getSize(), null, 0, getSize());
     }
 
+    /**
+     * Gets the pixels in a bounded region
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return Array of Arrays (2D) of RGB pixels
+     */
     public int[][] getRegion(int x, int y, int width, int height) {
         int[] flat = image.getRGB(x, y, width, height, null, 0, getSize());
         return MatrixUtils.unflatten(flat, width, height);
     }
 
-    // Provides a flat region buffer
+    /**
+     * Provides a buffer with all the RGB pixels in a region
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return An Array of RGB pixels, in row major order
+     */
     public int[] getRegionBuffer(int x, int y, int width, int height) {
         return image.getRGB(x, y, width, height, null, 0, width);
     }
 
+    /**
+     * Gets all the pixels in the particle
+     * 
+     * @return A 2D array of the RGB pixels in the particle
+     */
     public int[][] getPixels() {
         // TODO make this efficient
         return getRegion(0, 0, getSize(), getSize());
     }
 
+    /**
+     * Provides a buffer with all the RGB pixels in the particle
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return An Array of RGB pixels, in row major order
+     */
     public int[] getPixelBuffer() {
         return getRegionBuffer(0, 0, getSize(), getSize());
     }
 
+    /**
+     * Sets the value of a pixel at a given location
+     * 
+     * @param x
+     *            position
+     * @param y
+     *            position
+     * @param RGB
+     *            value
+     */
     public void setPixel(int x, int y, int value) {
         image.setRGB(x, y, value);
     }
 
-    // Transform stack ops
+    /**
+     * Records a transformation in this particle's history of transformations
+     * 
+     * @param affine
+     *            transform
+     */
     public void pushTransform(AffineTransform t) {
         // Push a transform that was just executed
         transforms.push(t);
     }
 
+    /**
+     * Sequentially undoes all the transformations previously performed on this
+     * particle, returning a new particle in the original state
+     * 
+     * @return new particle in untransformed (inverse transformed) state
+     */
     public Particle untransformed() {
         Particle result = this.clone();
 
@@ -109,7 +200,9 @@ public class Particle implements Serializable {
 
     }
 
-    // Object handling
+    /**
+     * Provides a clone of this particle
+     */
     @Override
     public Particle clone() {
         BufferedImage newImage = new BufferedImage(getSize(), getSize(),
@@ -119,12 +212,25 @@ public class Particle implements Serializable {
         return result;
     }
 
+    /**
+     * Writes this particle to a stream (for serialization)
+     * 
+     * @param out
+     * @throws IOException
+     */
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         // write buff with imageIO to out
         ImageIO.write(image, "png", out);
     }
 
+    /**
+     * Reads this particle from a stream (for deserialization)
+     * 
+     * @param in
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private void readObject(ObjectInputStream in) throws IOException,
                                                  ClassNotFoundException {
         in.defaultReadObject();
@@ -132,20 +238,45 @@ public class Particle implements Serializable {
         image = ImageIO.read(in);
     }
 
+    /**
+     * Returns a new particle that is a smaller area of this particle
+     * 
+     * @param x
+     * @param y
+     * @param size
+     * @return new subparticle
+     */
     public Particle subParticle(int x, int y, int size) {
         return new Particle(image.getSubimage(x, y, size, size));
     }
 
+    /**
+     * Provides a buffered image representation of this particle (for drawing
+     * etc)
+     * 
+     * @return a buffered image
+     */
     public BufferedImage asBufferedImage() {
         return image;
     }
 
-    // Serialization
+    /**
+     * Writes this particle to a PNG file
+     * 
+     * @param filename
+     * @throws IOException
+     */
     public void toFile(String filename) throws IOException {
         ImageIO.write(image, "png", new File(filename));
     }
 
-    // File loading
+    /**
+     * Creates a new particle from an image file
+     * 
+     * @param filename
+     * @return new particle from image file
+     * @throws IOException
+     */
     public static Particle fromFile(String filename) throws IOException {
         BufferedImage particleImage = ImageIO.read(new File(filename));
         return new Particle(particleImage);
