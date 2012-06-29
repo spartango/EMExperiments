@@ -9,8 +9,6 @@ import javax.imageio.ImageIO;
 import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
-import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
@@ -27,8 +25,8 @@ public class Main {
             DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
                                                              181, 200);
             // Setup some template generators
-            RotationGenerator templateRotator = new RotationGenerator(10);
-            ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
+            // RotationGenerator templateRotator = new RotationGenerator(10);
+            // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
             // Setup a pipe full of filters to be applied to picked particles
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
@@ -45,16 +43,15 @@ public class Main {
             classifier.addParticleSource(processor);
 
             // Load up templates
-            for (int i = 1; i <= 2; i++) {
+            for (int i = 1; i <= 4; i++) {
                 // Generate many templates that are rotations and shifts from
                 // each template
-                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/template_"
-                                                                                                            + i
-                                                                                                            + ".png"))));
+                classifier.addTemplate(Particle.fromFile("templates/template_"
+                                                         + i + ".png"));
             }
 
             System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 2; i++) {
+            for (int i = 1; i <= 1; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
                                                                  "raw/rib_10fold_49kx_"
                                                                          + i
@@ -77,7 +74,8 @@ public class Main {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            } while (picker.isActive() || classifier.isActive());
+            } while (picker.isActive() || processor.isActive()
+                     || classifier.isActive());
 
             // Get the class averages and write them to files
             System.out.println("[Main]: Writing Class Averages");

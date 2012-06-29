@@ -83,16 +83,15 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     @Override
     public Particle getAverageForTemplate(Particle template) {
         // Checks the cache for a class average
-        if (classAverages.containsKey(template)) {
-            return classAverages.get(template);
-        } else {
+        Particle average = classAverages.get(template);
+        if (average == null && classes.containsKey(template)) {
             // Otherwise calculates a new one, which is a bit costly
-            Particle average = ClassAverager.average(classes.get(template));
+            average = ClassAverager.average(classes.get(template));
             if (average != null) {
                 classAverages.put(template, average);
             }
-            return average;
         }
+        return average;
     }
 
     /**
