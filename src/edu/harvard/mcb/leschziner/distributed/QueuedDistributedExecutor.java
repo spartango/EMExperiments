@@ -16,7 +16,7 @@ import com.hazelcast.core.Hazelcast;
  * 
  */
 public class QueuedDistributedExecutor implements Runnable {
-    public static final int                          POLL_TIME           = 400;
+    public static final int                          POLL_TIME           = 250;
 
     public static int                                defaultNodeCapacity = 8;
 
