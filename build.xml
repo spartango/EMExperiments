@@ -10,7 +10,11 @@
 
 	<target name="javadoc">
 	    <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
-
+			<classpath>
+			    <pathelement path="bin/"/>
+				<pathelement path="lib/hazelcast-2.1.2.jar"/>
+			</classpath>
+			
 	        <packageset dir="src" defaultexcludes="yes">
 	            <include name="edu/**" />
 	        </packageset>
