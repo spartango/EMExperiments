@@ -16,8 +16,10 @@ import com.hazelcast.core.Hazelcast;
  * 
  */
 public class QueuedDistributedExecutor implements Runnable {
+    // Time between cluster capacity checks
     public static final int                          POLL_TIME           = 250;
 
+    // Default number of tasks that can be run on each node
     public static int                                defaultNodeCapacity = 8;
 
     // The underlying executor
@@ -37,10 +39,29 @@ public class QueuedDistributedExecutor implements Runnable {
     private boolean                                  running;
     private Thread                                   execThread;
 
+    /**
+     * Builds a distributed executor that queues tasks until cluster capacity is
+     * available, calculating capacity from the number of nodes and a default
+     * number of nodes
+     * 
+     * @param name
+     *            of distributed executor which will disperse tasks across a
+     *            cluster
+     */
     public QueuedDistributedExecutor(String executorName) {
         this(executorName, defaultNodeCapacity);
     }
 
+    /**
+     * Builds a distributed executor that queues tasks until cluster capacity is
+     * available
+     * 
+     * @param name
+     *            of distributed executor which will disperse tasks across a
+     *            cluster
+     * @param nodeCapacity
+     *            : number of tasks that can be run on each node
+     */
     public QueuedDistributedExecutor(String executorName, int nodeCapacity) {
         this.executor = Hazelcast.getExecutorService(executorName);
         this.activeTasks = Hazelcast.getAtomicNumber(executorName
@@ -64,9 +85,13 @@ public class QueuedDistributedExecutor implements Runnable {
         queuedTasks.add(task);
     }
 
+    /**
+     * Prevent any unexecuted tasks from being executed
+     */
     public void shutdown() {
         running = false;
         execThread.interrupt();
+        executor.shutdown();
     }
 
     /**
