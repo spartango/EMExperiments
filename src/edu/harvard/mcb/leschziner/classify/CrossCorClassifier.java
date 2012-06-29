@@ -9,11 +9,19 @@ import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.ParticleClassifier;
+import edu.harvard.mcb.leschziner.core.TemplateClassifier;
 import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
 
+/**
+ * A Classifier that compares particles to a set of template particles, sorting
+ * them into classes by greatest similarity (determined by Pearson cross
+ * correlation).
+ * 
+ * @author spartango
+ * 
+ */
 public class CrossCorClassifier extends DistributedParticleConsumer implements
-                                                                   ParticleClassifier {
+                                                                   TemplateClassifier {
 
     // A map of the templates -> classes
     private final String                       classesMapName;
@@ -30,11 +38,21 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     // Gates classification with a minimum correlation
     private final double                       matchThreshold;
 
-    // Defaults to trying to classify all particles
+    /**
+     * Builds a Cross Correlating Classifier with no minimum correlation
+     * required for sorting
+     */
     public CrossCorClassifier() {
         this(0.0);
     }
 
+    /**
+     * Builds a Cross Correlating Classifier that only adds a particle to a
+     * class when its correlation to the template is above a certain value
+     * 
+     * @param minimumCorrelation
+     *            : minimum score necessary to sort a particle
+     */
     public CrossCorClassifier(double minimumCorrelation) {
         super();
         matchThreshold = minimumCorrelation;
@@ -49,11 +67,19 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
         templates = Hazelcast.getSet(templateSetName);
     }
 
+    /**
+     * Gets the set of particles sorted into a class due to similarity to a
+     * given template
+     */
     @Override
     public Collection<Particle> getClassForTemplate(Particle template) {
         return classes.get(template);
     }
 
+    /**
+     * Gets the average of particles sorted into a template's class. Will
+     * utilize a cached average if one has already been calculated.
+     */
     @Override
     public Particle getAverageForTemplate(Particle template) {
         // Checks the cache for a class average
@@ -69,17 +95,21 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
         }
     }
 
+    /**
+     * Classifies a particle
+     */
     @Override
     public void processParticle(final Particle target) {
-        // Bump the pending counter
-        // Do this asynchronously across the cluster
-
+        // Classify the particle asynchronously in a distributed way
         execute(new CrossCorClassifierTask(target, matchThreshold,
                                            classesMapName, averagesMapName,
                                            templateSetName, executorName));
 
     }
 
+    /**
+     * Adds a template to compare particles against
+     */
     @Override
     public void addTemplate(Particle template) {
         // System.out.println("[CrossCorClassifier]: Added Template "
@@ -87,12 +117,21 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
         templates.add(template);
     }
 
+    /**
+     * Add a bunch of templates to compare particles against
+     * 
+     * @param templates
+     */
+    @Override
     public void addTemplates(Collection<Particle> templates) {
         for (Particle template : templates) {
             addTemplate(template);
         }
     }
 
+    /**
+     * Get all the templates being used for classification
+     */
     @Override
     public Collection<Particle> getTemplates() {
         return templates;
