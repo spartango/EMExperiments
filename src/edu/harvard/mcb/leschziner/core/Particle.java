@@ -284,7 +284,19 @@ public class Particle implements Serializable {
 
     // Primitive operations
     // -----------------------------------------------------------------
+    //
+    // All operations on a particle generate a new particle rather than
+    // operating in place
 
+    /**
+     * Transforms a particle given a transformation matrix (affine transform)
+     * 
+     * @param target
+     *            particle
+     * @param matrix
+     *            (2x2 or 3x3)
+     * @return new, transformed particle
+     */
     public static Particle transform(Particle target, float[][] matrix) {
         float[] flatMatrix = MatrixUtils.flatten(matrix);
 
@@ -292,6 +304,15 @@ public class Particle implements Serializable {
         return transform(target, transform);
     }
 
+    /**
+     * Transforms a particle given an affine transform
+     * 
+     * @param target
+     *            particle
+     * @param xform
+     *            , an affine transform
+     * @return a new, transformed particle
+     */
     public static Particle transform(Particle target, AffineTransform xform) {
         // Build an AffineTransformOp
         AffineTransformOp operation = new AffineTransformOp(
@@ -302,6 +323,15 @@ public class Particle implements Serializable {
         return result;
     }
 
+    /**
+     * Convolves a particle with a matrix
+     * 
+     * @param target
+     *            particle
+     * @param kernel
+     *            , the matrix to be convolved with the particle
+     * @return a new, convolved particle
+     */
     public static Particle convolve(Particle target, float[][] kernel) {
         int kernelHeight = kernel.length;
         int kernelWidth = kernel[0].length;
@@ -313,6 +343,15 @@ public class Particle implements Serializable {
         return convolve(target, newKernel);
     }
 
+    /**
+     * Convolves a kernel with a particle
+     * 
+     * @param target
+     *            particle
+     * @param kernel
+     *            , to be convolved with the particle
+     * @return a new, convolved particle
+     */
     public static Particle convolve(Particle target, Kernel kernel) {
         // Build a ConvolveOp
         ConvolveOp operation = new ConvolveOp(kernel);
@@ -320,11 +359,29 @@ public class Particle implements Serializable {
         return applyOperation(target, operation);
     }
 
+    /**
+     * Scales the values of a particle (scalar multiplication)
+     * 
+     * @param target
+     *            particle
+     * @param scaleFactor
+     *            to be multiplied at each pixel
+     * @return new, scaled particle
+     */
     public static Particle scale(Particle target, float scaleFactor) {
         RescaleOp operation = new RescaleOp(scaleFactor, 0, null);
         return applyOperation(target, operation);
     }
 
+    /**
+     * Adds a scalar value to each pixel
+     * 
+     * @param target
+     *            particle
+     * @param offset
+     *            to be added to each pixel
+     * @return a new particle with each pixel increased by the scalar
+     */
     public static Particle addScalar(Particle target, float offset) {
         RescaleOp operation = new RescaleOp(1, offset, null);
         return applyOperation(target, operation);
