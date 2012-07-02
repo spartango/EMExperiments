@@ -79,19 +79,16 @@ public class Main {
 
             // Get the class averages and write them to files
             System.out.println("[Main]: Writing Class Averages");
-            for (Particle template : classifier.getTemplates()) {
-                Particle average = classifier.getAverageForTemplate(template);
+            for (long templateId : classifier.getTemplateIds()) {
+                Particle average = classifier.getAverageForTemplate(templateId);
                 if (average != null) {
-                    int matches = classifier.getClassForTemplate(template)
+                    int matches = classifier.getClassForTemplate(templateId)
                                             .size();
-                    System.out.println("[Main]: Template "
-                                       + template.hashCode() + " -> "
-                                       + average.hashCode() + " with "
-                                       + matches);
+
                     // Ignore extremely small classes
                     if (matches > 3)
-                        average.toFile("processed/avg" + template.hashCode()
-                                       + "_" + matches + ".png");
+                        average.toFile("processed/avg" + templateId + "_"
+                                       + matches + ".png");
                 }
             }
 

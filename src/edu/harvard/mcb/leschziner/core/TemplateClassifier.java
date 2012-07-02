@@ -11,11 +11,13 @@ import java.util.Collection;
  */
 public interface TemplateClassifier extends ParticleConsumer {
 
-    public Collection<Particle> getClassForTemplate(Particle template);
+    public Collection<Particle> getClassForTemplate(long templateId);
 
-    public Particle getAverageForTemplate(Particle template);
+    public Particle getAverageForTemplate(long templateId);
 
     public Collection<Particle> getTemplates();
+
+    public Collection<Long> getTemplateIds();
 
     public void processParticle(Particle target);
 

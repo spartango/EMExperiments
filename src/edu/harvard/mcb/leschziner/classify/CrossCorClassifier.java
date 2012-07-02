@@ -2,8 +2,8 @@ package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
+import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
@@ -23,20 +23,21 @@ import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
 public class CrossCorClassifier extends DistributedParticleConsumer implements
                                                                    TemplateClassifier {
 
-    // A map of the templates -> classes
-    private final String                       classesMapName;
-    private final MultiMap<Particle, Particle> classes;
+    // A map of the templates -> classes keyed by template uuid
+    private final String                   classesMapName;
+    private final MultiMap<Long, Particle> classes;
 
-    // This is a cache of calculated classAverages
-    private final String                       averagesMapName;
-    private final Map<Particle, Particle>      classAverages;
+    // This is a cache of calculated classAverages keyed by template uuid
+    private final String                   averagesMapName;
+    private final Map<Long, Particle>      classAverages;
 
-    // The set of templates
-    private final String                       templateSetName;
-    private final Set<Particle>                templates;
+    // The set of templates keyed by UUID
+    private final String                   templateSetName;
+    private final AtomicNumber             currentTemplateId;
+    private final Map<Long, Particle>      templates;
 
     // Gates classification with a minimum correlation
-    private final double                       matchThreshold;
+    private final double                   matchThreshold;
 
     /**
      * Builds a Cross Correlating Classifier with no minimum correlation
@@ -64,7 +65,8 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
         classAverages = Hazelcast.getMap(averagesMapName);
 
         templateSetName = "ClassTemplates_" + this.hashCode();
-        templates = Hazelcast.getSet(templateSetName);
+        currentTemplateId = Hazelcast.getAtomicNumber(templateSetName);
+        templates = Hazelcast.getMap(templateSetName);
     }
 
     /**
@@ -72,8 +74,8 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * given template
      */
     @Override
-    public Collection<Particle> getClassForTemplate(Particle template) {
-        return classes.get(template);
+    public Collection<Particle> getClassForTemplate(long templateId) {
+        return classes.get(templateId);
     }
 
     /**
@@ -81,14 +83,14 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * utilize a cached average if one has already been calculated.
      */
     @Override
-    public Particle getAverageForTemplate(Particle template) {
+    public Particle getAverageForTemplate(long templateId) {
         // Checks the cache for a class average
-        Particle average = classAverages.get(template);
-        if (average == null && classes.containsKey(template)) {
+        Particle average = classAverages.get(templateId);
+        if (average == null && classes.containsKey(templateId)) {
             // Otherwise calculates a new one, which is a bit costly
-            average = ClassAverager.average(classes.get(template));
+            average = ClassAverager.average(classes.get(templateId));
             if (average != null) {
-                classAverages.put(template, average);
+                classAverages.put(templateId, average);
             }
         }
         return average;
@@ -113,7 +115,9 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     public void addTemplate(Particle template) {
         // System.out.println("[CrossCorClassifier]: Added Template "
         // + template.hashCode());
-        templates.add(template);
+
+        long id = currentTemplateId.incrementAndGet();
+        templates.put(id, template);
     }
 
     /**
@@ -133,7 +137,12 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      */
     @Override
     public Collection<Particle> getTemplates() {
-        return templates;
+        return templates.values();
+    }
+
+    @Override
+    public Collection<Long> getTemplateIds() {
+        return templates.keySet();
     }
 
 }
