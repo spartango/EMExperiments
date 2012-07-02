@@ -1,7 +1,6 @@
 package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
@@ -72,28 +71,29 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
     @Override
     public void process() {
         // Pull up distributed maps
-        MultiMap<Particle, Particle> classes = Hazelcast.getMultiMap(classMapName);
-        Map<Particle, Particle> classAverages = Hazelcast.getMap(averagesMapName);
-        Set<Particle> templates = Hazelcast.getSet(templateSetName);
+        MultiMap<Long, Particle> classes = Hazelcast.getMultiMap(classMapName);
+        Map<Long, Particle> classAverages = Hazelcast.getMap(averagesMapName);
+        Map<Long, Particle> templates = Hazelcast.getMap(templateSetName);
 
         // Iterate through the templates, scoring pearson correlation.
         double bestCorrelation = 0;
-        Particle bestTemplate = null;
-        for (Particle template : templates) {
-            double score = PearsonCorrelator.compare(target, template);
+        Long bestTemplateId = null;
+        for (long templateId : templates.keySet()) {
+            double score = PearsonCorrelator.compare(target,
+                                                     templates.get(templateId));
             // Select best correlation
             if (score > bestCorrelation) {
                 bestCorrelation = score;
-                bestTemplate = template;
+                bestTemplateId = templateId;
             }
         }
 
         // Add target particle to closest match, if its above the threshold
-        if (bestTemplate != null && bestCorrelation >= matchThreshold) {
+        if (bestTemplateId != null && bestCorrelation >= matchThreshold) {
             // Add to class
-            classes.put(bestTemplate, target);
+            classes.put(bestTemplateId, target);
             // Invalidate the class average cache
-            classAverages.remove(bestTemplate);
+            classAverages.remove(bestTemplateId);
         }
 
     }
