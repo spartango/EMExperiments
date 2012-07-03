@@ -37,7 +37,7 @@ public class Main {
             // processor.addStage(new GaussianFilter(3));
 
             // Setup a classifier to sort the picked, filtered particles
-            CrossCorClassifier classifier = new CrossCorClassifier(0);
+            CrossCorClassifier classifier = new CrossCorClassifier(.9);
 
             // Attach the processing pipe to the particle picker
             processor.addParticleSource(picker);
@@ -45,16 +45,16 @@ public class Main {
             classifier.addParticleSource(processor);
 
             // Load up templates
-            for (int i = 1; i <= 4; i++) {
+            for (int i = 15; i <= 20; i++) {
                 // Generate many templates that are rotations and shifts from
                 // each template
-                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/template_"
+                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/rib_"
                                                                                                             + i
                                                                                                             + ".png"))));
             }
 
             System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 2; i++) {
+            for (int i = 1; i <= 5; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
                                                                  "raw/rib_10fold_49kx_"
                                                                          + i
