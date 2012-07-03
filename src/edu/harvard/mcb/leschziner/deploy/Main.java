@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
+import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
@@ -25,8 +27,8 @@ public class Main {
             DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
                                                              181, 200);
             // Setup some template generators
-            // RotationGenerator templateRotator = new RotationGenerator(10);
-            // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
+            RotationGenerator templateRotator = new RotationGenerator(10);
+            ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
             // Setup a pipe full of filters to be applied to picked particles
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
@@ -35,7 +37,7 @@ public class Main {
             // processor.addStage(new GaussianFilter(3));
 
             // Setup a classifier to sort the picked, filtered particles
-            CrossCorClassifier classifier = new CrossCorClassifier(.5);
+            CrossCorClassifier classifier = new CrossCorClassifier(0);
 
             // Attach the processing pipe to the particle picker
             processor.addParticleSource(picker);
@@ -46,12 +48,13 @@ public class Main {
             for (int i = 1; i <= 4; i++) {
                 // Generate many templates that are rotations and shifts from
                 // each template
-                classifier.addTemplate(Particle.fromFile("templates/template_"
-                                                         + i + ".png"));
+                classifier.addTemplates(templateShifter.generate(templateRotator.generate(Particle.fromFile("templates/template_"
+                                                                                                            + i
+                                                                                                            + ".png"))));
             }
 
             System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 1; i++) {
+            for (int i = 1; i <= 2; i++) {
                 BufferedImage micrograph = ImageIO.read(new File(
                                                                  "raw/rib_10fold_49kx_"
                                                                          + i
@@ -84,7 +87,8 @@ public class Main {
                 if (average != null) {
                     int matches = classifier.getClassForTemplate(templateId)
                                             .size();
-
+                    System.out.println("[Main]: Writing " + templateId
+                                       + " with " + matches + " matches");
                     // Ignore extremely small classes
                     if (matches > 3)
                         average.toFile("processed/avg" + templateId + "_"

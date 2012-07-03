@@ -113,9 +113,6 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      */
     @Override
     public void addTemplate(Particle template) {
-        // System.out.println("[CrossCorClassifier]: Added Template "
-        // + template.hashCode());
-
         long id = currentTemplateId.incrementAndGet();
         templates.put(id, template);
     }
@@ -140,6 +137,9 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
         return templates.values();
     }
 
+    /**
+     * Get the ids of the templates being used for classification
+     */
     @Override
     public Collection<Long> getTemplateIds() {
         return templates.keySet();
