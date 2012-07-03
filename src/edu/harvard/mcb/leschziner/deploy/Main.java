@@ -16,6 +16,8 @@ import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
 public class Main {
 
+    public static final int LOG_RATE = 5000; // ms
+
     /**
      * @param args
      */
@@ -27,8 +29,8 @@ public class Main {
             DoGParticlePicker picker = new DoGParticlePicker(80, 20, 22, 30,
                                                              181, 200);
             // Setup some template generators
-            RotationGenerator templateRotator = new RotationGenerator(10);
-            ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
+            RotationGenerator templateRotator = new RotationGenerator(90);
+            ShiftGenerator templateShifter = new ShiftGenerator(3, 2);
 
             // Setup a pipe full of filters to be applied to picked particles
             ParticleProcessingPipe processor = new ParticleProcessingPipe();
@@ -67,13 +69,60 @@ public class Main {
 
             // Wait for the particles to be picked, processed, and finally
             // classified.
+
+            // Keep track of the last pending count to calculate rate
+            long lastPick = 1;
+            long lastProcessed = 1;
+            long lastClassfied = 1;
+
+            long prevUnpicked = 0;
+            long prevUnprocessed = 0;
+            long prevUnclassified = 0;
+
             do {
-                System.out.println("[Main]: " + picker.getPendingCount()
-                                   + " micrographs and "
-                                   + classifier.getPendingCount()
-                                   + " unclassified particles waiting");
+                long currentUnpicked = picker.getPendingCount();
+                long currentUnprocessed = processor.getPendingCount();
+                long currentUnclassified = classifier.getPendingCount();
+                // Log pending
+                System.out.println("[Main]: " + currentUnpicked
+                                   + " micrographs,  " + currentUnprocessed
+                                   + " unprocessed particles, and "
+                                   + currentUnclassified
+                                   + " unclassified particles");
+                // Log rate
+                if (prevUnpicked > currentUnpicked) {
+                    System.out.println("[Main]: Picking at "
+                                       + (.001 * lastPick / (prevUnpicked - currentUnpicked))
+                                       + " s/micrograph");
+                    lastPick = LOG_RATE;
+                } else {
+                    lastPick += LOG_RATE;
+                }
+
+                if (prevUnprocessed > currentUnprocessed) {
+                    System.out.println("[Main]: Processing at "
+                                       + (.001 * lastProcessed / (prevUnprocessed - currentUnprocessed))
+                                       + " s/particle");
+                    lastProcessed = LOG_RATE;
+                } else {
+                    lastProcessed += LOG_RATE;
+                }
+
+                if (prevUnclassified > currentUnclassified) {
+                    System.out.println("[Main]: Classifying at "
+                                       + (.001 * lastClassfied / (prevUnclassified - currentUnclassified))
+                                       + " s/particle");
+                    lastClassfied = LOG_RATE;
+                } else {
+                    lastClassfied += LOG_RATE;
+                }
+
+                prevUnpicked = currentUnpicked;
+                prevUnprocessed = currentUnprocessed;
+                prevUnclassified = currentUnclassified;
+
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(LOG_RATE);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
