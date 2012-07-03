@@ -16,11 +16,11 @@ import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
 public class Main {
 
-    public static final int              LOG_RATE = 5000; // ms
+    public static final int               POLL_RATE = 5000; // ms
 
-    public static DoGParticlePicker      picker;
-    public static ParticleProcessingPipe processor;
-    public static CrossCorClassifier     classifier;
+    private static DoGParticlePicker      picker;
+    private static ParticleProcessingPipe processor;
+    private static CrossCorClassifier     classifier;
 
     /**
      * @param args
@@ -46,7 +46,7 @@ public class Main {
 
     }
 
-    public static void initPipeline() throws IOException {
+    private static void initPipeline() throws IOException {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
@@ -91,7 +91,7 @@ public class Main {
         }
     }
 
-    public static void awaitCompletion() {
+    private static void awaitCompletion() {
         // Keep track of the last pending count to calculate rate
         long lastPick = 1;
         long lastProcessed = 1;
@@ -116,27 +116,27 @@ public class Main {
                 System.out.println("[Main]: Picking at "
                                    + (.001 * lastPick / (prevUnpicked - currentUnpicked))
                                    + " s/micrograph");
-                lastPick = LOG_RATE;
+                lastPick = POLL_RATE;
             } else {
-                lastPick += LOG_RATE;
+                lastPick += POLL_RATE;
             }
 
             if (prevUnprocessed > currentUnprocessed) {
                 System.out.println("[Main]: Processing at "
                                    + (.001 * lastProcessed / (prevUnprocessed - currentUnprocessed))
                                    + " s/particle");
-                lastProcessed = LOG_RATE;
+                lastProcessed = POLL_RATE;
             } else {
-                lastProcessed += LOG_RATE;
+                lastProcessed += POLL_RATE;
             }
 
             if (prevUnclassified > currentUnclassified) {
                 System.out.println("[Main]: Classifying at "
                                    + (.001 * lastClassfied / (prevUnclassified - currentUnclassified))
                                    + " s/particle");
-                lastClassfied = LOG_RATE;
+                lastClassfied = POLL_RATE;
             } else {
-                lastClassfied += LOG_RATE;
+                lastClassfied += POLL_RATE;
             }
 
             prevUnpicked = currentUnpicked;
@@ -144,7 +144,7 @@ public class Main {
             prevUnclassified = currentUnclassified;
 
             try {
-                Thread.sleep(LOG_RATE);
+                Thread.sleep(POLL_RATE);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -152,7 +152,7 @@ public class Main {
                  || classifier.isActive());
     }
 
-    public static void writeClassAverages() throws IOException {
+    private static void writeClassAverages() throws IOException {
         System.out.println("[Main]: Writing Class Averages");
         for (long templateId : classifier.getTemplateIds()) {
             Particle average = classifier.getAverageForTemplate(templateId);
