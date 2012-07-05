@@ -1,8 +1,8 @@
 package edu.harvard.mcb.leschziner.analyze;
 
+import com.googlecode.javacv.cpp.opencv_core;
+
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
-import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class PearsonCorrelator {
 
@@ -17,20 +17,19 @@ public class PearsonCorrelator {
      */
     public static double compare(Particle firstParticle, Particle secondParticle) {
 
-        int[][] firstImage = firstParticle.getPixels();
-        int[][] secondImage = secondParticle.getPixels();
-
         double imagesSum = 0;
         double firstImageSumN = 0;
         double secondImageSumN = 0;
 
-        double firstImageAverage = MatrixUtils.average(ColorUtils.extractRed(firstImage));
-        double secondImageAverage = MatrixUtils.average(ColorUtils.extractRed(secondImage));
+        double firstImageAverage = opencv_core.cvAvg(firstParticle.getImage(),
+                                                     null).red();
+        double secondImageAverage = opencv_core.cvAvg(secondParticle.getImage(),
+                                                      null).red();
 
         for (int y = 0; y < firstParticle.getSize(); y++) {
             for (int x = 0; x < firstParticle.getSize(); x++) {
-                int firstImagePixel = ColorUtils.extractRed(firstImage[y][x]);
-                int secondImagePixel = ColorUtils.extractRed(secondImage[y][x]);
+                int firstImagePixel = firstParticle.getPixelRed(x, y);
+                int secondImagePixel = secondParticle.getPixelRed(x, y);
 
                 imagesSum = imagesSum + (firstImagePixel - firstImageAverage)
                             * (secondImagePixel - secondImageAverage);

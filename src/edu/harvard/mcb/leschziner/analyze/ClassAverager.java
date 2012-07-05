@@ -1,17 +1,16 @@
 package edu.harvard.mcb.leschziner.analyze;
 
-import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_core.CvSize;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_imgproc;
+
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class ClassAverager {
-
-    private static final int RED_OFFSET   = 0;
-    private static final int GREEN_OFFSET = 1;
-    private static final int BLUE_OFFSET  = 2;
 
     /**
      * Averages a set of particles to generate an average, summing each pixel
@@ -32,47 +31,24 @@ public class ClassAverager {
             // Get the particle dimensions
             int size = particle.getSize();
 
-            // Allocate a sum buffer
-            long[] sums = new long[3 * size * size];
+            // Allocate a sum buffer with greater depth
+            IplImage sumBuffer = IplImage.create(new CvSize(particle.getSize()),
+                                                 32, 3);
 
             for (; iter.hasNext(); particle = iter.next()) {
-                // Get the pixels (RGB) from the image
-                int[] pixelBuffer = particle.getPixelBuffer();
-                for (int i = 0; i < sums.length - 3; i += 3) {
-                    // For each pixel
-                    // Extract each color and add it to the sums
-                    int pixel = pixelBuffer[i / 3];
-                    sums[i + RED_OFFSET] += ColorUtils.extractRed(pixel);
-                    sums[i + GREEN_OFFSET] += ColorUtils.extractGreen(pixel);
-                    sums[i + BLUE_OFFSET] += ColorUtils.extractBlue(pixel);
-                }
+                // Accumulate the images
+                opencv_imgproc.cvAcc(particle.getImage(), sumBuffer, null);
             }
 
-            // Divide sums by the number of images
-            int[] avgBuffer = new int[size * size];
-            for (int i = 0; i < sums.length - 3; i += 3) {
-                avgBuffer[i / 3] = ColorUtils.buildColor((int) (sums[i
-                                                                     + RED_OFFSET] / particleCount),
-                                                         (int) (sums[i
-                                                                     + GREEN_OFFSET] / particleCount),
-                                                         (int) (sums[i
-                                                                     + BLUE_OFFSET] / particleCount));
-            }
+            IplImage mean = IplImage.createCompatible(particle.getImage());
 
-            BufferedImage avgImage = new BufferedImage(
-                                                       size,
-                                                       size,
-                                                       particle.asBufferedImage()
-                                                               .getType());
+            // Rescale
+            opencv_core.cvScale(sumBuffer, mean, 1.0 / particleCount, 0);
 
-            // Copy in a pixel buffer
-            avgImage.setRGB(0, 0, size, size, avgBuffer, 0, size);
-
-            Particle average = new Particle(avgImage);
+            Particle average = new Particle(mean);
             return average;
         } else {
             return null;
         }
     }
-
 }

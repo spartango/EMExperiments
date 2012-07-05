@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Stack;
 
 import javax.imageio.ImageIO;
@@ -113,63 +114,6 @@ public class Particle implements Serializable {
     }
 
     /**
-     * Gets a single row of pixels
-     * 
-     * @param y
-     *            coordinate of the row
-     * @return the row of RGB pixels
-     */
-    public int getRow(int y) {
-        // TODO
-    }
-
-    /**
-     * Gets a single column of pixels
-     * 
-     * @param x
-     *            coordinate of the column
-     * @return
-     */
-    public int[] getColumn(int x) {
-        // TODO
-    }
-
-    /**
-     * Gets the pixels in a bounded region
-     * 
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @return Array of Arrays (2D) of RGB pixels
-     */
-    public int[][] getRegion(int x, int y, int width, int height) {
-        // TODO
-    }
-
-    /**
-     * Provides a buffer with all the RGB pixels in a region
-     * 
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @return An Array of RGB pixels, in row major order
-     */
-    public int[] getRegionBuffer(int x, int y, int width, int height) {
-        // TODO
-    }
-
-    /**
-     * Gets all the pixels in the particle
-     * 
-     * @return A 2D array of the RGB pixels in the particle
-     */
-    public int[][] getPixels() {
-        // TODO make this efficient
-    }
-
-    /**
      * Provides a buffer with all the RGB pixels in the particle
      * 
      * @param x
@@ -178,8 +122,8 @@ public class Particle implements Serializable {
      * @param height
      * @return An Array of RGB pixels, in row major order
      */
-    public int[] getPixelBuffer() {
-        // TODO
+    public ByteBuffer getPixelBuffer() {
+        return image.asByteBuffer();
     }
 
     /**
