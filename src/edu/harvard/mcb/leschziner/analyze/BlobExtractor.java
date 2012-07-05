@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 /**
  * Extracts blobs from a thresholded (targets are white, everything else is
@@ -30,6 +29,8 @@ public class BlobExtractor implements Serializable {
     private static final int  SECTOR_C         = 2;
     private static final int  SECTOR_X         = 3;
     private static final int  SECTOR_D         = 4;
+
+    private static final int  BLACK            = 255;
 
     // The expected size of the particle we're finding in pixels
     private final int         targetSize;
@@ -69,19 +70,19 @@ public class BlobExtractor implements Serializable {
 
         // Pass 1: Region labeling
         System.out.println("[BlobExtractor]: Starting Blob Extraction Pass 1");
+        int[] labelKernel = new int[6];
+
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 // Get the pixel value from the particle
-                int xPixel = target.getPixel(x, y);
-                // System.out.print(xPixel + " ");
+                int xPixel = target.getPixelRed(x, y);
+                System.out.println("(" + x + ", " + y + ") " + xPixel + " ");
 
                 // Pixel is in foreground (is a blob)
-                if (xPixel != ColorUtils.BLACK) {
-                    int[] labelKernel;
+                if (xPixel != BLACK) {
 
                     // Check for pre-existing labels around the target pixel, if
                     // those pixels exist
-                    labelKernel = new int[6];
                     labelKernel[SECTOR_A] = (x > 0 && y > 0 ? labelBuffer[y - 1][x - 1]
                                                            : UNLABELED);
                     labelKernel[SECTOR_B] = (y > 0 ? labelBuffer[y - 1][x]
