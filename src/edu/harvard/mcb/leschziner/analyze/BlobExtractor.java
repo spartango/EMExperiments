@@ -76,7 +76,6 @@ public class BlobExtractor implements Serializable {
             for (int x = 0; x < size; x++) {
                 // Get the pixel value from the particle
                 int xPixel = target.getPixelRed(x, y);
-                System.out.println("(" + x + ", " + y + ") " + xPixel + " ");
 
                 // Pixel is in foreground (is a blob)
                 if (xPixel != BLACK) {

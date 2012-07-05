@@ -108,9 +108,9 @@ public class Particle implements Serializable {
 
     public int getPixelChannel(int x, int y, int channel) {
         // Find row, go to channel byte, compensate for unsigned value
-        return image.asByteBuffer().get(y * image.widthStep()
-                                                + image.nChannels() * x
-                                                + channel) & 0xFF;
+        return image.getByteBuffer().get(y * image.widthStep()
+                                                 + image.nChannels() * x
+                                                 + channel) & 0xFF;
     }
 
     /**
@@ -123,7 +123,7 @@ public class Particle implements Serializable {
      * @return An Array of RGB pixels, in row major order
      */
     public ByteBuffer getPixelBuffer() {
-        return image.asByteBuffer();
+        return image.getByteBuffer();
     }
 
     /**
@@ -155,8 +155,8 @@ public class Particle implements Serializable {
     }
 
     public void setPixelChannel(int x, int y, int channel, int value) {
-        image.asByteBuffer().put(y * image.widthStep() + image.nChannels() * x
-                                         + channel, (byte) (value));
+        image.getByteBuffer().put(y * image.widthStep() + image.nChannels() * x
+                                          + channel, (byte) (value));
     }
 
     /**

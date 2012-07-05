@@ -17,27 +17,27 @@ import com.hazelcast.core.Hazelcast;
  */
 public class QueuedDistributedExecutor implements Runnable {
     // Time between cluster capacity checks
-    public static final int                          POLL_TIME           = 250;
+    public static final int                                POLL_TIME           = 250;
 
     // Default number of tasks that can be run on each node
-    public static int                                defaultNodeCapacity = 8;
+    public static int                                      defaultNodeCapacity = 8;
 
     // The underlying executor
-    private ExecutorService                          executor;
+    private final ExecutorService                          executor;
 
     // Number of active tasks
-    private AtomicNumber                             activeTasks;
+    private final AtomicNumber                             activeTasks;
     // Cluster nodes
-    private Cluster                                  cluster;
+    private final Cluster                                  cluster;
     // Number of tasks that can be run per node
-    private int                                      nodeCapacity;
+    private final int                                      nodeCapacity;
 
     // Tasks waiting to be sent to the executor
-    private BlockingQueue<DistributedProcessingTask> queuedTasks;
+    private final BlockingQueue<DistributedProcessingTask> queuedTasks;
 
     // Thread that executes queued tasks when there is capacity available
-    private boolean                                  running;
-    private Thread                                   execThread;
+    private boolean                                        running;
+    private final Thread                                   execThread;
 
     /**
      * Builds a distributed executor that queues tasks until cluster capacity is
