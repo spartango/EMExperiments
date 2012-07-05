@@ -36,8 +36,7 @@ public abstract class DistributedProcessingTask implements Serializable,
      * Run the task, noting its completion in the pending and activity trackers
      * when it finishes
      */
-    @Override
-    public void run() {
+    @Override public void run() {
         process();
         markComplete();
     }

@@ -50,8 +50,7 @@ public class DoGParticlePicker extends DistributedTaskHandler implements
         extractedParticles = Hazelcast.getQueue(particleQueueName);
     }
 
-    @Override
-    public void processMicrograph(final BufferedImage image) {
+    @Override public void processMicrograph(final BufferedImage image) {
         // Queuing a request to pick particles
         Particle target = new Particle(image);
         execute(new DoGPickingTask(target, lowFilter, highFilter,
@@ -63,8 +62,7 @@ public class DoGParticlePicker extends DistributedTaskHandler implements
         return particleQueueName;
     }
 
-    @Override
-    public BlockingQueue<Particle> getParticleQueue() {
+    @Override public BlockingQueue<Particle> getParticleQueue() {
         return extractedParticles;
     }
 }

@@ -27,8 +27,7 @@ public class ProcessingPipeTask extends DistributedProcessingTask {
         this.processedQueueName = processedQueueName;
     }
 
-    @Override
-    public void process() {
+    @Override public void process() {
         BlockingQueue<Particle> processedParticles = Hazelcast.getQueue(processedQueueName);
 
         Particle processed = target;

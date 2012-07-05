@@ -37,8 +37,7 @@ public class ThresholdFilter implements ParticleFilter {
      * @param target
      *            particle
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         // Copy the particle
         Particle filteredParticle = target.clone();
         // Goes across the particle, blacking out any pixel outside of the

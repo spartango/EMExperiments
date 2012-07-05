@@ -38,8 +38,7 @@ public abstract class DistributedParticleConsumer extends
     /**
      * Add a source to be watched for new particles
      */
-    @Override
-    public void addParticleSource(ParticleSource p) {
+    @Override public void addParticleSource(ParticleSource p) {
         particleSources.add(p);
         // Attach as listener
         ((ICollection<Particle>) p.getParticleQueue()).addItemListener(this,
@@ -74,8 +73,7 @@ public abstract class DistributedParticleConsumer extends
     /**
      * Handle item add events on particle source queues
      */
-    @Override
-    public void itemAdded(ItemEvent<Particle> e) {
+    @Override public void itemAdded(ItemEvent<Particle> e) {
         BlockingQueue<Particle> queue = queueFromEvent(e);
         if (queue != null) {
             // Queue Draining
@@ -87,8 +85,7 @@ public abstract class DistributedParticleConsumer extends
         }
     }
 
-    @Override
-    public void itemRemoved(ItemEvent<Particle> arg0) {
+    @Override public void itemRemoved(ItemEvent<Particle> arg0) {
         // Don't really care when items are removed
     }
 

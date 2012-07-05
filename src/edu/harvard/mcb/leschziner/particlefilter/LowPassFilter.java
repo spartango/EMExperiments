@@ -48,8 +48,7 @@ public class LowPassFilter implements ParticleFilter {
      * Applies the low pass filter to a particle, generating a new, filtered
      * particle
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         if (kernel == null) {
             kernel = generateKernel(size);
         }

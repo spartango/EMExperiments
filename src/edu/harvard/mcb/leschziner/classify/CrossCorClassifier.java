@@ -73,8 +73,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * Gets the set of particles sorted into a class due to similarity to a
      * given template
      */
-    @Override
-    public Collection<Particle> getClassForTemplate(long templateId) {
+    @Override public Collection<Particle> getClassForTemplate(long templateId) {
         return classes.get(templateId);
     }
 
@@ -82,8 +81,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * Gets the average of particles sorted into a template's class. Will
      * utilize a cached average if one has already been calculated.
      */
-    @Override
-    public Particle getAverageForTemplate(long templateId) {
+    @Override public Particle getAverageForTemplate(long templateId) {
         // Checks the cache for a class average
         Particle average = classAverages.get(templateId);
         if (average == null && classes.containsKey(templateId)) {
@@ -99,8 +97,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     /**
      * Classifies a particle
      */
-    @Override
-    public void processParticle(final Particle target) {
+    @Override public void processParticle(final Particle target) {
         // Classify the particle asynchronously in a distributed way
         execute(new CrossCorClassifierTask(target, matchThreshold,
                                            classesMapName, averagesMapName,
@@ -111,8 +108,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     /**
      * Adds a template to compare particles against
      */
-    @Override
-    public void addTemplate(Particle template) {
+    @Override public void addTemplate(Particle template) {
         long id = currentTemplateId.incrementAndGet();
         templates.put(id, template);
     }
@@ -122,8 +118,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * 
      * @param templates
      */
-    @Override
-    public void addTemplates(Collection<Particle> templates) {
+    @Override public void addTemplates(Collection<Particle> templates) {
         for (Particle template : templates) {
             addTemplate(template);
         }
@@ -132,16 +127,14 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     /**
      * Get all the templates being used for classification
      */
-    @Override
-    public Collection<Particle> getTemplates() {
+    @Override public Collection<Particle> getTemplates() {
         return templates.values();
     }
 
     /**
      * Get the ids of the templates being used for classification
      */
-    @Override
-    public Collection<Long> getTemplateIds() {
+    @Override public Collection<Long> getTemplateIds() {
         return templates.keySet();
     }
 

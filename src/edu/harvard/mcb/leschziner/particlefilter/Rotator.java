@@ -38,8 +38,7 @@ public class Rotator implements ParticleFilter {
     /**
      * Rotate a particle, generating a new, rotated particle
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         AffineTransform transform = generateTransform(radianAngle,
                                                       target.getSize());
         return Particle.transform(target, transform);

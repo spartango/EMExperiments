@@ -202,8 +202,7 @@ public class Particle implements Serializable {
     /**
      * Provides a clone of this particle
      */
-    @Override
-    public Particle clone() {
+    @Override public Particle clone() {
         Particle result = new Particle(image.clone());
         return result;
     }
@@ -255,6 +254,10 @@ public class Particle implements Serializable {
      */
     public BufferedImage asBufferedImage() {
         return image.getBufferedImage();
+    }
+
+    public Particle createCompatible() {
+        return new Particle(IplImage.createCompatible(image));
     }
 
     public IplImage getImage() {

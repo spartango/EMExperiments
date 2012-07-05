@@ -4,8 +4,6 @@ import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
-import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 /**
  * A Filter that finds the center of mass of a particle, and moves that center
@@ -19,10 +17,10 @@ public class MassCenterer implements ParticleFilter {
     /**
      * 
      */
-    private static final long      serialVersionUID = 3903067451461061220L;
+    private static final long            serialVersionUID = 3903067451461061220L;
 
     // List of filters to be applied prior to center-finding
-    private Vector<ParticleFilter> preFilters;
+    private final Vector<ParticleFilter> preFilters;
 
     /**
      * Builds a new centerer, ready to center particles
@@ -35,8 +33,7 @@ public class MassCenterer implements ParticleFilter {
      * Finds a particle's center of mass, and then generates a new particle by
      * shifting the original to center that point
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         // Find center of mass
         // in X
         // Sum mass of each column, find greatest
@@ -50,26 +47,34 @@ public class MassCenterer implements ParticleFilter {
         }
 
         int maxMassX = 0;
-        for (int i = 0; i < target.getSize(); i++) {
-            int mass = MatrixUtils.sum(ColorUtils.extractRed(filtered.getColumn(i)));
+        for (int x = 0; x < target.getSize(); x++) {
+            int mass = 0;
+
+            // Sum mass
+            for (int y = 0; y < target.getSize(); y++) {
+                mass += target.getPixelRed(x, y);
+            }
+
             if (mass > maxMassX) {
                 maxMassX = mass;
-                massCenterX = i;
-                // System.out.println("[MassCenterer]: X Sum(" + i + ") = " +
-                // mass);
+                massCenterX = x;
+
             }
         }
 
         // in Y
         // Sum mass of each row, find greatest
         int maxMassY = 0;
-        for (int j = 0; j < target.getSize(); j++) {
-            int mass = MatrixUtils.sum(ColorUtils.extractRed(filtered.getRow(j)));
+        for (int y = 0; y < target.getSize(); y++) {
+            int mass = 0;
+            // Sum mass
+            for (int x = 0; x < target.getSize(); x++) {
+                mass += target.getPixelRed(x, y);
+            }
+
             if (mass > maxMassY) {
                 maxMassY = mass;
-                massCenterY = j;
-                // System.out.println("[MassCenterer]: Y Sum(" + j + ") = " +
-                // mass);
+                massCenterY = y;
             }
         }
 

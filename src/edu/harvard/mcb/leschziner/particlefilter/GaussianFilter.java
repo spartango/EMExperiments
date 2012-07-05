@@ -1,6 +1,9 @@
 package edu.harvard.mcb.leschziner.particlefilter;
 
-import java.awt.image.Kernel;
+import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_imgproc;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
@@ -19,11 +22,7 @@ public class GaussianFilter implements ParticleFilter {
     private static final long serialVersionUID = -5419594820002104375L;
 
     // Radius of the filtering kernel
-    private int               radius;
-
-    // Linear gaussian distributions (cannot be serialized)
-    private transient Kernel  xKernel;
-    private transient Kernel  yKernel;
+    private final int         radius;
 
     /**
      * Builds a gaussian filter
@@ -35,58 +34,19 @@ public class GaussianFilter implements ParticleFilter {
     }
 
     /**
-     * Filters a particle by convolving two 1D gaussian distributions (x and y)
-     * with it
+     * Applies a gaussian blur to the particle
      */
-    @Override
-    public Particle filter(Particle target) {
-        if (xKernel == null && yKernel == null) {
-            xKernel = generateXKernel(radius);
-            yKernel = generateYKernel(radius);
-        }
-        // Apply each 1D filter
-        Particle filtered = Particle.convolve(target, xKernel);
-        filtered = Particle.convolve(filtered, yKernel);
-        return filtered;
-    }
+    @Override public Particle filter(Particle target) {
+        Particle result = target.createCompatible();
 
-    private static Kernel generateXKernel(int radius) {
-        float[] xDistribution = generateGaussian(radius);
-        return new Kernel(xDistribution.length, 1, xDistribution);
-    }
+        // The kernel is separable, so we'll use 1D kernels
+        CvMat kernel = opencv_imgproc.getGaussianKernel(radius, -1,
+                                                        opencv_core.CV_32F);
 
-    private static Kernel generateYKernel(int radius) {
-        float[] yDistribution = generateGaussian(radius);
-        return new Kernel(1, yDistribution.length, yDistribution);
-    }
+        opencv_imgproc.sepFilter2D(target.getImage(), result.getImage(), 3,
+                                   kernel, kernel, new CvPoint(-1, 1), 0.0,
+                                   opencv_imgproc.BORDER_DEFAULT);
 
-    private static float[] generateGaussian(int radius) {
-        // Build kernel
-        int rCeil = (int) Math.ceil(radius);
-        int rows = rCeil * 2 + 1;
-        float[] basis = new float[rows];
-        float sigma = radius / 3;
-        float sigma2sq = 2 * sigma * sigma;
-        float sigmaPi2 = (float) (2 * Math.PI * sigma);
-        float sqrtSigmaPi2 = (float) Math.sqrt(sigmaPi2);
-        float radiusSq = radius * radius;
-        float total = 0;
-        int index = 0;
-        for (int row = -rCeil; row <= rCeil; row++) {
-            float distance = row * row;
-            if (distance > radiusSq) {
-                basis[index] = 0;
-            } else {
-                basis[index] = (float) Math.exp(-distance / sigma2sq)
-                               / sqrtSigmaPi2;
-            }
-            total += basis[index];
-            index++;
-        }
-        for (int i = 0; i < rows; i++) {
-            basis[i] /= total;
-        }
-
-        return basis;
+        return result;
     }
 }

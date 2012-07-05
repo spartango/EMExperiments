@@ -18,11 +18,11 @@ public class CircularMask implements ParticleFilter {
     private static final long serialVersionUID = -3268811096169325679L;
 
     // Radius of pixels to preserve
-    private int               radius;
+    private final int         radius;
 
     // Amount to offset the circle from the Particle center
-    private int               xOffset;
-    private int               yOffset;
+    private final int         xOffset;
+    private final int         yOffset;
 
     /**
      * Build a new mask that masks out everything outside of a centered circle
@@ -53,19 +53,19 @@ public class CircularMask implements ParticleFilter {
     /**
      * Generate a new particle by masking the target
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         // Copy the particle
         Particle filteredParticle = target.clone();
         // Goes across the particle, blacking out any pixel outside of the
         // circular radius
         int size = target.getSize();
+        double xShift = (size / 2.0) + xOffset;
+        double yShift = (size / 2.0) + yOffset;
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 // Radius Check
-                double xShift = (size / 2.0) + xOffset;
-                double yShift = (size / 2.0) + yOffset;
+
                 double distanceSquared = (x - xShift) * (x - xShift)
                                          + (y - yShift) * (y - yShift);
                 if (distanceSquared > (radius * radius)) {

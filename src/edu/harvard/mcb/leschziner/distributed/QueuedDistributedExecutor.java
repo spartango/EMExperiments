@@ -97,8 +97,7 @@ public class QueuedDistributedExecutor implements Runnable {
     /**
      * Pulls from the queue when there is capacity available
      */
-    @Override
-    public void run() {
+    @Override public void run() {
         while (running) {
             try {
                 // Check for capacity available vs number of running tasks

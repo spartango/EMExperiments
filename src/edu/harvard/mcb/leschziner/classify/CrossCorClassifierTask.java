@@ -68,8 +68,7 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
     /**
      * Do the classification
      */
-    @Override
-    public void process() {
+    @Override public void process() {
         // Pull up distributed maps
         MultiMap<Long, Particle> classes = Hazelcast.getMultiMap(classMapName);
         Map<Long, Particle> classAverages = Hazelcast.getMap(averagesMapName);

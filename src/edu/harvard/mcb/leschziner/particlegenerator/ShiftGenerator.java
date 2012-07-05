@@ -21,8 +21,7 @@ public class ShiftGenerator implements ParticleGenerator {
         }
     }
 
-    @Override
-    public Collection<Particle> generate(Particle seed) {
+    @Override public Collection<Particle> generate(Particle seed) {
         // Apply each rotator to the particle
         Vector<Particle> shifted = new Vector<Particle>(shifters.size());
         for (Shifter shifter : shifters) {
@@ -31,8 +30,7 @@ public class ShiftGenerator implements ParticleGenerator {
         return shifted;
     }
 
-    @Override
-    public Collection<Particle> generate(Collection<Particle> seeds) {
+    @Override public Collection<Particle> generate(Collection<Particle> seeds) {
         Vector<Particle> shifted = new Vector<Particle>(seeds.size()
                                                         * shifters.size());
         for (Particle seed : seeds) {

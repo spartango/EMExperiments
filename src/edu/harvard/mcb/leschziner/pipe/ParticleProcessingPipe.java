@@ -33,15 +33,13 @@ public class ParticleProcessingPipe extends DistributedParticleConsumer
         stages.add(filter);
     }
 
-    @Override
-    public void processParticle(final Particle particle) {
+    @Override public void processParticle(final Particle particle) {
         // Queuing a request
         execute(new ProcessingPipeTask(particle, stages, processedQueueName,
                                        executorName));
     }
 
-    @Override
-    public BlockingQueue<Particle> getParticleQueue() {
+    @Override public BlockingQueue<Particle> getParticleQueue() {
         return processedParticles;
     }
 

@@ -41,8 +41,7 @@ public class Shifter implements ParticleFilter {
     /**
      * Apply a shift to the particle, generating a new, shifted particle
      */
-    @Override
-    public Particle filter(Particle target) {
+    @Override public Particle filter(Particle target) {
         return Particle.transform(target, transform);
     }
 
