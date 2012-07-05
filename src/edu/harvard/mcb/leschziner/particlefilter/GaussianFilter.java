@@ -1,8 +1,6 @@
 package edu.harvard.mcb.leschziner.particlefilter;
 
-import com.googlecode.javacv.cpp.opencv_core;
-import com.googlecode.javacv.cpp.opencv_core.CvMat;
-import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_core.CvSize;
 import com.googlecode.javacv.cpp.opencv_imgproc;
 
 import edu.harvard.mcb.leschziner.core.Particle;
@@ -40,12 +38,9 @@ public class GaussianFilter implements ParticleFilter {
         Particle result = target.createCompatible();
 
         // The kernel is separable, so we'll use 1D kernels
-        CvMat kernel = opencv_imgproc.getGaussianKernel(radius, -1,
-                                                        opencv_core.CV_32F);
-
-        opencv_imgproc.sepFilter2D(target.getImage(), result.getImage(), 3,
-                                   kernel, kernel, new CvPoint(-1, 1), 0.0,
-                                   opencv_imgproc.BORDER_DEFAULT);
+        opencv_imgproc.GaussianBlur(target.getImage(), result.getImage(),
+                                    new CvSize(radius, radius), 0, 0,
+                                    opencv_imgproc.BORDER_DEFAULT);
 
         return result;
     }

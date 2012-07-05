@@ -53,7 +53,7 @@ public class DoGPickingTask extends DistributedProcessingTask {
         // Debug visualization
         // DisplayUtils.displayParticle(filtered);
         // DisplayUtils.displayParticle(thresholded);
-
+        System.out.println("[DoGParticleSource]: Filtered " + target.hashCode());
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(thresholded);
         System.out.println("[DoGParticleSource]: Extracted " + blobs.length

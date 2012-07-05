@@ -1,8 +1,9 @@
 package edu.harvard.mcb.leschziner.particlefilter;
 
+import com.googlecode.javacv.cpp.opencv_imgproc;
+
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 /**
  * Thresholds black and white particles, blacking out pixels below a certain
@@ -39,24 +40,12 @@ public class ThresholdFilter implements ParticleFilter {
      */
     @Override public Particle filter(Particle target) {
         // Copy the particle
-        Particle filteredParticle = target.clone();
-        // Goes across the particle, blacking out any pixel outside of the
-        // circular radius
-        int size = target.getSize();
+        Particle filteredParticle = target.createCompatible();
 
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                int pixel = filteredParticle.getPixelRed(x, y);
-                // Threshold Check
-                if (pixel >= threshold) {
-                    // Mark pixels above threshold white
-                    filteredParticle.setPixel(x, y, ColorUtils.WHITE);
-                } else {
-                    // Mark pixels below threshold black
-                    filteredParticle.setPixel(x, y, ColorUtils.BLACK);
-                }
-            }
-        }
+        opencv_imgproc.cvThreshold(target.getImage(),
+                                   filteredParticle.getImage(), threshold, 255,
+                                   opencv_imgproc.CV_THRESH_BINARY);
+
         return filteredParticle;
     }
 }
