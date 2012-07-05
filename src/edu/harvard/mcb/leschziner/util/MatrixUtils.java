@@ -1,6 +1,20 @@
 package edu.harvard.mcb.leschziner.util;
 
 public class MatrixUtils {
+
+    public static double[] flatten(double[][] matrix) {
+        int matrixHeight = matrix.length;
+        int matrixWidth = matrix[0].length;
+
+        double[] flattened = new double[matrixWidth * matrixHeight];
+        // Copy over the kernel contents
+        for (int i = 0; i < matrixHeight; i++) {
+            System.arraycopy(matrix[i], 0, flattened, i * matrixWidth,
+                             matrixWidth);
+        }
+        return flattened;
+    }
+
     public static float[] flatten(float[][] matrix) {
         int matrixHeight = matrix.length;
         int matrixWidth = matrix[0].length;
@@ -25,6 +39,14 @@ public class MatrixUtils {
                              matrixWidth);
         }
         return flattened;
+    }
+
+    public static double[][] unflatten(double[] matrix, int width, int height) {
+        double[][] unflattened = new double[height][width];
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(matrix, i * width, unflattened[i], 0, width);
+        }
+        return unflattened;
     }
 
     public static float[][] unflatten(float[] matrix, int width, int height) {
@@ -67,5 +89,13 @@ public class MatrixUtils {
 
     public static double average(int[][] matrix) {
         return sum(matrix) / (matrix.length * matrix[0].length);
+    }
+
+    public static double[] upConvertArray(float[] target) {
+        double[] result = new double[target.length];
+        for (int i = 0; i < target.length; i++) {
+            result[i] = target[i];
+        }
+        return result;
     }
 }

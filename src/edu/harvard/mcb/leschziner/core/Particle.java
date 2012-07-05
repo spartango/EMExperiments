@@ -2,13 +2,9 @@ package edu.harvard.mcb.leschziner.core;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,6 +13,13 @@ import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
+import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_highgui;
+import com.googlecode.javacv.cpp.opencv_imgproc;
+
+import edu.harvard.mcb.leschziner.util.ColorUtils;
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 /**
@@ -32,13 +35,18 @@ public class Particle implements Serializable {
     /**
      * 
      */
-    private static final long       serialVersionUID = 8805574980503468420L;
+    private static final long      serialVersionUID = 8805574980503468420L;
+
+    // Channel offsets
+    private static final int       GREEN            = 1;
+    private static final int       BLUE             = 2;
+    private static final int       RED              = 0;
 
     // Image can't be serialized, will be transferred manually
-    private transient BufferedImage image;
+    private transient IplImage     image;
 
     // Stack of reversible transformation operations performed on this particle
-    private Stack<AffineTransform>  transforms;
+    private Stack<AffineTransform> transforms;
 
     /**
      * Builds a particle from a square image
@@ -46,6 +54,16 @@ public class Particle implements Serializable {
      * @param image
      */
     public Particle(BufferedImage image) {
+        this.image = IplImage.createFrom(image);
+        transforms = new Stack<AffineTransform>();
+    }
+
+    /**
+     * Builds a particle from a square image
+     * 
+     * @param image
+     */
+    public Particle(IplImage image) {
         this.image = image;
         transforms = new Stack<AffineTransform>();
     }
@@ -56,7 +74,7 @@ public class Particle implements Serializable {
      * @return particle box size in pixels
      */
     public int getSize() {
-        return image.getHeight();
+        return image.width();
     }
 
     // I/O methods
@@ -71,7 +89,27 @@ public class Particle implements Serializable {
      * @return RGB pixel value
      */
     public int getPixel(int x, int y) {
-        return image.getRGB(x, y);
+        return (getPixelRed(x, y) << 16) & (getPixelGreen(x, y) << 8)
+               & getPixelBlue(x, y);
+    }
+
+    public int getPixelRed(int x, int y) {
+        return getPixelChannel(x, y, RED);
+    }
+
+    public int getPixelBlue(int x, int y) {
+        return getPixelChannel(x, y, BLUE);
+    }
+
+    public int getPixelGreen(int x, int y) {
+        return getPixelChannel(x, y, GREEN);
+    }
+
+    public int getPixelChannel(int x, int y, int channel) {
+        // Find row, go to channel byte, compensate for unsigned value
+        return image.getByteBuffer().get(y * image.widthStep()
+                                                 + image.nChannels() * x
+                                                 + channel) & 0xFF;
     }
 
     /**
@@ -81,8 +119,8 @@ public class Particle implements Serializable {
      *            coordinate of the row
      * @return the row of RGB pixels
      */
-    public int[] getRow(int y) {
-        return image.getRGB(0, y, getSize(), 1, null, 0, getSize());
+    public int getRow(int y) {
+        // TODO
     }
 
     /**
@@ -93,7 +131,7 @@ public class Particle implements Serializable {
      * @return
      */
     public int[] getColumn(int x) {
-        return image.getRGB(x, 0, 1, getSize(), null, 0, getSize());
+        // TODO
     }
 
     /**
@@ -106,8 +144,7 @@ public class Particle implements Serializable {
      * @return Array of Arrays (2D) of RGB pixels
      */
     public int[][] getRegion(int x, int y, int width, int height) {
-        int[] flat = image.getRGB(x, y, width, height, null, 0, getSize());
-        return MatrixUtils.unflatten(flat, width, height);
+        // TODO
     }
 
     /**
@@ -120,7 +157,7 @@ public class Particle implements Serializable {
      * @return An Array of RGB pixels, in row major order
      */
     public int[] getRegionBuffer(int x, int y, int width, int height) {
-        return image.getRGB(x, y, width, height, null, 0, width);
+        // TODO
     }
 
     /**
@@ -130,7 +167,6 @@ public class Particle implements Serializable {
      */
     public int[][] getPixels() {
         // TODO make this efficient
-        return getRegion(0, 0, getSize(), getSize());
     }
 
     /**
@@ -143,7 +179,7 @@ public class Particle implements Serializable {
      * @return An Array of RGB pixels, in row major order
      */
     public int[] getPixelBuffer() {
-        return getRegionBuffer(0, 0, getSize(), getSize());
+        // TODO
     }
 
     /**
@@ -157,7 +193,26 @@ public class Particle implements Serializable {
      *            value
      */
     public void setPixel(int x, int y, int value) {
-        image.setRGB(x, y, value);
+        setPixelRed(x, y, ColorUtils.extractRed(value));
+        setPixelGreen(x, y, ColorUtils.extractGreen(value));
+        setPixelBlue(x, y, ColorUtils.extractBlue(value));
+    }
+
+    public void setPixelRed(int x, int y, int value) {
+        setPixelChannel(x, y, RED, value);
+    }
+
+    public void setPixelGreen(int x, int y, int value) {
+        setPixelChannel(x, y, GREEN, value);
+    }
+
+    public void setPixelBlue(int x, int y, int value) {
+        setPixelChannel(x, y, BLUE, value);
+    }
+
+    public void setPixelChannel(int x, int y, int channel, int value) {
+        image.getByteBuffer().put(y * image.widthStep() + image.nChannels() * x
+                                          + channel, (byte) (value));
     }
 
     /**
@@ -205,10 +260,7 @@ public class Particle implements Serializable {
      */
     @Override
     public Particle clone() {
-        BufferedImage newImage = new BufferedImage(getSize(), getSize(),
-                                                   image.getType());
-        image.copyData(newImage.getRaster());
-        Particle result = new Particle(newImage);
+        Particle result = new Particle(image.clone());
         return result;
     }
 
@@ -221,7 +273,7 @@ public class Particle implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         // write buff with imageIO to out
-        ImageIO.write(image, "png", out);
+        ImageIO.write(asBufferedImage(), "png", out);
     }
 
     /**
@@ -235,7 +287,7 @@ public class Particle implements Serializable {
                                                  ClassNotFoundException {
         in.defaultReadObject();
         // read buff with imageIO from in
-        image = ImageIO.read(in);
+        image = IplImage.createFrom(ImageIO.read(in));
     }
 
     /**
@@ -247,7 +299,8 @@ public class Particle implements Serializable {
      * @return new subparticle
      */
     public Particle subParticle(int x, int y, int size) {
-        return new Particle(image.getSubimage(x, y, size, size));
+        return new Particle(image.getBufferedImage().getSubimage(x, y, size,
+                                                                 size));
     }
 
     /**
@@ -257,6 +310,10 @@ public class Particle implements Serializable {
      * @return a buffered image
      */
     public BufferedImage asBufferedImage() {
+        return image.getBufferedImage();
+    }
+
+    public IplImage getImage() {
         return image;
     }
 
@@ -267,7 +324,7 @@ public class Particle implements Serializable {
      * @throws IOException
      */
     public void toFile(String filename) throws IOException {
-        ImageIO.write(image, "png", new File(filename));
+        opencv_highgui.cvSaveImage(filename, image);
     }
 
     /**
@@ -278,8 +335,7 @@ public class Particle implements Serializable {
      * @throws IOException
      */
     public static Particle fromFile(String filename) throws IOException {
-        BufferedImage particleImage = ImageIO.read(new File(filename));
-        return new Particle(particleImage);
+        return new Particle(opencv_highgui.cvLoadImage(filename));
     }
 
     // Primitive operations
@@ -297,11 +353,15 @@ public class Particle implements Serializable {
      *            (2x2 or 3x3)
      * @return new, transformed particle
      */
-    public static Particle transform(Particle target, float[][] matrix) {
-        float[] flatMatrix = MatrixUtils.flatten(matrix);
+    public static Particle transform(Particle target, double[][] matrix) {
+        // Reformat the matrix
+        double[] kernel = MatrixUtils.flatten(matrix);
+        // TODO validate
+        CvMat kernelMat = CvMat.create(matrix.length, matrix[0].length);
+        kernelMat.put(0, kernel, 0, kernel.length);
 
-        AffineTransform transform = new AffineTransform(flatMatrix);
-        return transform(target, transform);
+        // Apply the transformation
+        return transform(target, kernelMat);
     }
 
     /**
@@ -314,13 +374,31 @@ public class Particle implements Serializable {
      * @return a new, transformed particle
      */
     public static Particle transform(Particle target, AffineTransform xform) {
-        // Build an AffineTransformOp
-        AffineTransformOp operation = new AffineTransformOp(
-                                                            xform,
-                                                            AffineTransformOp.TYPE_BICUBIC);
-        Particle result = applyOperation(target, operation);
+        // Grab data from the transform
+        double[] matrix = new double[6];
+        // stored as { m00 m10 m01 m11 m02 m12 }
+        xform.getMatrix(matrix);
+
+        // Build an appropriate CvMat
+        CvMat kernelMat = CvMat.create(2, 3);
+        kernelMat.put(0, 0, matrix[0]);
+        kernelMat.put(1, 0, matrix[1]);
+        kernelMat.put(0, 1, matrix[2]);
+        kernelMat.put(1, 1, matrix[3]);
+        kernelMat.put(0, 2, matrix[4]);
+        kernelMat.put(1, 2, matrix[5]);
+
+        Particle result = transform(target, kernelMat);
         result.pushTransform(xform);
         return result;
+    }
+
+    public static Particle transform(Particle target, CvMat kernel) {
+        IplImage dst = IplImage.createCompatible(target.image);
+
+        // Apply the transform
+        opencv_imgproc.cvWarpAffine(target.image, dst, kernel);
+        return new Particle(dst);
     }
 
     /**
@@ -336,11 +414,13 @@ public class Particle implements Serializable {
         int kernelHeight = kernel.length;
         int kernelWidth = kernel[0].length;
 
-        float[] basisKernel = MatrixUtils.flatten(kernel);
+        double[] basisKernel = MatrixUtils.upConvertArray(MatrixUtils.flatten(kernel));
 
         // Build a Kernel
-        Kernel newKernel = new Kernel(kernelWidth, kernelHeight, basisKernel);
-        return convolve(target, newKernel);
+        CvMat kernelMat = CvMat.create(kernelHeight, kernelWidth);
+        kernelMat.put(0, basisKernel, 0, basisKernel.length);
+
+        return convolve(target, kernelMat);
     }
 
     /**
@@ -353,10 +433,21 @@ public class Particle implements Serializable {
      * @return a new, convolved particle
      */
     public static Particle convolve(Particle target, Kernel kernel) {
-        // Build a ConvolveOp
-        ConvolveOp operation = new ConvolveOp(kernel);
+        double[] kernelData = MatrixUtils.upConvertArray(kernel.getKernelData(null));
 
-        return applyOperation(target, operation);
+        // Build a CvMat
+        CvMat kernelMat = CvMat.create(kernel.getHeight(), kernel.getWidth());
+
+        // Copy in kernel data
+        kernelMat.put(0, kernelData, 0, kernelData.length);
+        return convolve(target, kernelMat);
+    }
+
+    public static Particle convolve(Particle target, CvMat kernel) {
+        IplImage dst = IplImage.createCompatible(target.image);
+        opencv_imgproc.cvFilter2D(target.image, dst, kernel,
+                                  new CvPoint(-1, -1));
+        return new Particle(dst);
     }
 
     /**
@@ -387,15 +478,4 @@ public class Particle implements Serializable {
         return applyOperation(target, operation);
     }
 
-    private static Particle applyOperation(Particle target,
-                                           BufferedImageOp operation) {
-        // Create a destination
-        BufferedImage dest = new BufferedImage(target.getSize(),
-                                               target.getSize(),
-                                               target.image.getType());
-
-        // Apply the op
-        operation.filter(target.image, dest);
-        return new Particle(dest);
-    }
 }

@@ -19,7 +19,7 @@ public class ThresholdFilter implements ParticleFilter {
     private static final long serialVersionUID = -5385792577940651526L;
 
     // Value of pixel above which to allow
-    private int               threshold;
+    private final int         threshold;
 
     /**
      * Build a new threshold filter
@@ -37,6 +37,7 @@ public class ThresholdFilter implements ParticleFilter {
      * @param target
      *            particle
      */
+    @Override
     public Particle filter(Particle target) {
         // Copy the particle
         Particle filteredParticle = target.clone();
@@ -46,8 +47,7 @@ public class ThresholdFilter implements ParticleFilter {
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                int pixel = ColorUtils.extractRed(filteredParticle.getPixel(x,
-                                                                            y));
+                int pixel = filteredParticle.getPixelRed(x, y);
                 // Threshold Check
                 if (pixel >= threshold) {
                     // Mark pixels above threshold white
