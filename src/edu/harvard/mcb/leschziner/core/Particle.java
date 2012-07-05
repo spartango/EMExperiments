@@ -4,7 +4,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
-import java.awt.image.RescaleOp;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,6 +12,7 @@ import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
+import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
@@ -460,8 +460,9 @@ public class Particle implements Serializable {
      * @return new, scaled particle
      */
     public static Particle scale(Particle target, float scaleFactor) {
-        RescaleOp operation = new RescaleOp(scaleFactor, 0, null);
-        return applyOperation(target, operation);
+        IplImage dst = IplImage.createCompatible(target.image);
+        opencv_core.cvScale(target.image, dst, scaleFactor, 0);
+        return new Particle(dst);
     }
 
     /**
@@ -474,8 +475,9 @@ public class Particle implements Serializable {
      * @return a new particle with each pixel increased by the scalar
      */
     public static Particle addScalar(Particle target, float offset) {
-        RescaleOp operation = new RescaleOp(1, offset, null);
-        return applyOperation(target, operation);
+        IplImage dst = IplImage.createCompatible(target.image);
+        opencv_core.cvScale(target.image, dst, 1.0, offset);
+        return new Particle(dst);
     }
 
 }
