@@ -32,8 +32,9 @@ public class ClassAverager {
             int size = particle.getSize();
 
             // Allocate a sum buffer with greater depth
-            IplImage sumBuffer = IplImage.create(new CvSize(particle.getSize()),
-                                                 32, 3);
+            IplImage sumBuffer = IplImage.create(new CvSize(size, size), 32,
+                                                 particle.getImage()
+                                                         .nChannels());
 
             for (; iter.hasNext(); particle = iter.next()) {
                 // Accumulate the images

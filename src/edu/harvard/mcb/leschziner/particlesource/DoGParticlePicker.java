@@ -2,11 +2,13 @@ package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.image.BufferedImage;
 
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 import edu.harvard.mcb.leschziner.particlefilter.BinaryThresholdFilter;
+import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
 
 public class DoGParticlePicker extends DistributedParticlePicker {
 
@@ -35,6 +37,13 @@ public class DoGParticlePicker extends DistributedParticlePicker {
 
     @Override public void processMicrograph(final BufferedImage image) {
         // Queuing a request to pick particles
+        Particle target = new Particle(image);
+        execute(new DoGPickingTask(target, lowFilter, highFilter,
+                                   thresholdFilter, blobExtractor, boxSize,
+                                   particleQueueName, executorName));
+    }
+
+    @Override public void processMicrograph(final IplImage image) {
         Particle target = new Particle(image);
         execute(new DoGPickingTask(target, lowFilter, highFilter,
                                    thresholdFilter, blobExtractor, boxSize,

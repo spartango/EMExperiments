@@ -2,7 +2,6 @@ package edu.harvard.mcb.leschziner.particlefilter;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 /**
  * Creates a circular mask that blacks out everything outside of a certain
@@ -16,6 +15,8 @@ public class CircularMask implements ParticleFilter {
      * 
      */
     private static final long serialVersionUID = -3268811096169325679L;
+
+    private static final int  BLACK            = 0;
 
     // Radius of pixels to preserve
     private final int         radius;
@@ -69,7 +70,7 @@ public class CircularMask implements ParticleFilter {
                 double distanceSquared = (x - xShift) * (x - xShift)
                                          + (y - yShift) * (y - yShift);
                 if (distanceSquared > (radius * radius)) {
-                    filteredParticle.setPixel(x, y, ColorUtils.BLACK);
+                    filteredParticle.setPixelBlue(x, y, BLACK);
                 }
             }
         }

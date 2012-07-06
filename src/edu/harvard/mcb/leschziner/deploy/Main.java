@@ -1,10 +1,9 @@
 package edu.harvard.mcb.leschziner.deploy;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_highgui;
 
 import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
@@ -48,7 +47,7 @@ public class Main {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
-        picker = new DoGParticlePicker(80, 20, 15, 21, 120, 200);
+        picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
         // Setup some template generators
         // RotationGenerator templateRotator = new RotationGenerator(10);
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
@@ -77,10 +76,11 @@ public class Main {
 
         System.out.println("[Main]: Loading Images");
         for (int i = 1; i <= 1; i++) {
-            BufferedImage micrograph = ImageIO.read(new File(
-                                                             "raw/rib_10fold_49kx_"
-                                                                     + i
-                                                                     + ".png"));
+            String filename = "raw/rib_10fold_49kx_" + i + ".png";
+
+            // BufferedImage micrograph = ImageIO.read(new File(filename));
+            IplImage micrograph = opencv_highgui.cvLoadImage(filename);
+
             System.out.println("[Main]: Processing Micrograph "
                                + micrograph.hashCode());
             // Pick particles
