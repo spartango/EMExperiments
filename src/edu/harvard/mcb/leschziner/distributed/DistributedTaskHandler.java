@@ -24,7 +24,7 @@ public abstract class DistributedTaskHandler {
      * tracker
      */
     public DistributedTaskHandler() {
-        executorName = this.getClass().getName() + "_" + this.hashCode();
+        executorName = this.getClass().getSimpleName() + "_" + this.hashCode();
         // Use a queued executor to prevent flooding the cluster with tasks
         executor = new QueuedDistributedExecutor(executorName);
         pendingCount = Hazelcast.getAtomicNumber(executorName
