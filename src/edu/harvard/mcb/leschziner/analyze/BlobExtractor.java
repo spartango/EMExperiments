@@ -33,7 +33,7 @@ public class BlobExtractor implements Serializable {
     private static final int  SECTOR_X         = 3;
     private static final int  SECTOR_D         = 4;
 
-    private static final int  BLACK            = 255;
+    private static final int  BLACK            = 0;
 
     // The expected size of the particle we're finding in pixels
     private final int         targetSize;

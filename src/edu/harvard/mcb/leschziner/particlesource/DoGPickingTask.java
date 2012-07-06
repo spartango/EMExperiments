@@ -8,6 +8,7 @@ import com.hazelcast.core.Hazelcast;
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class DoGPickingTask extends DistributedPickingTask {
 
@@ -49,7 +50,7 @@ public class DoGPickingTask extends DistributedPickingTask {
 
         // Debug visualization
         // DisplayUtils.displayParticle(highFiltered);
-        // DisplayUtils.displayParticle(thresholded);
+        DisplayUtils.displayParticle(thresholded);
 
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(thresholded);

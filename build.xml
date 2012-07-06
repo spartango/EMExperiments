@@ -34,7 +34,7 @@
 
 	<target name="compile">
 	    <mkdir dir="bin/" />
-	    <javac srcdir="src" destdir="bin">
+	    <javac srcdir="src" destdir="bin" debug="on">
 		    <classpath>
 		        <pathelement path="lib/hazelcast-2.1.2.jar"/>
 		    	<pathelement path="lib/javacpp.jar"/>
