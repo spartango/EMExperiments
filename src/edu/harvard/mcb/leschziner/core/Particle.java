@@ -16,11 +16,12 @@ import javax.imageio.ImageIO;
 import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_core.CvRect;
+import com.googlecode.javacv.cpp.opencv_core.CvSize;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 import com.googlecode.javacv.cpp.opencv_imgproc;
 
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 /**
@@ -137,9 +138,9 @@ public class Particle implements Serializable {
      *            value
      */
     public void setPixel(int x, int y, int value) {
-        setPixelRed(x, y, ColorUtils.extractRed(value));
-        setPixelGreen(x, y, ColorUtils.extractGreen(value));
-        setPixelBlue(x, y, ColorUtils.extractBlue(value));
+        for (int channel = 0; channel < image.nChannels(); channel++) {
+            setPixelChannel(x, y, channel, value);
+        }
     }
 
     public void setPixelRed(int x, int y, int value) {
@@ -242,8 +243,17 @@ public class Particle implements Serializable {
      * @return new subparticle
      */
     public Particle subParticle(int x, int y, int size) {
-        return new Particle(image.getBufferedImage().getSubimage(x, y, size,
-                                                                 size));
+        // Prepare a target image
+        IplImage dst = IplImage.create(new CvSize(size, size), image.depth(),
+                                       image.nChannels());
+        // set an ROI
+        opencv_core.cvSetImageROI(image, new CvRect(x, y, size, size));
+        // Copy the ROI
+        opencv_core.cvCopy(image, dst);
+        // Unset the roi
+        opencv_core.cvResetImageROI(image);
+
+        return new Particle(dst);
     }
 
     /**

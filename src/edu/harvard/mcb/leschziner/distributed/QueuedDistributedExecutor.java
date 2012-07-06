@@ -64,8 +64,8 @@ public class QueuedDistributedExecutor implements Runnable {
      *            : number of tasks that can be run on each node
      */
     public QueuedDistributedExecutor(String executorName, int nodeCapacity) {
-        this.executor = Hazelcast.getExecutorService(executorName);
-        //this.executor = Executors.newCachedThreadPool();
+        // this.executor = Hazelcast.getExecutorService(executorName);
+        this.executor = Executors.newCachedThreadPool();
         this.activeTasks = Hazelcast.getAtomicNumber(executorName
                                                      + DistributedProcessingTask.ACTIVE_SUFFIX);
         this.cluster = Hazelcast.getCluster();

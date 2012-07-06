@@ -70,7 +70,7 @@ public class CircularMask implements ParticleFilter {
                 double distanceSquared = (x - xShift) * (x - xShift)
                                          + (y - yShift) * (y - yShift);
                 if (distanceSquared > (radius * radius)) {
-                    filteredParticle.setPixelBlue(x, y, BLACK);
+                    filteredParticle.setPixel(x, y, BLACK);
                 }
             }
         }

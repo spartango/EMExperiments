@@ -13,6 +13,7 @@ import com.hazelcast.core.Hazelcast;
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class TemplatePickingTask extends DistributedPickingTask {
     /**
@@ -52,6 +53,7 @@ public class TemplatePickingTask extends DistributedPickingTask {
 
         opencv_imgproc.cvThreshold(matchMat, filteredMat, matchThreshold, 255,
                                    opencv_imgproc.CV_THRESH_TOZERO);
+        DisplayUtils.displayMat(filteredMat);
 
         double padding = boxSize / 2.0;
 
@@ -61,29 +63,33 @@ public class TemplatePickingTask extends DistributedPickingTask {
                            + blobs.length + " blobs");
         for (Rectangle blob : blobs) {
             // Pull the match blob
-            CvRect cvBlob = BlobExtractor.cvRectFromRectangle(blob);
-            CvMat regionMat = CvMat.create(cvBlob.width(), cvBlob.height());
-            opencv_core.cvGetSubRect(filteredMat, regionMat, cvBlob);
+            if (blob.x + blob.width < filteredMat.cols()
+                && blob.y + blob.height < filteredMat.rows()) {
+                CvRect cvBlob = BlobExtractor.cvRectFromRectangle(blob);
+                CvMat regionMat = CvMat.create(cvBlob.width(), cvBlob.height());
+                opencv_core.cvGetSubRect(filteredMat, regionMat, cvBlob);
 
-            // Find Blob Max
-            CvPoint max = new CvPoint();
-            opencv_core.cvMinMaxLoc(regionMat, new double[1], new double[1],
-                                    new CvPoint(), max, null);
+                // Find Blob Max
+                CvPoint max = new CvPoint();
+                opencv_core.cvMinMaxLoc(regionMat, new double[1],
+                                        new double[1], new CvPoint(), max, null);
 
-            // Offset that point by the original rect coordinates
-            int xPick = blob.x + max.x();
-            int yPick = blob.y + max.y();
+                // Offset that point by the original rect coordinates
+                int xPick = blob.x + max.x();
+                int yPick = blob.y + max.y();
 
-            // Extract Boxes from original image
-            // Check that the boxes are fully in bounds
-            if (xPick + padding < target.getSize()
-                && yPick + padding < target.getSize() && xPick - padding > 0
-                && yPick - padding > 0) {
-                Particle extracted = target.subParticle((int) (xPick - padding),
-                                                        (int) (yPick - padding),
-                                                        boxSize);
-                // Queue the particle
-                particleQueue.add(extracted);
+                // Extract Boxes from original image
+                // Check that the boxes are fully in bounds
+                if (xPick + padding < target.getSize()
+                    && yPick + padding < target.getSize()
+                    && xPick - padding > 0 && yPick - padding > 0) {
+
+                    Particle extracted = target.subParticle((int) (xPick - padding),
+                                                            (int) (yPick - padding),
+                                                            boxSize);
+                    // Queue the particle
+                    particleQueue.add(extracted);
+                }
             }
         }
 

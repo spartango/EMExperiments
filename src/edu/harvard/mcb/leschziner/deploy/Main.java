@@ -10,14 +10,14 @@ import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
-import edu.harvard.mcb.leschziner.particlesource.TemplateParticlePicker;
+import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
 public class Main {
 
     public static final int               POLL_RATE = 5000; // ms
 
-    private static TemplateParticlePicker picker;
+    private static DoGParticlePicker      picker;
     private static ParticleProcessingPipe processor;
     private static CrossCorClassifier     classifier;
 
@@ -49,8 +49,8 @@ public class Main {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
-        // picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
-        picker = new TemplateParticlePicker(60, 20, .9, 200);
+        picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
+        // picker = new TemplateParticlePicker(80, 20, .12, 200);
 
         // Setup some template generators
         RotationGenerator templateRotator = new RotationGenerator(30);
@@ -71,12 +71,12 @@ public class Main {
         classifier.addParticleSource(processor);
 
         // Load up templates
-        for (int i = 15; i <= 16; i++) {
+        for (int i = 15; i <= 15; i++) {
             // Generate many templates that are rotations and shifts from
             // each template
             Particle template = Particle.fromFile("templates/rib_" + i + ".png");
             Collection<Particle> templates = templateRotator.generate(template);
-            picker.addTemplates(templates);
+            // picker.addTemplate(template);
             classifier.addTemplates(templates);
         }
 
