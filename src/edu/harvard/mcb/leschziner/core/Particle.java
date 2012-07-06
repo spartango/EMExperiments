@@ -40,8 +40,8 @@ public class Particle implements Serializable {
 
     // Channel offsets
     private static final int       GREEN            = 1;
-    private static final int       BLUE             = 2;
-    private static final int       RED              = 0;
+    private static final int       BLUE             = 0;
+    private static final int       RED              = 2;
 
     // Image can't be serialized, will be transferred manually
     private transient IplImage     image;

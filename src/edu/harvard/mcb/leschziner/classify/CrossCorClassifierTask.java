@@ -5,7 +5,7 @@ import java.util.Map;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
-import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
+import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 
@@ -78,7 +78,7 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
         double bestCorrelation = 0;
         Long bestTemplateId = null;
         for (long templateId : templates.keySet()) {
-            double score = PearsonCorrelator.compare(target,
+            double score = CrossCorrelator.compare(target,
                                                      templates.get(templateId));
             // Select best correlation
             if (score > bestCorrelation) {

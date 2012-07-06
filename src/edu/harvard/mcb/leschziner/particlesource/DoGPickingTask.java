@@ -8,23 +8,19 @@ import com.hazelcast.core.Hazelcast;
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
-public class DoGPickingTask extends DistributedProcessingTask {
+public class DoGPickingTask extends DistributedPickingTask {
 
     /**
      * 
      */
     private static final long    serialVersionUID = 1262983259390203636L;
 
-    private final Particle       target;
     private final ParticleFilter lowFilter;
     private final ParticleFilter highFilter;
     private final ParticleFilter thresholdFilter;
     private final BlobExtractor  blobExtractor;
-    private final int            boxSize;
-    private final String         particleQueueName;
 
     public DoGPickingTask(Particle target,
                           ParticleFilter lowFilter,
@@ -34,14 +30,13 @@ public class DoGPickingTask extends DistributedProcessingTask {
                           int boxSize,
                           String particleQueueName,
                           String executorName) {
-        super(executorName);
-        this.target = target;
+        super(target, boxSize, particleQueueName, executorName);
+
         this.lowFilter = lowFilter;
         this.highFilter = highFilter;
         this.thresholdFilter = thresholdFilter;
         this.blobExtractor = blobExtractor;
-        this.boxSize = boxSize;
-        this.particleQueueName = particleQueueName;
+
     }
 
     @Override public void process() {
