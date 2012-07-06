@@ -9,6 +9,7 @@ import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
+import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class DoGPickingTask extends DistributedProcessingTask {
 
@@ -47,13 +48,14 @@ public class DoGPickingTask extends DistributedProcessingTask {
         BlockingQueue<Particle> particleQueue = Hazelcast.getQueue(particleQueueName);
 
         // Filter the image with each gaussian and then the threshold
-        Particle filtered = highFilter.filter(lowFilter.filter(target));
-        Particle thresholded = thresholdFilter.filter(filtered);
+        Particle lowFiltered = lowFilter.filter(target);
+        Particle highFiltered = highFilter.filter(target);
+        Particle thresholded = thresholdFilter.filter(Particle.subtract(highFiltered,
+                                                                        lowFiltered));
 
         // Debug visualization
-        // DisplayUtils.displayParticle(filtered);
-        // DisplayUtils.displayParticle(thresholded);
-        System.out.println("[DoGParticleSource]: Filtered " + target.hashCode());
+        DisplayUtils.displayParticle(thresholded);
+
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(thresholded);
         System.out.println("[DoGParticleSource]: Extracted " + blobs.length

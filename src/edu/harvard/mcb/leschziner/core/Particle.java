@@ -427,4 +427,10 @@ public class Particle implements Serializable {
         return new Particle(dst);
     }
 
+    public static Particle subtract(Particle firstParticle,
+                                    Particle secondParticle) {
+        IplImage dst = IplImage.createCompatible(firstParticle.image);
+        opencv_core.cvSub(firstParticle.image, secondParticle.image, dst, null);
+        return new Particle(dst);
+    }
 }

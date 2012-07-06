@@ -48,7 +48,7 @@ public class Main {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
-        picker = new DoGParticlePicker(80, 20, 21, 29, 181, 200);
+        picker = new DoGParticlePicker(80, 20, 45, 75, 120, 200);
         // Setup some template generators
         // RotationGenerator templateRotator = new RotationGenerator(10);
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
@@ -76,7 +76,7 @@ public class Main {
         }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 1; i++) {
             BufferedImage micrograph = ImageIO.read(new File(
                                                              "raw/rib_10fold_49kx_"
                                                                      + i
