@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvRect;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 
@@ -246,5 +247,14 @@ public class BlobExtractor implements Serializable {
         }
         return filteredBounds;
 
+    }
+
+    public static CvRect cvRectFromRectangle(Rectangle target) {
+        return new CvRect(target.x, target.y, target.width, target.height);
+    }
+
+    public static Rectangle RectangleFromCvRect(CvRect target) {
+        return new Rectangle(target.x(), target.y(), target.width(),
+                             target.height());
     }
 }
