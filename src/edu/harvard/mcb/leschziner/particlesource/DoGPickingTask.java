@@ -45,10 +45,11 @@ public class DoGPickingTask extends DistributedPickingTask {
         // Filter the image with each gaussian and then the threshold
         Particle lowFiltered = lowFilter.filter(target);
         Particle highFiltered = highFilter.filter(target);
-        Particle thresholded = thresholdFilter.filter(Particle.subtract(highFiltered,
-                                                                        lowFiltered));
+        Particle subtracted = Particle.subtract(highFiltered, lowFiltered);
+        Particle thresholded = thresholdFilter.filter(subtracted);
 
         // Debug visualization
+        DisplayUtils.displayParticle(subtracted);
         DisplayUtils.displayParticle(thresholded);
 
         // Find Blobs

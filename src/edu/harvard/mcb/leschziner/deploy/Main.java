@@ -48,7 +48,7 @@ public class Main {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
-        picker = new DoGParticlePicker(80, 20, 45, 75, 120, 200);
+        picker = new DoGParticlePicker(80, 20, 15, 21, 120, 200);
         // Setup some template generators
         // RotationGenerator templateRotator = new RotationGenerator(10);
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
