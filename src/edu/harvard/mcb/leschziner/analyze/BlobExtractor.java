@@ -30,7 +30,7 @@ public class BlobExtractor implements Serializable {
     private static final int  SECTOR_A         = 0;
     private static final int  SECTOR_B         = 1;
     private static final int  SECTOR_C         = 2;
-    private static final int  SECTOR_X         = 3;
+    // private static final int SECTOR_X = 3;
     private static final int  SECTOR_D         = 4;
 
     private static final int  BLACK            = 0;

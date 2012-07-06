@@ -14,8 +14,12 @@ import edu.harvard.mcb.leschziner.core.ParticleFilter;
  */
 public class MaskThresholdFilter implements ParticleFilter {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4463626671980599698L;
     // Value of pixel above which to allow
-    private final int threshold;
+    private final int         threshold;
 
     /**
      * Build a new threshold filter

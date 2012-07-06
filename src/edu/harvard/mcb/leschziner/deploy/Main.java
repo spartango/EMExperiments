@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.deploy;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
@@ -8,14 +9,15 @@ import com.googlecode.javacv.cpp.opencv_highgui;
 import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
+import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.particlesource.TemplateParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
 public class Main {
 
     public static final int               POLL_RATE = 5000; // ms
 
-    private static DoGParticlePicker      picker;
+    private static TemplateParticlePicker picker;
     private static ParticleProcessingPipe processor;
     private static CrossCorClassifier     classifier;
 
@@ -47,9 +49,11 @@ public class Main {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the Particle picker
-        picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
+        // picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
+        picker = new TemplateParticlePicker(60, 20, .9, 200);
+
         // Setup some template generators
-        // RotationGenerator templateRotator = new RotationGenerator(10);
+        RotationGenerator templateRotator = new RotationGenerator(30);
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
         // Setup a pipe full of filters to be applied to picked particles
@@ -70,12 +74,14 @@ public class Main {
         for (int i = 15; i <= 16; i++) {
             // Generate many templates that are rotations and shifts from
             // each template
-            classifier.addTemplate(Particle.fromFile("templates/rib_" + i
-                                                     + ".png"));
+            Particle template = Particle.fromFile("templates/rib_" + i + ".png");
+            Collection<Particle> templates = templateRotator.generate(template);
+            picker.addTemplates(templates);
+            classifier.addTemplates(templates);
         }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 2; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
