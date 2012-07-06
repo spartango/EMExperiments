@@ -12,7 +12,12 @@
 	    <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
 			<classpath>
 			    <pathelement path="bin/"/>
-				<pathelement path="lib/hazelcast-2.1.2.jar"/>
+                <pathelement path="lib/hazelcast-2.1.2.jar"/>
+                <pathelement path="lib/javacpp.jar"/>
+                <pathelement path="lib/javacv.jar"/>
+                <pathelement path="lib/javacv-macosx-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86.jar"/>
 			</classpath>
 			
 	        <packageset dir="src" defaultexcludes="yes">
@@ -32,6 +37,11 @@
 	    <javac srcdir="src" destdir="bin">
 		    <classpath>
 		        <pathelement path="lib/hazelcast-2.1.2.jar"/>
+		    	<pathelement path="lib/javacpp.jar"/>
+		    	<pathelement path="lib/javacv.jar"/>
+		    	<pathelement path="lib/javacv-macosx-x86_64.jar"/>
+		    	<pathelement path="lib/javacv-linux-x86_64.jar"/>
+		    	<pathelement path="lib/javacv-linux-x86.jar"/>
 		    </classpath>
 	    </javac>
 	</target>
@@ -46,7 +56,12 @@
 		<java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.deploy.Main">
 			<classpath>
 			    <pathelement path="bin/"/>
-				<pathelement path="lib/hazelcast-2.1.2.jar"/>
+                <pathelement path="lib/hazelcast-2.1.2.jar"/>
+                <pathelement path="lib/javacpp.jar"/>
+                <pathelement path="lib/javacv.jar"/>
+                <pathelement path="lib/javacv-macosx-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86.jar"/>
 			</classpath>
 		</java>
 	</target>
@@ -56,6 +71,11 @@
             <classpath>
                 <pathelement path="bin/"/>
                 <pathelement path="lib/hazelcast-2.1.2.jar"/>
+                <pathelement path="lib/javacpp.jar"/>
+                <pathelement path="lib/javacv.jar"/>
+                <pathelement path="lib/javacv-macosx-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86_64.jar"/>
+                <pathelement path="lib/javacv-linux-x86.jar"/>
             </classpath>
         </java>
     </target>	

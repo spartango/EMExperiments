@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_imgproc;
 import com.hazelcast.core.Hazelcast;
@@ -50,6 +51,8 @@ public class TemplatePickingTask extends DistributedPickingTask {
         opencv_imgproc.cvThreshold(matchMat, filteredMat, matchThreshold, 255,
                                    opencv_imgproc.CV_THRESH_TOZERO);
 
+        double padding = boxSize / 2.0;
+
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(filteredMat);
         for (Rectangle blob : blobs) {
@@ -59,10 +62,27 @@ public class TemplatePickingTask extends DistributedPickingTask {
             opencv_core.cvGetSubRect(filteredMat, regionMat, cvBlob);
 
             // Find Blob Max
+            CvPoint max = new CvPoint();
+            opencv_core.cvMinMaxLoc(regionMat, new double[1], new double[1],
+                                    new CvPoint(), max, null);
 
+            // Offset that point by the original rect coordinates
+            int xPick = blob.x + max.x();
+            int yPick = blob.y + max.y();
+
+            // Extract Boxes from original image
+            // Check that the boxes are fully in bounds
+            if (xPick + padding < target.getSize()
+                && yPick + padding < target.getSize() && xPick - padding > 0
+                && yPick - padding > 0) {
+                Particle extracted = target.subParticle((int) (xPick - padding),
+                                                        (int) (yPick - padding),
+                                                        boxSize);
+                // Queue the particle
+                particleQueue.add(extracted);
+
+            }
         }
-
-        // Extract Boxes from original image
 
     }
 }
