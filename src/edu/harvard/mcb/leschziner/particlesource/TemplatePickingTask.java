@@ -43,6 +43,8 @@ public class TemplatePickingTask extends DistributedPickingTask {
 
         // Match the template
         CvMat matchMat = CrossCorrelator.matchTemplate(target, template);
+        System.out.println("[" + this.getClass().getName()
+                           + "]: Matched Template");
 
         // Filter out low correlation points
         CvMat filteredMat = CvMat.create(matchMat.rows(), matchMat.cols(),
@@ -55,6 +57,8 @@ public class TemplatePickingTask extends DistributedPickingTask {
 
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(filteredMat);
+        System.out.println("[" + this.getClass().getName() + "]: "
+                           + blobs.length + " blobs");
         for (Rectangle blob : blobs) {
             // Pull the match blob
             CvRect cvBlob = BlobExtractor.cvRectFromRectangle(blob);
@@ -80,7 +84,6 @@ public class TemplatePickingTask extends DistributedPickingTask {
                                                         boxSize);
                 // Queue the particle
                 particleQueue.add(extracted);
-
             }
         }
 

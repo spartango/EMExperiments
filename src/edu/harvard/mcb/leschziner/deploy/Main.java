@@ -81,7 +81,7 @@ public class Main {
         }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 1; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
