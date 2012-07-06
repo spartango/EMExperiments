@@ -1,6 +1,8 @@
 package edu.harvard.mcb.leschziner.analyze;
 
 import com.googlecode.javacv.cpp.opencv_core;
+import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_imgproc;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 
@@ -16,32 +18,15 @@ public class PearsonCorrelator {
      * @return the correlation between the two Particles, between 0.0 and 1.0
      */
     public static double compare(Particle firstParticle, Particle secondParticle) {
+        int resultSize = firstParticle.getSize() - secondParticle.getSize() + 1;
+        CvMat result = CvMat.create(resultSize, resultSize,
+                                    opencv_core.CV_32FC1);
+        opencv_imgproc.cvMatchTemplate(firstParticle.getImage(),
+                                       secondParticle.getImage(), result,
+                                       opencv_imgproc.CV_TM_CCOEFF_NORMED);
+        double[] maxValues = new double[1];
+        opencv_core.cvMinMaxLoc(result, new double[1], maxValues);
 
-        double imagesSum = 0;
-        double firstImageSumN = 0;
-        double secondImageSumN = 0;
-
-        double firstImageAverage = opencv_core.cvAvg(firstParticle.getImage(),
-                                                     null).red();
-        double secondImageAverage = opencv_core.cvAvg(secondParticle.getImage(),
-                                                      null).red();
-
-        for (int y = 0; y < firstParticle.getSize(); y++) {
-            for (int x = 0; x < firstParticle.getSize(); x++) {
-                int firstImagePixel = firstParticle.getPixelRed(x, y);
-                int secondImagePixel = secondParticle.getPixelRed(x, y);
-
-                imagesSum = imagesSum + (firstImagePixel - firstImageAverage)
-                            * (secondImagePixel - secondImageAverage);
-                firstImageSumN = firstImageSumN
-                                 + (firstImagePixel - firstImageAverage)
-                                 * (firstImagePixel - firstImageAverage);
-                secondImageSumN = secondImageSumN
-                                  + (secondImagePixel - secondImageAverage)
-                                  * (secondImagePixel - secondImageAverage);
-            }
-        }
-
-        return imagesSum / Math.sqrt(firstImageSumN * secondImageSumN);
+        return maxValues[0];
     }
 }
