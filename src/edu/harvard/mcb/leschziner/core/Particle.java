@@ -254,8 +254,11 @@ public class Particle implements Serializable {
         // read buff with imageIO from in
         IplImage tempImage = IplImage.createFrom(ImageIO.read(in));
         // Force the image to the right channel & colorscheme
-        image = IplImage.create(new CvSize(size, size), depth, channels);
-        opencv_imgproc.cvCvtColor(tempImage, image, opencv_imgproc.CV_BGR2GRAY);
+        if (channels != tempImage.nChannels() && channels == 1) {
+            image = IplImage.create(new CvSize(size, size), depth, channels);
+            opencv_imgproc.cvCvtColor(tempImage, image,
+                                      opencv_imgproc.CV_BGR2GRAY);
+        }
     }
 
     /**
