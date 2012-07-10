@@ -84,7 +84,7 @@ public class Main {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
-            IplImage micrograph = opencv_highgui.cvLoadImage(filename);
+            IplImage micrograph = opencv_highgui.cvLoadImage(filename, 0);
 
             System.out.println("[Main]: Processing Micrograph "
                                + micrograph.hashCode());
