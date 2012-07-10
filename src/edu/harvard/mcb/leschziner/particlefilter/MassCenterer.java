@@ -52,7 +52,7 @@ public class MassCenterer implements ParticleFilter {
 
             // Sum mass
             for (int y = 0; y < target.getSize(); y++) {
-                mass += target.getPixelRed(x, y);
+                mass += target.getPixel(x, y);
             }
 
             if (mass > maxMassX) {
@@ -69,7 +69,7 @@ public class MassCenterer implements ParticleFilter {
             int mass = 0;
             // Sum mass
             for (int x = 0; x < target.getSize(); x++) {
-                mass += target.getPixelRed(x, y);
+                mass += target.getPixel(x, y);
             }
 
             if (mass > maxMassY) {
