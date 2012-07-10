@@ -37,16 +37,20 @@ public class PCAClassifier extends DistributedParticleConsumer {
             int particleSize = targets.get(0).getSize();
             CvMat targetMat = CvMat.create(particleSize * particleSize,
                                            targets.size(), opencv_core.CV_32FC1);
-
             // Reshape the targets for use in the matrix
             for (int i = 0; i < targets.size(); i++) {
                 IplImage targetImage = targets.get(i).getImage();
-                CvMat row = CvMat.create(particleSize * particleSize, 1,
+                System.out.println("Channels: " + targetImage.nChannels());
+                CvMat row = CvMat.create(1, particleSize * particleSize,
                                          targetImage.depth(),
                                          targetImage.nChannels());
                 opencv_core.cvReshape(targetImage, row, 0, 0);
                 // Copy into the target matrix
-                opencv_core.cvConvertScale(row, targetMat.rows(i), 1 / 255.0, 0);
+                CvMat targetRow = CvMat.createHeader(1, particleSize
+                                                        * particleSize,
+                                                     opencv_core.CV_32FC1);
+                opencv_core.cvGetRow(targetMat, targetRow, i);
+                opencv_core.cvConvertScale(row, targetRow, 1 / 255.0, 0);
             }
 
             // Run PCA on the target matrix
@@ -54,13 +58,13 @@ public class PCAClassifier extends DistributedParticleConsumer {
             CvMat eigenVectors = CvMat.create(principalComponentCount,
                                               particleSize * particleSize,
                                               opencv_core.CV_32FC1);
-            opencv_core.cvCalcPCA(targetMat, new CvMat(), eigenValues,
+            opencv_core.cvCalcPCA(targetMat, new CvMat(null), eigenValues,
                                   eigenVectors, opencv_core.CV_PCA_DATA_AS_ROW);
 
             CvMat subspace = CvMat.create(targets.size(),
                                           principalComponentCount);
             // Project onto a subspace
-            opencv_core.cvProjectPCA(targetMat, new CvMat(), eigenVectors,
+            opencv_core.cvProjectPCA(targetMat, new CvMat(null), eigenVectors,
                                      subspace);
 
             CvTermCriteria terminationCriteria = new CvTermCriteria(

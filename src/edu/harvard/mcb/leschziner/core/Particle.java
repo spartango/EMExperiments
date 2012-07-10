@@ -47,8 +47,20 @@ public class Particle implements Serializable {
     // Image can't be serialized, will be transferred manually
     private transient IplImage     image;
 
+    // Image properties
+    private final int              size;
+    private final int              depth;
+    private final int              channels;
+
     // Stack of reversible transformation operations performed on this particle
     private Stack<AffineTransform> transforms;
+
+    private Particle(int size, int depth, int channels) {
+        this.size = size;
+        this.depth = depth;
+        this.channels = channels;
+        transforms = new Stack<AffineTransform>();
+    }
 
     /**
      * Builds a particle from a square image
@@ -56,8 +68,8 @@ public class Particle implements Serializable {
      * @param image
      */
     public Particle(BufferedImage image) {
+        this(image.getWidth(), 8, 3);
         this.image = IplImage.createFrom(image);
-        transforms = new Stack<AffineTransform>();
     }
 
     /**
@@ -66,8 +78,8 @@ public class Particle implements Serializable {
      * @param image
      */
     public Particle(IplImage image) {
+        this(image.width(), image.depth(), image.nChannels());
         this.image = image;
-        transforms = new Stack<AffineTransform>();
     }
 
     /**
@@ -76,7 +88,15 @@ public class Particle implements Serializable {
      * @return particle box size in pixels
      */
     public int getSize() {
-        return image.width();
+        return size;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public int getChannels() {
+        return channels;
     }
 
     // I/O methods
@@ -91,8 +111,11 @@ public class Particle implements Serializable {
      * @return RGB pixel value
      */
     public int getPixel(int x, int y) {
-        return (getPixelRed(x, y) << 16) & (getPixelGreen(x, y) << 8)
-               & getPixelBlue(x, y);
+        if (channels == 1) {
+            return getPixelChannel(x, y, 0);
+        } else
+            return (getPixelRed(x, y) << 16) & (getPixelGreen(x, y) << 8)
+                   & getPixelBlue(x, y);
     }
 
     public int getPixelRed(int x, int y) {
@@ -109,8 +132,7 @@ public class Particle implements Serializable {
 
     public int getPixelChannel(int x, int y, int channel) {
         // Find row, go to channel byte, compensate for unsigned value
-        return image.getByteBuffer().get(y * image.widthStep()
-                                                 + image.nChannels() * x
+        return image.getByteBuffer().get(y * image.widthStep() + channels * x
                                                  + channel) & 0xFF;
     }
 
@@ -138,7 +160,7 @@ public class Particle implements Serializable {
      *            value
      */
     public void setPixel(int x, int y, int value) {
-        for (int channel = 0; channel < image.nChannels(); channel++) {
+        for (int channel = 0; channel < channels; channel++) {
             setPixelChannel(x, y, channel, value);
         }
     }
@@ -156,7 +178,7 @@ public class Particle implements Serializable {
     }
 
     public void setPixelChannel(int x, int y, int channel, int value) {
-        image.getByteBuffer().put(y * image.widthStep() + image.nChannels() * x
+        image.getByteBuffer().put(y * image.widthStep() + channels * x
                                           + channel, (byte) (value));
     }
 
@@ -216,8 +238,7 @@ public class Particle implements Serializable {
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        // write buff with imageIO to out
-        ImageIO.write(asBufferedImage(), "png", out);
+        ImageIO.write(image.getBufferedImage(), "png", out);
     }
 
     /**
@@ -231,7 +252,10 @@ public class Particle implements Serializable {
                                                  ClassNotFoundException {
         in.defaultReadObject();
         // read buff with imageIO from in
-        image = IplImage.createFrom(ImageIO.read(in));
+        IplImage tempImage = IplImage.createFrom(ImageIO.read(in));
+        // Force the image to the right channel & colorscheme
+        image = IplImage.create(new CvSize(size, size), depth, channels);
+        opencv_imgproc.cvCvtColor(tempImage, image, opencv_imgproc.CV_BGR2GRAY);
     }
 
     /**
@@ -244,8 +268,7 @@ public class Particle implements Serializable {
      */
     public Particle subParticle(int x, int y, int size) {
         // Prepare a target image
-        IplImage dst = IplImage.create(new CvSize(size, size), image.depth(),
-                                       image.nChannels());
+        IplImage dst = IplImage.create(new CvSize(size, size), depth, channels);
         // set an ROI
         opencv_core.cvSetImageROI(image, new CvRect(x, y, size, size));
         // Copy the ROI

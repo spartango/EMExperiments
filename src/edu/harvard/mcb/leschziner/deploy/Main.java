@@ -1,15 +1,11 @@
 package edu.harvard.mcb.leschziner.deploy;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 
-import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
-import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
@@ -19,7 +15,7 @@ public class Main {
 
     private static DoGParticlePicker      picker;
     private static ParticleProcessingPipe processor;
-    private static CrossCorClassifier     classifier;
+    private static PCAClassifier          classifier;
 
     /**
      * @param args
@@ -32,6 +28,9 @@ public class Main {
             // Wait for the particles to be picked, processed, and finally
             // classified.
             awaitCompletion();
+
+            // Execute the Mass Classification
+            classifier.classifyAll();
 
             // Get the class averages and write them to files
             writeClassAverages();
@@ -53,32 +52,32 @@ public class Main {
         // picker = new TemplateParticlePicker(80, 20, .12, 200);
 
         // Setup some template generators
-        RotationGenerator templateRotator = new RotationGenerator(30);
+        // RotationGenerator templateRotator = new RotationGenerator(30);
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleProcessingPipe();
-        processor.addStage(new CircularMask(80));
+        // processor.addStage(new CircularMask(80));
         // processor.addStage(new LowPassFilter(3));
         // processor.addStage(new GaussianFilter(3));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new CrossCorClassifier(0);
+        classifier = new PCAClassifier(9, 3, .01);
 
         // Attach the processing pipe to the particle picker
-        processor.addParticleSource(picker);
+        // processor.addParticleSource(picker);
         // Have the classifier get particles from the processing pipe
-        classifier.addParticleSource(processor);
+        classifier.addParticleSource(picker);
 
         // Load up templates
-        for (int i = 15; i <= 15; i++) {
-            // Generate many templates that are rotations and shifts from
-            // each template
-            Particle template = Particle.fromFile("templates/rib_" + i + ".png");
-            Collection<Particle> templates = templateRotator.generate(template);
-            // picker.addTemplate(template);
-            classifier.addTemplates(templates);
-        }
+        // for (int i = 15; i <= 15; i++) {
+        // // Generate many templates that are rotations and shifts from
+        // // each template
+        // Particle template = Particle.fromFile("templates/rib_" + i + ".png");
+        // Collection<Particle> templates = templateRotator.generate(template);
+        // picker.addTemplate(template);
+        // classifier.addTemplates(templates);
+        // }
 
         System.out.println("[Main]: Loading Images");
         for (int i = 1; i <= 1; i++) {
@@ -157,17 +156,17 @@ public class Main {
 
     private static void writeClassAverages() throws IOException {
         System.out.println("[Main]: Writing Class Averages");
-        for (long templateId : classifier.getTemplateIds()) {
-            Particle average = classifier.getAverageForTemplate(templateId);
-            if (average != null) {
-                int matches = classifier.getClassForTemplate(templateId).size();
-                System.out.println("[Main]: Writing " + templateId + " with "
-                                   + matches + " matches");
-                // Ignore extremely small classes
-                if (matches > 3)
-                    average.toFile("processed/avg" + templateId + "_" + matches
-                                   + ".png");
-            }
-        }
+        // for (long templateId : classifier.getTemplateIds()) {
+        // Particle average = classifier.getAverageForTemplate(templateId);
+        // if (average != null) {
+        // int matches = classifier.getClassForTemplate(templateId).size();
+        // System.out.println("[Main]: Writing " + templateId + " with "
+        // + matches + " matches");
+        // // Ignore extremely small classes
+        // if (matches > 3)
+        // average.toFile("processed/avg" + templateId + "_" + matches
+        // + ".png");
+        // }
+        // }
     }
 }
