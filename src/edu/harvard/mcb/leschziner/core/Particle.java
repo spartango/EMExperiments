@@ -67,9 +67,7 @@ public class Particle implements Serializable {
         IplImage tempImage = IplImage.createFrom(image);
 
         // Grayscale this image
-        this.image = IplImage.create(tempImage.cvSize(), depth, 1);
-        opencv_imgproc.cvCvtColor(this.image, tempImage,
-                                  opencv_imgproc.CV_BGR2GRAY);
+        setImage(tempImage);
     }
 
     /**
@@ -80,13 +78,7 @@ public class Particle implements Serializable {
     public Particle(IplImage image) {
         this(image.width(), image.depth());
         // Grayscale this image
-        if (image.nChannels() != 1) {
-            this.image = IplImage.create(image.cvSize(), depth, 1);
-            opencv_imgproc.cvCvtColor(this.image, image,
-                                      opencv_imgproc.CV_BGR2GRAY);
-        } else {
-            this.image = image;
-        }
+        setImage(image);
     }
 
     /**
@@ -229,11 +221,7 @@ public class Particle implements Serializable {
                                                  ClassNotFoundException {
         in.defaultReadObject();
         // read buff with imageIO from in
-        IplImage tempImage = IplImage.createFrom(ImageIO.read(in));
-        // Force the image to the right channel & colorscheme
-        image = IplImage.create(new CvSize(size, size), depth, CHANNELS);
-        opencv_imgproc.cvCvtColor(tempImage, image, opencv_imgproc.CV_BGR2GRAY);
-
+        setImage(IplImage.createFrom(ImageIO.read(in)));
     }
 
     /**
@@ -265,6 +253,18 @@ public class Particle implements Serializable {
      */
     public BufferedImage asBufferedImage() {
         return image.getBufferedImage();
+    }
+
+    private void setImage(IplImage tempImage) {
+        // Force the image to the right channel & colorscheme
+        if (tempImage.nChannels() == 3) {
+            this.image = IplImage.create(new CvSize(size, size), depth,
+                                         CHANNELS);
+            opencv_imgproc.cvCvtColor(tempImage, this.image,
+                                      opencv_imgproc.CV_BGR2GRAY);
+        } else {
+            this.image = tempImage;
+        }
     }
 
     public Particle createCompatible() {
