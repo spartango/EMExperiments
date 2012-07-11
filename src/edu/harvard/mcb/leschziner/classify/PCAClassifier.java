@@ -10,6 +10,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
+import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class PCAClassifier extends DistributedParticleConsumer {
 
@@ -73,9 +74,23 @@ public class PCAClassifier extends DistributedParticleConsumer {
                                                 | opencv_core.CV_PCA_USE_AVG);
             System.out.println("[" + this.getClass().getSimpleName()
                                + "]: Eigenvalues: ");
+
             // Some info about the principal components
             for (int i = 0; i < principalComponentCount; i++) {
                 System.out.print(eigenValues.get(i) + " ");
+                // Get the eigenvector
+                CvMat eigenVector = CvMat.createHeader(1, particleArea,
+                                                       opencv_core.CV_32FC1);
+                opencv_core.cvGetRow(eigenVectors, eigenVector, i);
+
+                // Turn the eigenvector into an eigenimage
+                CvMat eigenImage = CvMat.create(particleSize, particleSize,
+                                                opencv_core.CV_32FC1);
+
+                opencv_core.cvReshape(eigenVector, eigenImage, 1, particleSize);
+
+                // Display the eigenImage
+                DisplayUtils.displayMat(eigenImage);
             }
             System.out.println();
 
