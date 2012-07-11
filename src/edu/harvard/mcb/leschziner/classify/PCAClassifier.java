@@ -66,16 +66,30 @@ public class PCAClassifier extends DistributedParticleConsumer {
                                               particleArea,
                                               opencv_core.CV_32FC1);
             CvMat averages = CvMat.create(1, particleArea, opencv_core.CV_32FC1);
-
+            System.out.println("[" + this.getClass().getSimpleName()
+                               + "]: Running PCA");
             opencv_core.cvCalcPCA(targetMat, averages, eigenValues,
                                   eigenVectors, opencv_core.CV_PCA_DATA_AS_ROW
                                                 | opencv_core.CV_PCA_USE_AVG);
+            System.out.println("[" + this.getClass().getSimpleName()
+                               + "]: Eigenvalues: ");
+            // Some info about the principal components
+            for (int i = 0; i < principalComponentCount; i++) {
+                System.out.print(eigenValues.get(i) + " ");
+            }
+            System.out.println();
 
             CvMat subspace = CvMat.create(targets.size(),
                                           principalComponentCount);
             // Project onto a subspace
+            System.out.println("[" + this.getClass().getSimpleName()
+                               + "]: Projecting Eigenvectors");
+
             opencv_core.cvProjectPCA(targetMat, averages, eigenVectors,
                                      subspace);
+
+            System.out.println("[" + this.getClass().getSimpleName()
+                               + "]: Clustering classes");
 
             CvTermCriteria terminationCriteria = new CvTermCriteria(
                                                                     opencv_core.CV_TERMCRIT_EPS
