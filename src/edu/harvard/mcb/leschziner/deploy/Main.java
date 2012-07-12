@@ -6,7 +6,9 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
+import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
+import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
@@ -59,7 +61,8 @@ public class Main {
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleProcessingPipe();
         processor.addStage(new CircularMask(80));
-        // processor.addStage(new LowPassFilter(3));
+        processor.addStage(new LowPassFilter(3));
+        processor.addStage(new Binner(2));
         // processor.addStage(new GaussianFilter(3));
 
         // Setup a classifier to sort the picked, filtered particles
