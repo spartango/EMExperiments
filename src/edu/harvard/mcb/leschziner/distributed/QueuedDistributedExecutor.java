@@ -2,7 +2,6 @@ package edu.harvard.mcb.leschziner.distributed;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.hazelcast.core.AtomicNumber;
@@ -21,7 +20,7 @@ public class QueuedDistributedExecutor implements Runnable {
     public static final int                                POLL_TIME           = 250;
 
     // Default number of tasks that can be run on each node
-    public static int                                      defaultNodeCapacity = 8;
+    public static int                                      defaultNodeCapacity = 4;
 
     // The underlying executor
     private final ExecutorService                          executor;
@@ -64,8 +63,8 @@ public class QueuedDistributedExecutor implements Runnable {
      *            : number of tasks that can be run on each node
      */
     public QueuedDistributedExecutor(String executorName, int nodeCapacity) {
-        this.executor = Executors.newCachedThreadPool();
-        // this.executor = Hazelcast.getExecutorService(executorName);
+        // this.executor = Executors.newCachedThreadPool();
+        this.executor = Hazelcast.getExecutorService(executorName);
         this.activeTasks = Hazelcast.getAtomicNumber(executorName
                                                      + DistributedProcessingTask.ACTIVE_SUFFIX);
         this.cluster = Hazelcast.getCluster();

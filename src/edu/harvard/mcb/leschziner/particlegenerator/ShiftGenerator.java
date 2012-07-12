@@ -9,6 +9,10 @@ import edu.harvard.mcb.leschziner.particlefilter.Shifter;
 
 public class ShiftGenerator implements ParticleGenerator {
 
+    /**
+     * 
+     */
+    private static final long     serialVersionUID = -2017066268978441033L;
     private final Vector<Shifter> shifters;
 
     public ShiftGenerator(int maxShift, int deltaShift) {

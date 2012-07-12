@@ -1,5 +1,6 @@
 package edu.harvard.mcb.leschziner.core;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Collection;
  * @author spartango
  * 
  */
-public interface ParticleGenerator {
+public interface ParticleGenerator extends Serializable {
     /**
      * Generate a series of particles from a seed
      * 

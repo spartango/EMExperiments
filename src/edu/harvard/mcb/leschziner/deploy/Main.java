@@ -66,7 +66,6 @@ public class Main {
         processor.addStage(new CircularMask(80));
         // processor.addStage(new LowPassFilter(3));
         processor.addStage(new Binner(2));
-        // processor.addStage(new GaussianFilter(3));
 
         // Setup a classifier to sort the picked, filtered particles
         classifier = new PCAClassifier(12, 3, .01);
@@ -79,16 +78,6 @@ public class Main {
 
         // Have the classifier get particles from the processing pipe
         classifier.addParticleSource(processor);
-
-        // Load up templates
-        // for (int i = 15; i <= 15; i++) {
-        // // Generate many templates that are rotations and shifts from
-        // // each template
-        // Particle template = Particle.fromFile("templates/rib_" + i + ".png");
-        // Collection<Particle> templates = templateRotator.generate(template);
-        // picker.addTemplate(template);
-        // classifier.addTemplates(templates);
-        // }
 
         System.out.println("[Main]: Loading Images");
         for (int i = 1; i <= 2; i++) {
@@ -179,19 +168,6 @@ public class Main {
     }
 
     private static void writeClassAverages() throws IOException {
-        System.out.println("[Main]: Writing Class Averages");
-
-        // for (long templateId : classifier.getTemplateIds()) {
-        // Particle average = classifier.getAverageForTemplate(templateId);
-        // if (average != null) {
-        // int matches = classifier.getClassForTemplate(templateId).size();
-        // System.out.println("[Main]: Writing " + templateId + " with "
-        // + matches + " matches");
-        // // Ignore extremely small classes
-        // if (matches > 3)
-        // average.toFile("processed/avg" + templateId + "_" + matches
-        // + ".png");
-        // }
-        // }
+        System.out.println("[Main]: Not Writing Class Averages");
     }
 }
