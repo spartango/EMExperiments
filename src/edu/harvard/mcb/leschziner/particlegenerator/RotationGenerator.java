@@ -9,7 +9,11 @@ import edu.harvard.mcb.leschziner.particlefilter.Rotator;
 
 public class RotationGenerator implements ParticleGenerator {
 
-    private Vector<Rotator> rotators;
+    /**
+     * 
+     */
+    private static final long     serialVersionUID = 2320805008859786796L;
+    private final Vector<Rotator> rotators;
 
     public RotationGenerator(double deltaTheta) {
         rotators = new Vector<Rotator>();

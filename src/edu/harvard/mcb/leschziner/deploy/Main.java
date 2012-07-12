@@ -59,7 +59,7 @@ public class Main {
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
         generator.addStage(new RotationGenerator(36));
-        generator.addStage(new ShiftGenerator(6, 4));
+        generator.addStage(new ShiftGenerator(5, 5));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
