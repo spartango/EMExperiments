@@ -8,17 +8,20 @@ import com.googlecode.javacv.cpp.opencv_highgui;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
+import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
+import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 
 public class Main {
 
-    public static final int              POLL_RATE = 5000; // ms
+    public static final int               POLL_RATE = 5000; // ms
 
-    private static DoGParticlePicker     picker;
-    private static ParticleFilteringPipe processor;
-    private static PCAClassifier         classifier;
+    private static DoGParticlePicker      picker;
+    private static ParticleFilteringPipe  processor;
+    private static ParticleGeneratingPipe generator;
+    private static PCAClassifier          classifier;
 
     /**
      * @param args
@@ -53,22 +56,27 @@ public class Main {
         picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
         // picker = new TemplateParticlePicker(80, 20, .12, 200);
 
-        // Setup some template generators
-        // RotationGenerator templateRotator = new RotationGenerator(30);
-        // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
+        generator = new ParticleGeneratingPipe();
+        // Setup some particle generators
+        generator.addStage(new RotationGenerator(36));
+        generator.addStage(new ShiftGenerator(6, 4));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
         processor.addStage(new CircularMask(80));
-        processor.addStage(new LowPassFilter(3));
+        // processor.addStage(new LowPassFilter(3));
         processor.addStage(new Binner(2));
         // processor.addStage(new GaussianFilter(3));
 
         // Setup a classifier to sort the picked, filtered particles
         classifier = new PCAClassifier(12, 3, .01);
 
-        // Attach the processing pipe to the particle picker
-        processor.addParticleSource(picker);
+        // Attach the generator to the picker
+        generator.addParticleSource(picker);
+
+        // Attach the processing pipe to the particle generator
+        processor.addParticleSource(generator);
+
         // Have the classifier get particles from the processing pipe
         classifier.addParticleSource(processor);
 
@@ -83,7 +91,7 @@ public class Main {
         // }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 2; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
@@ -154,16 +162,19 @@ public class Main {
                 e.printStackTrace();
             }
         } while (picker.isActive() || processor.isActive()
-                 || classifier.isActive());
+                 || generator.isActive() || classifier.isActive());
     }
 
     private static void classifyParticles() {
         System.out.println("[Main]: " + classifier.getParticlesConsumed()
                            + " particles consumed");
-        System.out.println("[Main]: Classifying");
-
+        System.out.println("[Main]: Classifying...");
+        long startTime = System.currentTimeMillis();
         // Execute the Mass Classification
         classifier.classifyAll();
+        long runTime = System.currentTimeMillis() - startTime;
+        System.out.println("[Main]: Completed Classification in "
+                           + (runTime / 1000.0) + " s");
 
     }
 
