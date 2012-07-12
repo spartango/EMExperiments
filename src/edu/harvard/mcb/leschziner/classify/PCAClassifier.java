@@ -102,6 +102,9 @@ public class PCAClassifier extends DistributedParticleConsumer {
             opencv_core.cvProjectPCA(targetMat, averages, eigenVectors,
                                      subspace);
 
+            // Display the subspace
+            DisplayUtils.displayMat(subspace, "PCA Subspace");
+
             // System.out.println("[" + this.getClass().getSimpleName()
             // + "]: Clustering classes");
 
