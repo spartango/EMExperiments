@@ -14,11 +14,11 @@ import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 
 public class Main {
 
-    public static final int               POLL_RATE = 5000; // ms
+    public static final int              POLL_RATE = 5000; // ms
 
-    private static DoGParticlePicker      picker;
+    private static DoGParticlePicker     picker;
     private static ParticleFilteringPipe processor;
-    private static PCAClassifier          classifier;
+    private static PCAClassifier         classifier;
 
     /**
      * @param args
@@ -65,7 +65,7 @@ public class Main {
         // processor.addStage(new GaussianFilter(3));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new PCAClassifier(9, 3, .01);
+        classifier = new PCAClassifier(12, 3, .01);
 
         // Attach the processing pipe to the particle picker
         processor.addParticleSource(picker);
@@ -83,7 +83,7 @@ public class Main {
         // }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 8; i++) {
+        for (int i = 1; i <= 1; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
