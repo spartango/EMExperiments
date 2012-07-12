@@ -20,7 +20,7 @@ public class QueuedDistributedExecutor implements Runnable {
     public static final int                                POLL_TIME           = 250;
 
     // Default number of tasks that can be run on each node
-    public static int                                      defaultNodeCapacity = 4;
+    public static int                                      defaultNodeCapacity = 8;
 
     // The underlying executor
     private final ExecutorService                          executor;

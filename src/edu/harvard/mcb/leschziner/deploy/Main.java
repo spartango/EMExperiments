@@ -8,8 +8,9 @@ import com.googlecode.javacv.cpp.opencv_highgui;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
+import edu.harvard.mcb.leschziner.particlefilter.Cropper;
+import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
-import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
@@ -58,13 +59,14 @@ public class Main {
 
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
-        generator.addStage(new RotationGenerator(45));
-        generator.addStage(new ShiftGenerator(6, 6));
+        generator.addStage(new RotationGenerator(60));
+        // generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
         processor.addStage(new CircularMask(80));
-        // processor.addStage(new LowPassFilter(3));
+        processor.addStage(new LowPassFilter(3));
+        processor.addStage(new Cropper(160, 20, 20));
         processor.addStage(new Binner(2));
 
         // Setup a classifier to sort the picked, filtered particles
@@ -80,7 +82,7 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 1; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
