@@ -7,24 +7,19 @@ import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 
-public class ProcessingPipeTask extends DistributedProcessingTask {
+public class FilteringPipeTask extends ParticlePipeTask {
 
     private static final long            serialVersionUID = 2219341028285498238L;
 
-    private final Particle               target;
     private final Vector<ParticleFilter> stages;
-    private final String                 processedQueueName;
 
-    public ProcessingPipeTask(Particle target,
-                              Vector<ParticleFilter> stages,
-                              String processedQueueName,
-                              String executorName) {
-        super(executorName);
-        this.target = target;
+    public FilteringPipeTask(Particle target,
+                             Vector<ParticleFilter> stages,
+                             String processedQueueName,
+                             String executorName) {
+        super(target, processedQueueName, executorName);
         this.stages = stages;
-        this.processedQueueName = processedQueueName;
     }
 
     @Override public void process() {

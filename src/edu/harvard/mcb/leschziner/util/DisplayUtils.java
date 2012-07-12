@@ -16,19 +16,23 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import edu.harvard.mcb.leschziner.core.Particle;
 
 public class DisplayUtils {
+    public static final int PADDING = 20;
+
     // Where to place the next window on the screen
-    private static int windowX = 0;
-    private static int windowY = 0;
+    private static int      windowX = 0;
+    private static int      windowY = 0;
 
     public static void displayMat(CvMat target) {
         displayMat(target, "Mat " + target.hashCode());
     }
 
     public static void displayMat(CvMat target, String label) {
+        CvMat normalized = CvMat.create(target.rows(), target.cols(),
+                                        target.type());
+        opencv_core.cvNormalize(target, normalized);
         IplImage image = IplImage.create(target.cols(), target.rows(), 8,
                                          target.channels());
-
-        opencv_core.cvConvertScale(target, image, 25500, 0);
+        opencv_core.cvConvertScale(target, image, 255, 0);
         displayImage(image.getBufferedImage(), label);
     }
 
@@ -56,10 +60,10 @@ public class DisplayUtils {
 
         // Move the window to a nice place
         canvas.setLocation(windowX, windowY);
-        windowX += canvas.getWidth();
+        windowX += canvas.getWidth() + PADDING;
         if (windowX > screenDimension.width) {
             windowX = 0;
-            windowY += canvas.getHeight();
+            windowY += canvas.getHeight() + PADDING;
         }
         if (windowY > screenDimension.height) {
             windowY = 0;

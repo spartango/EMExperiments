@@ -26,6 +26,9 @@ public abstract class DistributedParticleConsumer extends
     // Input Sources being watched
     protected final Vector<ParticleSource> particleSources;
 
+    // Consumption Counter
+    protected int                          particlesConsumed;
+
     /**
      * Builds a particle consumer that is ready to attach sources
      */
@@ -33,6 +36,7 @@ public abstract class DistributedParticleConsumer extends
         // Setup the distributed processing core
         super();
         particleSources = new Vector<ParticleSource>();
+        particlesConsumed = 0;
     }
 
     /**
@@ -80,6 +84,7 @@ public abstract class DistributedParticleConsumer extends
             Particle target = queue.poll();
 
             if (target != null) {
+                particlesConsumed++;
                 processParticle(target);
             }
         }
@@ -87,6 +92,10 @@ public abstract class DistributedParticleConsumer extends
 
     @Override public void itemRemoved(ItemEvent<Particle> arg0) {
         // Don't really care when items are removed
+    }
+
+    public int getParticlesConsumed() {
+        return particlesConsumed;
     }
 
 }

@@ -32,7 +32,7 @@ import edu.harvard.mcb.leschziner.util.MatrixUtils;
  * @author spartango
  * 
  */
-public class Particle implements Serializable {
+public class Particle implements Serializable, Cloneable {
 
     /**
      * 

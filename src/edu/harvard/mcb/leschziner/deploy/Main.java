@@ -10,14 +10,14 @@ import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
-import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
+import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 
 public class Main {
 
     public static final int               POLL_RATE = 5000; // ms
 
     private static DoGParticlePicker      picker;
-    private static ParticleProcessingPipe processor;
+    private static ParticleFilteringPipe processor;
     private static PCAClassifier          classifier;
 
     /**
@@ -32,8 +32,7 @@ public class Main {
             // classified.
             awaitCompletion();
 
-            // Execute the Mass Classification
-            classifier.classifyAll();
+            classifyParticles();
 
             // Get the class averages and write them to files
             writeClassAverages();
@@ -59,7 +58,7 @@ public class Main {
         // ShiftGenerator templateShifter = new ShiftGenerator(5, 2);
 
         // Setup a pipe full of filters to be applied to picked particles
-        processor = new ParticleProcessingPipe();
+        processor = new ParticleFilteringPipe();
         processor.addStage(new CircularMask(80));
         processor.addStage(new LowPassFilter(3));
         processor.addStage(new Binner(2));
@@ -84,7 +83,7 @@ public class Main {
         // }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 8; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
@@ -158,8 +157,19 @@ public class Main {
                  || classifier.isActive());
     }
 
+    private static void classifyParticles() {
+        System.out.println("[Main]: " + classifier.getParticlesConsumed()
+                           + " particles consumed");
+        System.out.println("[Main]: Classifying");
+
+        // Execute the Mass Classification
+        classifier.classifyAll();
+
+    }
+
     private static void writeClassAverages() throws IOException {
         System.out.println("[Main]: Writing Class Averages");
+
         // for (long templateId : classifier.getTemplateIds()) {
         // Particle average = classifier.getAverageForTemplate(templateId);
         // if (average != null) {
