@@ -70,8 +70,7 @@ public class PCAClassifier extends DistributedParticleConsumer {
             System.out.println("[" + this.getClass().getSimpleName()
                                + "]: Running PCA");
             opencv_core.cvCalcPCA(targetMat, averages, eigenValues,
-                                  eigenVectors, opencv_core.CV_PCA_DATA_AS_ROW
-                                                | opencv_core.CV_PCA_USE_AVG);
+                                  eigenVectors, opencv_core.CV_PCA_DATA_AS_ROW);
             System.out.println("[" + this.getClass().getSimpleName()
                                + "]: Eigenvalues: ");
 
@@ -90,7 +89,7 @@ public class PCAClassifier extends DistributedParticleConsumer {
                 opencv_core.cvReshape(eigenVector, eigenImage, 1, particleSize);
 
                 // Display the eigenImage
-                DisplayUtils.displayMat(eigenImage);
+                DisplayUtils.displayMat(eigenImage, "EigenImage " + i);
             }
             System.out.println();
 
@@ -103,8 +102,8 @@ public class PCAClassifier extends DistributedParticleConsumer {
             opencv_core.cvProjectPCA(targetMat, averages, eigenVectors,
                                      subspace);
 
-            System.out.println("[" + this.getClass().getSimpleName()
-                               + "]: Clustering classes");
+            // System.out.println("[" + this.getClass().getSimpleName()
+            // + "]: Clustering classes");
 
             CvTermCriteria terminationCriteria = new CvTermCriteria(
                                                                     opencv_core.CV_TERMCRIT_EPS
@@ -115,8 +114,8 @@ public class PCAClassifier extends DistributedParticleConsumer {
             CvArr clusterLabels = new CvMat(subspace.rows());
 
             // Run a clusterer on the eigenimages
-            opencv_core.cvKMeans2(subspace, classCount, clusterLabels,
-                                  terminationCriteria, 1, null, 0, null, null);
+            // opencv_core.cvKMeans2(subspace, classCount, clusterLabels,
+            // terminationCriteria, 1, null, 0, null, null);
         }
     }
 }

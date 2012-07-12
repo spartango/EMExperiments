@@ -6,6 +6,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
+import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleProcessingPipe;
 
@@ -36,7 +37,7 @@ public class Main {
             writeClassAverages();
 
             System.out.println("[Main]: Complete");
-            System.exit(0);
+            // System.exit(0);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -57,7 +58,7 @@ public class Main {
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleProcessingPipe();
-        // processor.addStage(new CircularMask(80));
+        processor.addStage(new CircularMask(80));
         // processor.addStage(new LowPassFilter(3));
         // processor.addStage(new GaussianFilter(3));
 
@@ -65,9 +66,9 @@ public class Main {
         classifier = new PCAClassifier(9, 3, .01);
 
         // Attach the processing pipe to the particle picker
-        // processor.addParticleSource(picker);
+        processor.addParticleSource(picker);
         // Have the classifier get particles from the processing pipe
-        classifier.addParticleSource(picker);
+        classifier.addParticleSource(processor);
 
         // Load up templates
         // for (int i = 15; i <= 15; i++) {
@@ -80,7 +81,7 @@ public class Main {
         // }
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 4; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
