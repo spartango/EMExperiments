@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.pipe;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 
@@ -25,13 +26,10 @@ public class GeneratingPipeTask extends ParticlePipeTask {
     @Override public void process() {
         BlockingQueue<Particle> processedParticles = Hazelcast.getQueue(processedQueueName);
 
-        Collection<Particle> generated = null;
+        Collection<Particle> generated = new LinkedList<Particle>();
+        generated.add(target);
         for (ParticleGenerator stage : stages) {
-            if (generated == null) {
-                generated = stage.generate(target);
-            } else {
-                generated = stage.generate(generated);
-            }
+            generated = stage.generate(generated);
         }
         processedParticles.addAll(generated);
     }

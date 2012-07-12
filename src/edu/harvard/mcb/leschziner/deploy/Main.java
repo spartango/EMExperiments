@@ -58,8 +58,8 @@ public class Main {
 
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
-        generator.addStage(new RotationGenerator(36));
-        generator.addStage(new ShiftGenerator(5, 5));
+        generator.addStage(new RotationGenerator(45));
+        generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
@@ -71,10 +71,10 @@ public class Main {
         classifier = new PCAClassifier(12, 3, .01);
 
         // Attach the generator to the picker
-        generator.addParticleSource(picker);
+        // generator.addParticleSource(picker);
 
         // Attach the processing pipe to the particle generator
-        processor.addParticleSource(generator);
+        processor.addParticleSource(picker);
 
         // Have the classifier get particles from the processing pipe
         classifier.addParticleSource(processor);
