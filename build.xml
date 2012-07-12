@@ -12,6 +12,7 @@
 	    <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
 			<classpath>
 			    <pathelement path="bin/"/>
+			    <pathelement path="lib/ij.jar"/>
                 <pathelement path="lib/hazelcast-2.1.2.jar"/>
                 <pathelement path="lib/javacpp.jar"/>
                 <pathelement path="lib/javacv.jar"/>
@@ -36,6 +37,7 @@
 	    <mkdir dir="bin/" />
 	    <javac srcdir="src" destdir="bin" debug="on">
 		    <classpath>
+		    	<pathelement path="lib/ij.jar"/>
 		        <pathelement path="lib/hazelcast-2.1.2.jar"/>
 		    	<pathelement path="lib/javacpp.jar"/>
 		    	<pathelement path="lib/javacv.jar"/>
@@ -56,6 +58,7 @@
 		<java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.deploy.Main">
 			<classpath>
 			    <pathelement path="bin/"/>
+			    <pathelement path="lib/ij.jar"/>
                 <pathelement path="lib/hazelcast-2.1.2.jar"/>
                 <pathelement path="lib/javacpp.jar"/>
                 <pathelement path="lib/javacv.jar"/>
@@ -70,6 +73,7 @@
         <java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.remote.RemoteMain">
             <classpath>
                 <pathelement path="bin/"/>
+                <pathelement path="lib/ij.jar"/>
                 <pathelement path="lib/hazelcast-2.1.2.jar"/>
                 <pathelement path="lib/javacpp.jar"/>
                 <pathelement path="lib/javacv.jar"/>
