@@ -71,13 +71,13 @@ public class Main {
         processor.addStage(new Binner(2));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new PCAClassifier(12, 6, .01);
+        classifier = new PCAClassifier(12, 6, .001);
 
         // Attach the generator to the picker
-        // generator.addParticleSource(picker);
+        generator.addParticleSource(picker);
 
         // Attach the processing pipe to the particle generator
-        processor.addParticleSource(picker);
+        processor.addParticleSource(generator);
 
         // Have the classifier get particles from the processing pipe
         classifier.addParticleSource(processor);

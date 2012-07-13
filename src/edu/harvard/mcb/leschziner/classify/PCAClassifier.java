@@ -1,15 +1,13 @@
 package edu.harvard.mcb.leschziner.classify;
 
+import java.io.IOException;
 import java.util.Vector;
-
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 import edu.harvard.mcb.leschziner.analyze.Clusters;
 import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponentAnalyzer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponents;
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class PCAClassifier extends DistributedClassifier {
 
@@ -48,15 +46,17 @@ public class PCAClassifier extends DistributedClassifier {
             // Some info about the principal components
             for (int i = 0; i < pComponents.componentCount(); i++) {
                 System.out.print(pComponents.getEigenValue(i) + " ");
-                IplImage eigenImage = pComponents.getEigenImage(i);
+                Particle eigenParticle = new Particle(
+                                                      pComponents.getEigenImage(i));
 
-                // Display the eigenImage
-                DisplayUtils.displayImage(eigenImage, "EigenImage " + i);
+                // write the eigenParticle
+                try {
+                    eigenParticle.toFile("processed/eigen_" + i + ".png");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             System.out.println();
-
-            // Display the subspace
-            DisplayUtils.displayMat(pComponents.getSubSpace(), "PCA Subspace");
 
             // Run Clustering
             System.out.println("[" + this.getClass().getSimpleName()
@@ -81,5 +81,4 @@ public class PCAClassifier extends DistributedClassifier {
 
         }
     }
-
 }
