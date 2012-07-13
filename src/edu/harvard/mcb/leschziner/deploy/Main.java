@@ -6,6 +6,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
+import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.Cropper;
@@ -171,5 +172,18 @@ public class Main {
 
     private static void writeClassAverages() throws IOException {
         System.out.println("[Main]: Writing Class Averages");
+        for (long classId : classifier.getClassIds()) {
+            Particle average = classifier.getClassAverage(classId);
+            if (average != null) {
+                int matches = classifier.getClass(classId).size();
+                System.out.println("[Main]: Writing " + classId + " with "
+                                   + matches + " matches");
+                // Ignore extremely small classes
+                if (matches > 3) {
+                    average.toFile("processed/avg" + classId + "_" + matches
+                                   + ".png");
+                }
+            }
+        }
     }
 }

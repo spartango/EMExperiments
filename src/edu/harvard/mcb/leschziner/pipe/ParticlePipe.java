@@ -16,7 +16,7 @@ public abstract class ParticlePipe extends DistributedParticleConsumer
     protected final BlockingQueue<Particle> processedParticles;
 
     public ParticlePipe() {
-        processedQueueName = this.getClass().getSimpleName() + "_"
+        processedQueueName = this.getClass().getSimpleName() + "_Processed_"
                              + this.hashCode();
         processedParticles = Hazelcast.getQueue(processedQueueName);
     }
