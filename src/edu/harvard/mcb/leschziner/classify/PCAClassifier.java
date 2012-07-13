@@ -40,8 +40,8 @@ public class PCAClassifier extends DistributedClassifier {
         // Run PCA
         PrincipalComponents pComponents = pcAnalyzer.analyze(targets);
         if (pComponents != null) {
-            System.out.println("[" + this.getClass().getSimpleName()
-                               + "]: Eigenvalues: ");
+            System.out.print("[" + this.getClass().getSimpleName()
+                             + "]: Eigenvalues: ");
 
             // Some info about the principal components
             for (int i = 0; i < pComponents.componentCount(); i++) {

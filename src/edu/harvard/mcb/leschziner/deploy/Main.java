@@ -12,6 +12,7 @@ import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.Cropper;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
+import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
@@ -43,7 +44,7 @@ public class Main {
             writeClassAverages();
 
             System.out.println("[Main]: Complete");
-            // System.exit(0);
+            System.exit(0);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,7 +62,7 @@ public class Main {
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
         generator.addStage(new RotationGenerator(60));
-        // generator.addStage(new ShiftGenerator(6, 6));
+        generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
@@ -83,7 +84,7 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 2; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
