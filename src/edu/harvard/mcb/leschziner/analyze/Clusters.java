@@ -29,11 +29,21 @@ public class Clusters {
         return compactness;
     }
 
-    public int size() {
-        return clusterLabels.rows();
+    public int clusterCount() {
+        return clusterCenters.rows();
     }
 
-    public int getClusterLabel(int index) {
+    public int sampleCount() {
+        return clusterLabels.size();
+    }
+
+    /**
+     * Gets the cluster label for a particular row
+     * 
+     * @param index
+     * @return
+     */
+    public int getClusterForSample(int index) {
         return (int) clusterLabels.get(index, 1);
     }
 

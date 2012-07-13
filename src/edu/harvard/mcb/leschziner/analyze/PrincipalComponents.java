@@ -75,7 +75,7 @@ public class PrincipalComponents {
         return averages.get(componentIndex, 0);
     }
 
-    public int size() {
+    public int componentCount() {
         return eigenVectors.rows();
     }
 }

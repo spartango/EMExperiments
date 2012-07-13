@@ -170,6 +170,6 @@ public class Main {
     }
 
     private static void writeClassAverages() throws IOException {
-        System.out.println("[Main]: Not Writing Class Averages");
+        System.out.println("[Main]: Writing Class Averages");
     }
 }
