@@ -44,7 +44,7 @@ public class Clusters {
      * @return
      */
     public int getClusterForSample(int index) {
-        return (int) clusterLabels.get(index, 1);
+        return (int) clusterLabels.get(index, 0);
     }
 
     public CvMat getClusterCenter(int clusterIndex) {
