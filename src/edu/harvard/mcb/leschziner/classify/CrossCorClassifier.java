@@ -8,8 +8,8 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
+import edu.harvard.mcb.leschziner.core.Classifier;
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.TemplateClassifier;
 import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
 
 /**
@@ -21,7 +21,7 @@ import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
  * 
  */
 public class CrossCorClassifier extends DistributedParticleConsumer implements
-                                                                   TemplateClassifier {
+                                                                   Classifier {
 
     // A map of the templates -> classes keyed by template uuid
     private final String                   classesMapName;
@@ -73,7 +73,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * Gets the set of particles sorted into a class due to similarity to a
      * given template
      */
-    @Override public Collection<Particle> getClassForTemplate(long templateId) {
+    @Override public Collection<Particle> getClass(long templateId) {
         return classes.get(templateId);
     }
 
@@ -81,7 +81,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * Gets the average of particles sorted into a template's class. Will
      * utilize a cached average if one has already been calculated.
      */
-    @Override public Particle getAverageForTemplate(long templateId) {
+    @Override public Particle getClassAverage(long templateId) {
         // Checks the cache for a class average
         Particle average = classAverages.get(templateId);
         if (average == null && classes.containsKey(templateId)) {
@@ -108,7 +108,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     /**
      * Adds a template to compare particles against
      */
-    @Override public void addTemplate(Particle template) {
+    public void addTemplate(Particle template) {
         long id = currentTemplateId.incrementAndGet();
         templates.put(id, template);
     }
@@ -118,7 +118,7 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
      * 
      * @param templates
      */
-    @Override public void addTemplates(Collection<Particle> templates) {
+    public void addTemplates(Collection<Particle> templates) {
         for (Particle template : templates) {
             addTemplate(template);
         }
@@ -127,14 +127,14 @@ public class CrossCorClassifier extends DistributedParticleConsumer implements
     /**
      * Get all the templates being used for classification
      */
-    @Override public Collection<Particle> getTemplates() {
+    public Collection<Particle> getTemplates() {
         return templates.values();
     }
 
     /**
      * Get the ids of the templates being used for classification
      */
-    @Override public Collection<Long> getTemplateIds() {
+    @Override public Collection<Long> getClassIds() {
         return templates.keySet();
     }
 
