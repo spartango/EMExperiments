@@ -2,12 +2,15 @@ package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Vector;
 
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
 import edu.harvard.mcb.leschziner.analyze.Clusters;
 import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponentAnalyzer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponents;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
+import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class PCAClassifier extends DistributedParticleConsumer {
 
@@ -37,8 +40,26 @@ public class PCAClassifier extends DistributedParticleConsumer {
         PrincipalComponents pComponents = pcAnalyzer.analyze(targets);
         if (pComponents != null) {
             System.out.println("[" + this.getClass().getSimpleName()
+                               + "]: Eigenvalues: ");
+
+            // Some info about the principal components
+            for (int i = 0; i < pComponents.size(); i++) {
+                System.out.print(pComponents.getEigenValue(i) + " ");
+                IplImage eigenImage = pComponents.getEigenImage(i);
+
+                // Display the eigenImage
+                DisplayUtils.displayImage(eigenImage, "EigenImage " + i);
+            }
+            System.out.println();
+
+            // Display the subspace
+            DisplayUtils.displayMat(pComponents.getSubSpace(), "PCA Subspace");
+
+            // Run Clustering
+            System.out.println("[" + this.getClass().getSimpleName()
                                + "]: Clustering classes");
             Clusters clusters = clusterer.cluster(pComponents.getSubSpace());
+
             // Group the original images
 
             System.out.println("[" + this.getClass().getSimpleName()

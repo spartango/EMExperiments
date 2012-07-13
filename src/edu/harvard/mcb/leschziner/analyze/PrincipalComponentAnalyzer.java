@@ -8,7 +8,6 @@ import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class PrincipalComponentAnalyzer implements Serializable {
     /**
@@ -59,27 +58,6 @@ public class PrincipalComponentAnalyzer implements Serializable {
                                + "]: Running PCA");
             opencv_core.cvCalcPCA(targetMat, averages, eigenValues,
                                   eigenVectors, opencv_core.CV_PCA_DATA_AS_ROW);
-            System.out.println("[" + this.getClass().getSimpleName()
-                               + "]: Eigenvalues: ");
-
-            // Some info about the principal components
-            for (int i = 0; i < principalComponentCount; i++) {
-                System.out.print(eigenValues.get(i) + " ");
-                // Get the eigenvector
-                CvMat eigenVector = CvMat.createHeader(1, particleArea,
-                                                       opencv_core.CV_32FC1);
-                opencv_core.cvGetRow(eigenVectors, eigenVector, i);
-
-                // Turn the eigenvector into an eigenimage
-                CvMat eigenImage = CvMat.create(particleSize, particleSize,
-                                                opencv_core.CV_32FC1);
-
-                opencv_core.cvReshape(eigenVector, eigenImage, 1, particleSize);
-
-                // Display the eigenImage
-                DisplayUtils.displayMat(eigenImage, "EigenImage " + i);
-            }
-            System.out.println();
 
             CvMat subspace = CvMat.create(targets.size(),
                                           principalComponentCount,
@@ -91,12 +69,14 @@ public class PrincipalComponentAnalyzer implements Serializable {
             opencv_core.cvProjectPCA(targetMat, averages, eigenVectors,
                                      subspace);
 
-            // Display the subspace
-            DisplayUtils.displayMat(subspace, "PCA Subspace");
+            PrincipalComponents components = new PrincipalComponents(
+                                                                     eigenValues,
+                                                                     eigenVectors,
+                                                                     subspace,
+                                                                     averages);
 
             // Stuff everything into the principal components
-            return new PrincipalComponents(eigenValues, eigenVectors, subspace,
-                                           averages);
+            return components;
         } else {
             return null;
         }

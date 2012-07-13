@@ -49,6 +49,10 @@ public class DisplayUtils {
         displayImage(target, "Image " + target.hashCode());
     }
 
+    public static void displayImage(IplImage target, String label) {
+        displayImage(target.getBufferedImage(), label);
+    }
+
     public static void displayImage(BufferedImage target, String label) {
         Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
 
