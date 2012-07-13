@@ -33,7 +33,6 @@ public class MRCReader {
         ImagePlus imp = openRaw(dtype, "", filename, w, h, 1024L, n, 0, true, // little-endian
                                 false);
         return imp.getBufferedImage();
-
     }
 
     private static int getType(int datatype) {

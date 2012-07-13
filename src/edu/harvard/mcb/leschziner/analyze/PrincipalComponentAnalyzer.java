@@ -1,5 +1,6 @@
 package edu.harvard.mcb.leschziner.analyze;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import com.googlecode.javacv.cpp.opencv_core;
@@ -9,8 +10,12 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
-public class PrincipalComponentAnalyzer {
-    private final int principalComponentCount;
+public class PrincipalComponentAnalyzer implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2016995095636434924L;
+    private final int         principalComponentCount;
 
     public PrincipalComponentAnalyzer(int principalComponentCount) {
         this.principalComponentCount = principalComponentCount;
@@ -77,7 +82,8 @@ public class PrincipalComponentAnalyzer {
             System.out.println();
 
             CvMat subspace = CvMat.create(targets.size(),
-                                          principalComponentCount);
+                                          principalComponentCount,
+                                          opencv_core.CV_32FC1);
             // Project onto a subspace
             System.out.println("[" + this.getClass().getSimpleName()
                                + "]: Projecting Eigenvectors");

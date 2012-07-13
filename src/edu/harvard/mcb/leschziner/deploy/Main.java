@@ -70,7 +70,7 @@ public class Main {
         processor.addStage(new Binner(2));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new PCAClassifier(12, 3, .01);
+        classifier = new PCAClassifier(12, 6, .01);
 
         // Attach the generator to the picker
         // generator.addParticleSource(picker);
