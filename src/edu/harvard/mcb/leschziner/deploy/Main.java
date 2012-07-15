@@ -12,14 +12,13 @@ import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.Cropper;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
-import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 
 public class Main {
 
-    public static final int               POLL_RATE = 5000; // ms
+    public static final int               POLL_RATE = 2000; // ms
 
     private static DoGParticlePicker      picker;
     private static ParticleFilteringPipe  processor;
@@ -62,7 +61,7 @@ public class Main {
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
         generator.addStage(new RotationGenerator(60));
-        generator.addStage(new ShiftGenerator(6, 6));
+        // generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
         processor = new ParticleFilteringPipe();
@@ -84,7 +83,7 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 2; i <= 2; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
@@ -112,7 +111,9 @@ public class Main {
             long currentUnprocessed = processor.getPendingCount();
             long currentUnclassified = classifier.getPendingCount();
             // Log pending
-            System.out.println("[Main]: " + currentUnpicked + " micrographs,  "
+            System.out.println("[Main]: "
+                               + currentUnpicked
+                               + " micrographs,  "
                                + currentUnprocessed
                                + " unprocessed particles, and "
                                + currentUnclassified
@@ -154,12 +155,15 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while (picker.isActive() || processor.isActive()
-                 || generator.isActive() || classifier.isActive());
+        } while (picker.isActive()
+                 || processor.isActive()
+                 || generator.isActive()
+                 || classifier.isActive());
     }
 
     private static void classifyParticles() {
-        System.out.println("[Main]: " + classifier.getParticlesConsumed()
+        System.out.println("[Main]: "
+                           + classifier.getParticlesConsumed()
                            + " particles consumed");
         System.out.println("[Main]: Classifying...");
         long startTime = System.currentTimeMillis();
@@ -167,7 +171,8 @@ public class Main {
         classifier.classifyAll();
         long runTime = System.currentTimeMillis() - startTime;
         System.out.println("[Main]: Completed Classification in "
-                           + (runTime / 1000.0) + " s");
+                           + (runTime / 1000.0)
+                           + " s");
 
     }
 
@@ -177,11 +182,17 @@ public class Main {
             Particle average = classifier.getClassAverage(classId);
             if (average != null) {
                 int matches = classifier.getClass(classId).size();
-                System.out.println("[Main]: Writing " + classId + " with "
-                                   + matches + " matches");
+                System.out.println("[Main]: Writing "
+                                   + classId
+                                   + " with "
+                                   + matches
+                                   + " matches");
                 // Ignore extremely small classes
                 if (matches > 3) {
-                    average.toFile("processed/avg" + classId + "_" + matches
+                    average.toFile("processed/avg"
+                                   + classId
+                                   + "_"
+                                   + matches
                                    + ".png");
                 }
             }

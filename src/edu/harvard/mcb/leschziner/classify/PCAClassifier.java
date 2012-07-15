@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.analyze.Clusters;
 import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
-import edu.harvard.mcb.leschziner.analyze.PrincipalComponentAnalyzer;
+import edu.harvard.mcb.leschziner.analyze.CvPrincipalComponentAnalyzer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponents;
 import edu.harvard.mcb.leschziner.core.Particle;
 
@@ -16,7 +16,7 @@ public class PCAClassifier extends DistributedClassifier {
 
     private final Vector<Particle>           targets;
 
-    private final PrincipalComponentAnalyzer pcAnalyzer;
+    private final CvPrincipalComponentAnalyzer pcAnalyzer;
     private final KMeansClusterer            clusterer;
 
     public PCAClassifier(int principalComponents,
@@ -24,7 +24,7 @@ public class PCAClassifier extends DistributedClassifier {
                          double classAccuracy) {
         super();
         targets = new Vector<Particle>();
-        pcAnalyzer = new PrincipalComponentAnalyzer(principalComponents);
+        pcAnalyzer = new CvPrincipalComponentAnalyzer(principalComponents);
         clusterer = new KMeansClusterer(classCount, classAccuracy, iterations,
                                         attempts);
     }
