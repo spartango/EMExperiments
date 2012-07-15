@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.hazelcast.core.AtomicNumber;
-import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
 /**
  * A Classifier that compares particles to a set of template particles, sorting
@@ -46,8 +47,10 @@ public class CrossCorClassifier extends DistributedClassifier {
         matchThreshold = minimumCorrelation;
 
         templateSetName = "ClassTemplates_" + this.hashCode();
-        currentTemplateId = Hazelcast.getAtomicNumber(templateSetName);
-        templates = Hazelcast.getMap(templateSetName);
+
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
+        currentTemplateId = storage.getAtomicNumber(templateSetName);
+        templates = storage.getMap(templateSetName);
     }
 
     /**
@@ -55,9 +58,12 @@ public class CrossCorClassifier extends DistributedClassifier {
      */
     @Override public void processParticle(final Particle target) {
         // Classify the particle asynchronously in a distributed way
-        execute(new CrossCorClassifierTask(target, matchThreshold,
-                                           classesMapName, averagesMapName,
-                                           templateSetName, executorName));
+        execute(new CrossCorClassifierTask(target,
+                                           matchThreshold,
+                                           classesMapName,
+                                           averagesMapName,
+                                           templateSetName,
+                                           executorName));
 
     }
 

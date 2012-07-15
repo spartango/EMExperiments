@@ -3,16 +3,16 @@ package edu.harvard.mcb.leschziner.classify;
 import java.util.Collection;
 import java.util.Map;
 
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.ClassAverager;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleClassifier;
 import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
-public abstract class DistributedClassifier extends DistributedParticleConsumer
-                                                                               implements
+public abstract class DistributedClassifier extends DistributedParticleConsumer implements
                                                                                ParticleClassifier {
     // A map of the templates -> classes keyed by template uuid
     protected final String                   classesMapName;
@@ -23,13 +23,17 @@ public abstract class DistributedClassifier extends DistributedParticleConsumer
     protected final Map<Long, Particle>      classAverages;
 
     public DistributedClassifier() {
-        classesMapName = this.getClass().getSimpleName() + "_Classes_"
-                         + this.hashCode();
-        classes = Hazelcast.getMultiMap(classesMapName);
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
 
-        averagesMapName = this.getClass().getSimpleName() + "_Averages_"
+        classesMapName = this.getClass().getSimpleName()
+                         + "_Classes_"
+                         + this.hashCode();
+        classes = storage.getMultiMap(classesMapName);
+
+        averagesMapName = this.getClass().getSimpleName()
+                          + "_Averages_"
                           + this.hashCode();
-        classAverages = Hazelcast.getMap(averagesMapName);
+        classAverages = storage.getMap(averagesMapName);
     }
 
     /**

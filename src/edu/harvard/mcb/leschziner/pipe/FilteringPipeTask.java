@@ -3,10 +3,9 @@ package edu.harvard.mcb.leschziner.pipe;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 
-import com.hazelcast.core.Hazelcast;
-
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class FilteringPipeTask extends ParticlePipeTask {
 
@@ -23,7 +22,8 @@ public class FilteringPipeTask extends ParticlePipeTask {
     }
 
     @Override public void process() {
-        BlockingQueue<Particle> processedParticles = Hazelcast.getQueue(processedQueueName);
+        BlockingQueue<Particle> processedParticles = DefaultStorageEngine.getStorageEngine()
+                                                                         .getQueue(processedQueueName);
 
         Particle processed = target;
         // Apply each filter
@@ -32,5 +32,4 @@ public class FilteringPipeTask extends ParticlePipeTask {
         }
         processedParticles.add(processed);
     }
-
 }

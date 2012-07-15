@@ -2,9 +2,11 @@ package edu.harvard.mcb.leschziner.distributed;
 
 import java.io.Serializable;
 
-import com.hazelcast.core.Hazelcast;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
-public abstract class DistributedProcessingTask implements Serializable,
+public abstract class DistributedProcessingTask implements
+                                               Serializable,
                                                Runnable {
     /**
      * 
@@ -46,26 +48,28 @@ public abstract class DistributedProcessingTask implements Serializable,
      * either queued or actively underway.
      */
     public void markPending() {
-        Hazelcast.getAtomicNumber(executorName + PENDING_SUFFIX)
-                 .incrementAndGet();
+        DefaultStorageEngine.getStorageEngine()
+                            .getAtomicNumber(executorName + PENDING_SUFFIX)
+                            .incrementAndGet();
     }
 
     /**
      * Mark this task as actively being run
      */
     public void markActive() {
-        Hazelcast.getAtomicNumber(executorName + ACTIVE_SUFFIX)
-                 .incrementAndGet();
+        DefaultStorageEngine.getStorageEngine()
+                            .getAtomicNumber(executorName + ACTIVE_SUFFIX)
+                            .incrementAndGet();
     }
 
     /**
      * Mark this task complete
      */
     private void markComplete() {
-        Hazelcast.getAtomicNumber(executorName + PENDING_SUFFIX)
-                 .decrementAndGet();
-        Hazelcast.getAtomicNumber(executorName + ACTIVE_SUFFIX)
-                 .decrementAndGet();
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
+        storage.getAtomicNumber(executorName + PENDING_SUFFIX)
+               .decrementAndGet();
+        storage.getAtomicNumber(executorName + ACTIVE_SUFFIX).decrementAndGet();
     }
 
 }

@@ -5,10 +5,9 @@ import java.util.LinkedList;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 
-import com.hazelcast.core.Hazelcast;
-
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleGenerator;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class GeneratingPipeTask extends ParticlePipeTask {
     private static final long               serialVersionUID = 638400970037283314L;
@@ -24,7 +23,8 @@ public class GeneratingPipeTask extends ParticlePipeTask {
     }
 
     @Override public void process() {
-        BlockingQueue<Particle> processedParticles = Hazelcast.getQueue(processedQueueName);
+        BlockingQueue<Particle> processedParticles = DefaultStorageEngine.getStorageEngine()
+                                                                         .getQueue(processedQueueName);
 
         Collection<Particle> generated = new LinkedList<Particle>();
         generated.add(target);

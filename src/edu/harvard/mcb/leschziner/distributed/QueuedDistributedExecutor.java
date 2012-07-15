@@ -8,6 +8,9 @@ import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.Hazelcast;
 
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
+
 /**
  * A queue that sits in front of an unbounded, distributed executor service,
  * holding onto tasks until cluster capacity is available.
@@ -64,10 +67,12 @@ public class QueuedDistributedExecutor implements Runnable {
      */
     public QueuedDistributedExecutor(String executorName, int nodeCapacity) {
         // this.executor = Executors.newCachedThreadPool();
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
         this.executor = Hazelcast.getExecutorService(executorName);
-        this.activeTasks = Hazelcast.getAtomicNumber(executorName
-                                                     + DistributedProcessingTask.ACTIVE_SUFFIX);
         this.cluster = Hazelcast.getCluster();
+
+        this.activeTasks = storage.getAtomicNumber(executorName
+                                                   + DistributedProcessingTask.ACTIVE_SUFFIX);
         this.nodeCapacity = nodeCapacity;
         this.queuedTasks = new LinkedBlockingQueue<DistributedProcessingTask>();
 

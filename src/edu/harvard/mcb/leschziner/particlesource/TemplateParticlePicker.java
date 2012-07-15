@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class TemplateParticlePicker extends DistributedParticlePicker {
 
@@ -25,16 +25,21 @@ public class TemplateParticlePicker extends DistributedParticlePicker {
         super(boxSize);
         blobExtractor = new BlobExtractor(particleSize, particleEpsillon);
         templateSetName = "PickingTemplates_" + this.hashCode();
-        templates = Hazelcast.getSet(templateSetName);
+        templates = DefaultStorageEngine.getStorageEngine()
+                                        .getSet(templateSetName);
         this.matchThreshold = matchThreshold;
     }
 
     @Override public void processMicrograph(final BufferedImage image) {
         Particle target = new Particle(image);
         for (Particle template : templates) {
-            execute(new TemplatePickingTask(target, template, boxSize,
-                                            matchThreshold, blobExtractor,
-                                            particleQueueName, executorName));
+            execute(new TemplatePickingTask(target,
+                                            template,
+                                            boxSize,
+                                            matchThreshold,
+                                            blobExtractor,
+                                            particleQueueName,
+                                            executorName));
         }
 
     }
@@ -43,9 +48,13 @@ public class TemplateParticlePicker extends DistributedParticlePicker {
         Particle target = new Particle(image);
 
         for (Particle template : templates) {
-            execute(new TemplatePickingTask(target, template, boxSize,
-                                            matchThreshold, blobExtractor,
-                                            particleQueueName, executorName));
+            execute(new TemplatePickingTask(target,
+                                            template,
+                                            boxSize,
+                                            matchThreshold,
+                                            blobExtractor,
+                                            particleQueueName,
+                                            executorName));
         }
 
     }

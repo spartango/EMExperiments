@@ -8,11 +8,11 @@ import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_imgproc;
-import com.hazelcast.core.Hazelcast;
 
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 import edu.harvard.mcb.leschziner.util.DisplayUtils;
 
 public class TemplatePickingTask extends DistributedPickingTask {
@@ -40,18 +40,24 @@ public class TemplatePickingTask extends DistributedPickingTask {
     }
 
     @Override public void process() {
-        BlockingQueue<Particle> particleQueue = Hazelcast.getQueue(particleQueueName);
+        BlockingQueue<Particle> particleQueue = DefaultStorageEngine.getStorageEngine()
+                                                                    .getQueue(particleQueueName);
 
         // Match the template
         CvMat matchMat = CrossCorrelator.matchTemplate(target, template);
-        System.out.println("[" + this.getClass().getSimpleName()
+        System.out.println("["
+                           + this.getClass().getSimpleName()
                            + "]: Matched Template");
 
         // Filter out low correlation points
-        CvMat filteredMat = CvMat.create(matchMat.rows(), matchMat.cols(),
+        CvMat filteredMat = CvMat.create(matchMat.rows(),
+                                         matchMat.cols(),
                                          matchMat.type());
 
-        opencv_imgproc.cvThreshold(matchMat, filteredMat, matchThreshold, 255,
+        opencv_imgproc.cvThreshold(matchMat,
+                                   filteredMat,
+                                   matchThreshold,
+                                   255,
                                    opencv_imgproc.CV_THRESH_TOZERO);
         DisplayUtils.displayMat(filteredMat);
 
@@ -59,8 +65,11 @@ public class TemplatePickingTask extends DistributedPickingTask {
 
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(filteredMat);
-        System.out.println("[" + this.getClass().getSimpleName() + "]: "
-                           + blobs.length + " blobs");
+        System.out.println("["
+                           + this.getClass().getSimpleName()
+                           + "]: "
+                           + blobs.length
+                           + " blobs");
         for (Rectangle blob : blobs) {
             // Pull the match blob
             if (blob.x + blob.width < filteredMat.cols()
@@ -71,8 +80,12 @@ public class TemplatePickingTask extends DistributedPickingTask {
 
                 // Find Blob Max
                 CvPoint max = new CvPoint();
-                opencv_core.cvMinMaxLoc(regionMat, new double[1],
-                                        new double[1], new CvPoint(), max, null);
+                opencv_core.cvMinMaxLoc(regionMat,
+                                        new double[1],
+                                        new double[1],
+                                        new CvPoint(),
+                                        max,
+                                        null);
 
                 // Offset that point by the original rect coordinates
                 int xPick = blob.x + max.x();
@@ -82,7 +95,8 @@ public class TemplatePickingTask extends DistributedPickingTask {
                 // Check that the boxes are fully in bounds
                 if (xPick + padding < target.getSize()
                     && yPick + padding < target.getSize()
-                    && xPick - padding > 0 && yPick - padding > 0) {
+                    && xPick - padding > 0
+                    && yPick - padding > 0) {
 
                     Particle extracted = target.subParticle((int) (xPick - padding),
                                                             (int) (yPick - padding),

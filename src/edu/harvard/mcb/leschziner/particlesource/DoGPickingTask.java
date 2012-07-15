@@ -3,11 +3,10 @@ package edu.harvard.mcb.leschziner.particlesource;
 import java.awt.Rectangle;
 import java.util.concurrent.BlockingQueue;
 
-import com.hazelcast.core.Hazelcast;
-
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class DoGPickingTask extends DistributedPickingTask {
 
@@ -39,7 +38,8 @@ public class DoGPickingTask extends DistributedPickingTask {
     }
 
     @Override public void process() {
-        BlockingQueue<Particle> particleQueue = Hazelcast.getQueue(particleQueueName);
+        BlockingQueue<Particle> particleQueue = DefaultStorageEngine.getStorageEngine()
+                                                                    .getQueue(particleQueueName);
 
         // Filter the image with each gaussian and then the threshold
         Particle lowFiltered = lowFilter.filter(target);
@@ -53,8 +53,10 @@ public class DoGPickingTask extends DistributedPickingTask {
 
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(thresholded);
-        System.out.println("[DoGParticleSource]: Extracted " + blobs.length
-                           + " blobs from " + target.hashCode());
+        System.out.println("[DoGParticleSource]: Extracted "
+                           + blobs.length
+                           + " blobs from "
+                           + target.hashCode());
         // Extract Particles from target micrograph
         // Pad the particles with a box
         double padding = boxSize / 2.0;
@@ -63,9 +65,11 @@ public class DoGPickingTask extends DistributedPickingTask {
             int xOffset = (int) (boundingBox.getCenterX() - padding);
             int yOffset = (int) (boundingBox.getCenterY() - padding);
             if (xOffset + boxSize < target.getSize()
-                && yOffset + boxSize < target.getSize() && xOffset > 0
+                && yOffset + boxSize < target.getSize()
+                && xOffset > 0
                 && yOffset > 0) {
-                Particle extracted = target.subParticle(xOffset, yOffset,
+                Particle extracted = target.subParticle(xOffset,
+                                                        yOffset,
                                                         boxSize);
                 // Queue the particle
                 particleQueue.add(extracted);

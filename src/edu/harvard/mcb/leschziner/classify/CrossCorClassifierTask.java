@@ -2,12 +2,13 @@ package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Map;
 
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.MultiMap;
 
 import edu.harvard.mcb.leschziner.analyze.CrossCorrelator;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
 /**
  * A task that classifies a single particle against many references using
@@ -70,16 +71,18 @@ public class CrossCorClassifierTask extends DistributedProcessingTask {
      */
     @Override public void process() {
         // Pull up distributed maps
-        MultiMap<Long, Particle> classes = Hazelcast.getMultiMap(classMapName);
-        Map<Long, Particle> classAverages = Hazelcast.getMap(averagesMapName);
-        Map<Long, Particle> templates = Hazelcast.getMap(templateSetName);
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
+
+        MultiMap<Long, Particle> classes = storage.getMultiMap(classMapName);
+        Map<Long, Particle> classAverages = storage.getMap(averagesMapName);
+        Map<Long, Particle> templates = storage.getMap(templateSetName);
 
         // Iterate through the templates, scoring pearson correlation.
         double bestCorrelation = 0;
         Long bestTemplateId = null;
         for (long templateId : templates.keySet()) {
             double score = CrossCorrelator.compare(target,
-                                                     templates.get(templateId));
+                                                   templates.get(templateId));
             // Select best correlation
             if (score > bestCorrelation) {
                 bestCorrelation = score;

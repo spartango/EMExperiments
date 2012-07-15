@@ -1,7 +1,8 @@
 package edu.harvard.mcb.leschziner.distributed;
 
 import com.hazelcast.core.AtomicNumber;
-import com.hazelcast.core.Hazelcast;
+
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 /**
  * Handles tasks to be distributed for execution, keeping track of how many are
@@ -27,8 +28,9 @@ public abstract class DistributedTaskHandler {
         executorName = this.getClass().getSimpleName() + "_" + this.hashCode();
         // Use a queued executor to prevent flooding the cluster with tasks
         executor = new QueuedDistributedExecutor(executorName);
-        pendingCount = Hazelcast.getAtomicNumber(executorName
-                                                 + DistributedProcessingTask.PENDING_SUFFIX);
+        pendingCount = DefaultStorageEngine.getStorageEngine()
+                                           .getAtomicNumber(executorName
+                                                            + DistributedProcessingTask.PENDING_SUFFIX);
     }
 
     /**

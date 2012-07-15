@@ -2,14 +2,12 @@ package edu.harvard.mcb.leschziner.particlesource;
 
 import java.util.concurrent.BlockingQueue;
 
-import com.hazelcast.core.Hazelcast;
-
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticlePicker;
 import edu.harvard.mcb.leschziner.distributed.DistributedTaskHandler;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
-public abstract class DistributedParticlePicker extends DistributedTaskHandler
-                                                                              implements
+public abstract class DistributedParticlePicker extends DistributedTaskHandler implements
                                                                               ParticlePicker {
     // Size of area picked around particle
     protected final int                     boxSize;
@@ -23,7 +21,9 @@ public abstract class DistributedParticlePicker extends DistributedTaskHandler
         this.boxSize = boxSize;
         // Pull up output queue
         particleQueueName = "ExtractedParticles_" + this.hashCode();
-        extractedParticles = Hazelcast.getQueue(particleQueueName);
+
+        extractedParticles = DefaultStorageEngine.getStorageEngine()
+                                                 .getQueue(particleQueueName);
     }
 
     public String getParticleQueueName() {
