@@ -56,11 +56,10 @@ public class Main {
 
         // Setup the Particle picker
         picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
-        // picker = new TemplateParticlePicker(80, 20, .12, 200);
 
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
-        generator.addStage(new RotationGenerator(60));
+        generator.addStage(new RotationGenerator(10));
         // generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
@@ -71,7 +70,7 @@ public class Main {
         processor.addStage(new Binner(2));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new PCAClassifier(12, 6, .001);
+        classifier = new PCAClassifier(12, 180, .001);
 
         // Attach the generator to the picker
         generator.addParticleSource(picker);
@@ -83,7 +82,7 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 2; i <= 2; i++) {
+        for (int i = 1; i <= 20; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
@@ -111,9 +110,7 @@ public class Main {
             long currentUnprocessed = processor.getPendingCount();
             long currentUnclassified = classifier.getPendingCount();
             // Log pending
-            System.out.println("[Main]: "
-                               + currentUnpicked
-                               + " micrographs,  "
+            System.out.println("[Main]: " + currentUnpicked + " micrographs,  "
                                + currentUnprocessed
                                + " unprocessed particles, and "
                                + currentUnclassified
@@ -155,15 +152,12 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while (picker.isActive()
-                 || processor.isActive()
-                 || generator.isActive()
-                 || classifier.isActive());
+        } while (picker.isActive() || processor.isActive()
+                 || generator.isActive() || classifier.isActive());
     }
 
     private static void classifyParticles() {
-        System.out.println("[Main]: "
-                           + classifier.getParticlesConsumed()
+        System.out.println("[Main]: " + classifier.getParticlesConsumed()
                            + " particles consumed");
         System.out.println("[Main]: Classifying...");
         long startTime = System.currentTimeMillis();
@@ -171,8 +165,7 @@ public class Main {
         classifier.classifyAll();
         long runTime = System.currentTimeMillis() - startTime;
         System.out.println("[Main]: Completed Classification in "
-                           + (runTime / 1000.0)
-                           + " s");
+                           + (runTime / 1000.0) + " s");
 
     }
 
@@ -182,19 +175,11 @@ public class Main {
             Particle average = classifier.getClassAverage(classId);
             if (average != null) {
                 int matches = classifier.getClass(classId).size();
-                System.out.println("[Main]: Writing "
-                                   + classId
-                                   + " with "
-                                   + matches
-                                   + " matches");
-                // Ignore extremely small classes
-                if (matches > 3) {
-                    average.toFile("processed/avg"
-                                   + classId
-                                   + "_"
-                                   + matches
-                                   + ".png");
-                }
+                System.out.println("[Main]: Writing " + classId + " with "
+                                   + matches + " matches");
+                average.toFile("processed/avg" + classId + "_" + matches
+                               + ".png");
+
             }
         }
     }

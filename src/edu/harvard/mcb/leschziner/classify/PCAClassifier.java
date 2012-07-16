@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.util.Vector;
 
 import edu.harvard.mcb.leschziner.analyze.Clusters;
-import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
 import edu.harvard.mcb.leschziner.analyze.CvPrincipalComponentAnalyzer;
+import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
 import edu.harvard.mcb.leschziner.analyze.PrincipalComponents;
 import edu.harvard.mcb.leschziner.core.Particle;
 
 public class PCAClassifier extends DistributedClassifier {
 
-    public static int                        iterations = 50;
-    public static int                        attempts   = 1;
+    public static int                          iterations = 50;
+    public static int                          attempts   = 1;
 
-    private final Vector<Particle>           targets;
+    private final Vector<Particle>             targets;
 
     private final CvPrincipalComponentAnalyzer pcAnalyzer;
-    private final KMeansClusterer            clusterer;
+    private final KMeansClusterer              clusterer;
 
     public PCAClassifier(int principalComponents,
                          int classCount,
@@ -34,7 +34,7 @@ public class PCAClassifier extends DistributedClassifier {
     }
 
     public void classifyAll() {
-        // Clear any existing clasess
+        // Clear any existing classes
         classes.clear();
 
         // Run PCA
