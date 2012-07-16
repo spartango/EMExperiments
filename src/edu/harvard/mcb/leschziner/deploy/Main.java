@@ -82,7 +82,7 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 2; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
@@ -110,7 +110,9 @@ public class Main {
             long currentUnprocessed = processor.getPendingCount();
             long currentUnclassified = classifier.getPendingCount();
             // Log pending
-            System.out.println("[Main]: " + currentUnpicked + " micrographs,  "
+            System.out.println("[Main]: "
+                               + currentUnpicked
+                               + " micrographs,  "
                                + currentUnprocessed
                                + " unprocessed particles, and "
                                + currentUnclassified
@@ -152,12 +154,15 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while (picker.isActive() || processor.isActive()
-                 || generator.isActive() || classifier.isActive());
+        } while (picker.isActive()
+                 || processor.isActive()
+                 || generator.isActive()
+                 || classifier.isActive());
     }
 
     private static void classifyParticles() {
-        System.out.println("[Main]: " + classifier.getParticlesConsumed()
+        System.out.println("[Main]: "
+                           + classifier.getParticlesConsumed()
                            + " particles consumed");
         System.out.println("[Main]: Classifying...");
         long startTime = System.currentTimeMillis();
@@ -165,7 +170,8 @@ public class Main {
         classifier.classifyAll();
         long runTime = System.currentTimeMillis() - startTime;
         System.out.println("[Main]: Completed Classification in "
-                           + (runTime / 1000.0) + " s");
+                           + (runTime / 1000.0)
+                           + " s");
 
     }
 
@@ -175,9 +181,15 @@ public class Main {
             Particle average = classifier.getClassAverage(classId);
             if (average != null) {
                 int matches = classifier.getClass(classId).size();
-                System.out.println("[Main]: Writing " + classId + " with "
-                                   + matches + " matches");
-                average.toFile("processed/avg" + classId + "_" + matches
+                System.out.println("[Main]: Writing "
+                                   + classId
+                                   + " with "
+                                   + matches
+                                   + " matches");
+                average.toFile("processed/avg"
+                               + classId
+                               + "_"
+                               + matches
                                + ".png");
 
             }

@@ -5,20 +5,29 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.MultiMap;
 
+import edu.harvard.mcb.leschziner.storage.localstorage.EventBlockingQueue;
 import edu.harvard.mcb.leschziner.storage.localstorage.HashMultiMap;
 import edu.harvard.mcb.leschziner.storage.localstorage.LocalAtomicNumber;
 
 public class LocalMemStorage implements StorageEngine {
-    private Map<String, Map>           maps;
-    private Map<String, BlockingQueue> queues;
-    private Map<String, Set>           sets;
-    private Map<String, MultiMap>      multiMaps;
-    private Map<String, AtomicNumber>  atomicNumbers;
+    private final Map<String, Map>           maps;
+    private final Map<String, BlockingQueue> queues;
+    private final Map<String, Set>           sets;
+    private final Map<String, MultiMap>      multiMaps;
+    private final Map<String, AtomicNumber>  atomicNumbers;
+
+    public LocalMemStorage() {
+        maps = new ConcurrentHashMap<String, Map>();
+        queues = new ConcurrentHashMap<String, BlockingQueue>();
+        sets = new ConcurrentHashMap<String, Set>();
+        multiMaps = new ConcurrentHashMap<String, MultiMap>();
+        atomicNumbers = new ConcurrentHashMap<String, AtomicNumber>();
+    }
 
     @Override public AtomicNumber getAtomicNumber(String name) {
         // Look the key up
@@ -48,7 +57,7 @@ public class LocalMemStorage implements StorageEngine {
         // Look the key up
         if (!multiMaps.containsKey(name)) {
             // If it doesnt exist, create a new one
-            MultiMap<K, V> newMap = new HashMultiMap<>();
+            MultiMap<K, V> newMap = new HashMultiMap<>(name);
             multiMaps.put(name, newMap);
             return newMap;
         } else {
@@ -60,7 +69,7 @@ public class LocalMemStorage implements StorageEngine {
         // Look the key up
         if (!queues.containsKey(name)) {
             // If it doesnt exist, create a new one
-            BlockingQueue<T> newQueue = new LinkedBlockingQueue<>();
+            BlockingQueue<T> newQueue = new EventBlockingQueue<>(name);
             queues.put(name, newQueue);
             return newQueue;
         } else {
