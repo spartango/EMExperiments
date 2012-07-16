@@ -10,19 +10,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.MultiMap;
 
 public class HashMultiMap<K, V> implements MultiMap<K, V> {
 
-    private final Map<K, Collection<V>>             multimap;
+    private final Map<K, Collection<V>>                   multimap;
 
-    private Collection<EntryListener<K, V>>         globalListeners;
-    private Map<K, Collection<EntryListener<K, V>>> specificListeners;
+    private final Collection<EntryListener<K, V>>         globalListeners;
+    private final Map<K, Collection<EntryListener<K, V>>> specificListeners;
 
-    public HashMultiMap() {
+    private final String                                  name;
+
+    public HashMultiMap(String name) {
         multimap = new ConcurrentHashMap<>();
-
+        globalListeners = new ConcurrentLinkedQueue<>();
+        specificListeners = new ConcurrentHashMap<>();
+        this.name = name;
     }
 
     @Override public void destroy() {
@@ -100,7 +105,7 @@ public class HashMultiMap<K, V> implements MultiMap<K, V> {
     }
 
     @Override public String getName() {
-        return hashCode() + "";
+        return name;
     }
 
     @Override public Set<K> keySet() {
@@ -121,30 +126,32 @@ public class HashMultiMap<K, V> implements MultiMap<K, V> {
     }
 
     @Override public boolean put(K key, V value) {
-        if (multimap.containsKey(key)) {
-            multimap.get(key).add(value);
+        if (multimap.containsKey(key) && multimap.get(key).add(value)) {
+            notifyListenersOfAdd(key, value);
         } else {
             ConcurrentLinkedQueue<V> list = new ConcurrentLinkedQueue<>();
             list.add(value);
             multimap.put(key, list);
+            notifyListenersOfAdd(key, value);
         }
-        // Notify listeners
         return true;
     }
 
     @Override public Collection<V> remove(Object key) {
+        Collection<V> values = multimap.remove(key);
         // Notify listeners
-        return multimap.remove(key);
+        notifyListenersOfRemove((K) key, null);
+        return values;
     }
 
     @Override public boolean remove(Object key, Object value) {
-        if (multimap.containsKey(key)) {
-            multimap.get(key).remove(value);
+        if (multimap.containsKey(key) && multimap.get(key).remove(value)) {
             // Notify Listeners
+            notifyListenersOfRemove((K) key, (V) value);
             return true;
-        } else {
-            return false;
         }
+        return false;
+
     }
 
     @Override public void removeEntryListener(EntryListener<K, V> arg0) {
@@ -193,6 +200,39 @@ public class HashMultiMap<K, V> implements MultiMap<K, V> {
             values.addAll(keyValues);
         }
         return values();
+    }
+
+    private void notifyListenersOfAdd(K key, V value) {
+        // Notify All
+        EntryEvent<K, V> event = new EntryEvent<K, V>("m:" + name,
+                                                      null,
+                                                      EntryEvent.TYPE_ADDED,
+                                                      key,
+                                                      value);
+        for (EntryListener<K, V> listener : globalListeners) {
+            listener.entryAdded(event);
+        }
+        if (specificListeners.containsKey(key))
+            for (EntryListener<K, V> listener : specificListeners.get(key)) {
+                listener.entryAdded(event);
+            }
+    }
+
+    private void notifyListenersOfRemove(K key, V value) {
+        // Notify All
+        EntryEvent<K, V> event = new EntryEvent<K, V>("m:" + name,
+                                                      null,
+                                                      EntryEvent.TYPE_REMOVED,
+                                                      key,
+                                                      value);
+        for (EntryListener<K, V> listener : globalListeners) {
+            listener.entryRemoved(event);
+        }
+        // Notify Specific
+        if (specificListeners.containsKey(key))
+            for (EntryListener<K, V> listener : specificListeners.get(key)) {
+                listener.entryRemoved(event);
+            }
     }
 
     static class Entry<K, V> implements java.util.Map.Entry<K, V> {
