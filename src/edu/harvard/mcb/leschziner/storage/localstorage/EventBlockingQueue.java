@@ -16,14 +16,14 @@ public class EventBlockingQueue<E> extends LinkedBlockingQueue<E> implements
     /**
      * 
      */
-    private static final long        serialVersionUID = -8333359858822876327L;
+    private static final long           serialVersionUID = -8333359858822876327L;
 
-    private final String             name;
-    private final List<ItemListener> listeners;
+    private final String                name;
+    private final List<ItemListener<E>> listeners;
 
     public EventBlockingQueue(String name) {
         this.name = name;
-        listeners = new LinkedList<ItemListener>();
+        listeners = new LinkedList<ItemListener<E>>();
     }
 
     @Override public void destroy() {
