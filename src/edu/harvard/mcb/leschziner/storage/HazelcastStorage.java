@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.config.Join;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -13,7 +16,18 @@ public class HazelcastStorage implements StorageEngine {
     private final HazelcastInstance instance;
 
     public HazelcastStorage() {
-        this(Hazelcast.getDefaultInstance());
+        // Default configuration
+        Config cfg = new Config();
+
+        NetworkConfig network = cfg.getNetworkConfig();
+        Join join = network.getJoin();
+        join.getMulticastConfig().setEnabled(false);
+        join.getTcpIpConfig()
+            .addMember("bastien")
+            .addMember("isolde")
+            .addMember("aida")
+            .setEnabled(true);
+        this.instance = Hazelcast.init(cfg);
     }
 
     public HazelcastStorage(HazelcastInstance instance) {
