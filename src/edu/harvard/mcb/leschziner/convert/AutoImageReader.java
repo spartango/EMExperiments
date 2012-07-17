@@ -1,0 +1,49 @@
+package edu.harvard.mcb.leschziner.convert;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
+
+import loci.formats.FormatException;
+import loci.formats.ImageReader;
+import loci.formats.gui.BufferedImageReader;
+
+public class AutoImageReader {
+
+    public static Collection<BufferedImage>
+            readStack(String filename) throws FormatException, IOException {
+        ImageReader reader = new ImageReader();
+        reader.setId(filename);
+
+        BufferedImageReader imageReader = new BufferedImageReader(reader);
+        Vector<BufferedImage> images = new Vector<>(reader.getImageCount());
+
+        for (int i = 0; i < reader.getImageCount(); i++) {
+            images.add(imageReader.openImage(0));
+        }
+        imageReader.close();
+        reader.close();
+
+        return images;
+
+    }
+
+    public static BufferedImage
+            readImage(String filename) throws FormatException, IOException {
+        BufferedImage image = null;
+        ImageReader reader = new ImageReader();
+        reader.setId(filename);
+
+        BufferedImageReader imageReader = new BufferedImageReader(reader);
+
+        if (imageReader.getImageCount() > 0)
+            image = imageReader.openImage(0);
+
+        imageReader.close();
+        reader.close();
+
+        return image;
+    }
+
+}

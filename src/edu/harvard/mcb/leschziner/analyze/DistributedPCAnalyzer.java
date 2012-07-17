@@ -15,7 +15,12 @@ public class DistributedPCAnalyzer implements PrincipalComponentAnalyzer {
         // Figure out how many ways to partition the data
         // Partition the data
 
-        // TODO Auto-generated method stub
+        // Calculate the column means
+
+        // Form the column centered matrix
+
+        // Compute its QR decomposition
+
         return null;
     }
 

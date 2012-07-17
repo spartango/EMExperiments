@@ -9,9 +9,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Stack;
+import java.util.Vector;
 
 import javax.imageio.ImageIO;
+
+import loci.formats.FormatException;
 
 import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
@@ -22,6 +26,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_highgui;
 import com.googlecode.javacv.cpp.opencv_imgproc;
 
+import edu.harvard.mcb.leschziner.convert.AutoImageReader;
 import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 /**
@@ -115,8 +120,11 @@ public class Particle implements Serializable, Cloneable {
 
     public int getPixelChannel(int x, int y, int channel) {
         // Find row, go to channel byte, compensate for unsigned value
-        return image.getByteBuffer().get(y * image.widthStep() + CHANNELS * x
-                                                 + channel) & 0xFF;
+        return image.getByteBuffer().get(y
+                                         * image.widthStep()
+                                         + CHANNELS
+                                         * x
+                                         + channel) & 0xFF;
     }
 
     /**
@@ -147,8 +155,12 @@ public class Particle implements Serializable, Cloneable {
     }
 
     private void setPixelChannel(int x, int y, int channel, int value) {
-        image.getByteBuffer().put(y * image.widthStep() + CHANNELS * x
-                                          + channel, (byte) (value));
+        image.getByteBuffer().put(y
+                                          * image.widthStep()
+                                          + CHANNELS
+                                          * x
+                                          + channel,
+                                  (byte) (value));
     }
 
     /**
@@ -258,9 +270,11 @@ public class Particle implements Serializable, Cloneable {
     private void setImage(IplImage tempImage) {
         // Force the image to the right channel & colorscheme
         if (tempImage.nChannels() == 3) {
-            this.image = IplImage.create(new CvSize(size, size), depth,
+            this.image = IplImage.create(new CvSize(size, size),
+                                         depth,
                                          CHANNELS);
-            opencv_imgproc.cvCvtColor(tempImage, this.image,
+            opencv_imgproc.cvCvtColor(tempImage,
+                                      this.image,
                                       opencv_imgproc.CV_BGR2GRAY);
         } else {
             this.image = tempImage;
@@ -291,9 +305,21 @@ public class Particle implements Serializable, Cloneable {
      * @param filename
      * @return new particle from image file
      * @throws IOException
+     * @throws FormatException
      */
-    public static Particle fromFile(String filename) throws IOException {
-        return new Particle(opencv_highgui.cvLoadImage(filename));
+    public static Particle fromFile(String filename) throws IOException,
+                                                    FormatException {
+        return new Particle(AutoImageReader.readImage(filename));
+    }
+
+    public static Collection<Particle>
+            stackFromFile(String filename) throws FormatException, IOException {
+        Collection<BufferedImage> images = AutoImageReader.readStack(filename);
+        Vector<Particle> particles = new Vector<>(images.size());
+        for (BufferedImage image : images) {
+            particles.add(new Particle(image));
+        }
+        return particles;
     }
 
     // Primitive operations
@@ -403,7 +429,9 @@ public class Particle implements Serializable, Cloneable {
 
     public static Particle convolve(Particle target, CvMat kernel) {
         IplImage dst = IplImage.createCompatible(target.image);
-        opencv_imgproc.cvFilter2D(target.image, dst, kernel,
+        opencv_imgproc.cvFilter2D(target.image,
+                                  dst,
+                                  kernel,
                                   new CvPoint(-1, -1));
         return new Particle(dst);
     }

@@ -2,6 +2,7 @@ package edu.harvard.mcb.leschziner.distributed;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.hazelcast.core.AtomicNumber;
@@ -66,9 +67,9 @@ public class QueuedDistributedExecutor implements Runnable {
      *            : number of tasks that can be run on each node
      */
     public QueuedDistributedExecutor(String executorName, int nodeCapacity) {
-        // this.executor = Executors.newCachedThreadPool();
+        this.executor = Executors.newCachedThreadPool();
         StorageEngine storage = DefaultStorageEngine.getStorageEngine();
-        this.executor = Hazelcast.getExecutorService(executorName);
+        // this.executor = Hazelcast.getExecutorService(executorName);
         this.cluster = Hazelcast.getCluster();
 
         this.activeTasks = storage.getAtomicNumber(executorName
