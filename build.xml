@@ -1,7 +1,7 @@
 <project name="EMExperiments" default="help" basedir=".">
     <path id="project.class.path">
         <pathelement path="bin/"/>
-        <pathelement path="lib/ij.jar"/>
+        <pathelement path="lib/loci_tools.jar"/>
         <pathelement path="lib/hazelcast-2.1.2.jar"/>
         <pathelement path="lib/javacpp.jar"/>
         <pathelement path="lib/javacv.jar"/>
