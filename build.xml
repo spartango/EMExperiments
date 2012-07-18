@@ -1,7 +1,7 @@
 <project name="EMExperiments" default="help" basedir=".">
     <path id="project.class.path">
         <pathelement path="bin/"/>
-        <pathelement path="lib/ij.jar"/>
+        <pathelement path="lib/jets3t-0.9.0.jar"/>
         <pathelement path="lib/hazelcast-2.1.2.jar"/>
         <pathelement path="lib/javacpp.jar"/>
         <pathelement path="lib/javacv.jar"/>
@@ -9,6 +9,8 @@
         <pathelement path="lib/javacv-linux-x86_64.jar"/>
         <pathelement path="lib/javacv-linux-x86.jar"/>
         <pathelement path="lib/jedis-2.1.0.jar"/>
+    	<pathelement path="lib/typica.jar"/>
+    	<pathelement path="lib/loci_tools.jar"/>
     </path>
 
     <target name="clearresults">
