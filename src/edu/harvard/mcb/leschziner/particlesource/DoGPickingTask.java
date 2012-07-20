@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.Rectangle;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
 import edu.harvard.mcb.leschziner.analyze.BlobExtractor;
@@ -52,9 +53,9 @@ public class DoGPickingTask extends DistributedPickingTask {
         // DisplayUtils.displayParticle(thresholded);
 
         // Find Blobs
-        Rectangle[] blobs = blobExtractor.extract(thresholded);
+        Collection<Rectangle> blobs = blobExtractor.extract(thresholded);
         System.out.println("[DoGParticleSource]: Extracted "
-                           + blobs.length
+                           + blobs.size()
                            + " blobs from "
                            + target.hashCode());
         // Extract Particles from target micrograph

@@ -2,6 +2,7 @@ package edu.harvard.mcb.leschziner.analyze;
 
 import java.awt.Rectangle;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Vector;
 
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
@@ -62,7 +63,7 @@ public class BlobExtractor implements Serializable {
      *            : particle from which blobs are to be extracted
      * @return Array of squares containing blobs
      */
-    public Rectangle[] extract(Particle target) {
+    public Collection<Rectangle> extract(Particle target) {
         int size = target.getSize();
 
         // Pass 1: labeling
@@ -76,10 +77,10 @@ public class BlobExtractor implements Serializable {
         // Filtering by size
         Vector<Rectangle> filteredBounds = selectionPass(rects);
 
-        return filteredBounds.toArray(new Rectangle[filteredBounds.size()]);
+        return filteredBounds;
     }
 
-    public Rectangle[] extract(CvMat target) {
+    public Collection<Rectangle> extract(CvMat target) {
         int size = target.cols();
 
         // Pass 1: labeling
@@ -93,7 +94,7 @@ public class BlobExtractor implements Serializable {
         // Filtering by size
         Vector<Rectangle> filteredBounds = selectionPass(rects);
 
-        return filteredBounds.toArray(new Rectangle[filteredBounds.size()]);
+        return filteredBounds;
     }
 
     public static int labelPass(CvMat target, int[][] labelBuffer, int size) {
@@ -113,8 +114,12 @@ public class BlobExtractor implements Serializable {
 
                 // Pixel is in foreground (is a blob)
                 if (xPixel != BLACK) {
-                    currentLabel = labelFgPoint(labelBuffer, labelKernel,
-                                                currentLabel, x, y, size);
+                    currentLabel = labelFgPoint(labelBuffer,
+                                                labelKernel,
+                                                currentLabel,
+                                                x,
+                                                y,
+                                                size);
                 }
             }
 
@@ -122,7 +127,8 @@ public class BlobExtractor implements Serializable {
         return currentLabel;
     }
 
-    private static int labelPass(Particle target, int[][] labelBuffer, int size) {
+    private static int
+            labelPass(Particle target, int[][] labelBuffer, int size) {
 
         // Labels are generated to identify each individual blob
         int currentLabel = 1; // Labeling starts at 1.
@@ -139,8 +145,12 @@ public class BlobExtractor implements Serializable {
 
                 // Pixel is in foreground (is a blob)
                 if (xPixel != BLACK) {
-                    currentLabel = labelFgPoint(labelBuffer, labelKernel,
-                                                currentLabel, x, y, size);
+                    currentLabel = labelFgPoint(labelBuffer,
+                                                labelKernel,
+                                                currentLabel,
+                                                x,
+                                                y,
+                                                size);
                 }
             }
 
@@ -148,8 +158,12 @@ public class BlobExtractor implements Serializable {
         return currentLabel;
     }
 
-    private static int labelFgPoint(int[][] labelBuffer, int[] labelKernel,
-                                    int currentLabel, int x, int y, int size) {
+    private static int labelFgPoint(int[][] labelBuffer,
+                                    int[] labelKernel,
+                                    int currentLabel,
+                                    int x,
+                                    int y,
+                                    int size) {
         // Check for pre-existing labels around the target pixel, if
         // those pixels exist
         labelKernel[SECTOR_A] = (x > 0 && y > 0 ? labelBuffer[y - 1][x - 1]
@@ -157,7 +171,8 @@ public class BlobExtractor implements Serializable {
         labelKernel[SECTOR_B] = (y > 0 ? labelBuffer[y - 1][x]
 
         : UNLABELED);
-        labelKernel[SECTOR_C] = (x < size - 1 && y > 0 ? labelBuffer[y - 1][x + 1]
+        labelKernel[SECTOR_C] = (x < size - 1 && y > 0
+                                                      ? labelBuffer[y - 1][x + 1]
 
                                                       : UNLABELED);
         labelKernel[SECTOR_D] = (x > 0 ? labelBuffer[y][x - 1] : UNLABELED);
@@ -202,7 +217,8 @@ public class BlobExtractor implements Serializable {
     }
 
     private static Rectangle[] extractPass(int[][] labelBuffer,
-                                           int currentLabel, int size) {
+                                           int currentLabel,
+                                           int size) {
         // Preallocate a vector to hold our rectangles
         Rectangle[] rects = new Rectangle[currentLabel - 1];
 
@@ -254,7 +270,9 @@ public class BlobExtractor implements Serializable {
     }
 
     public static Rectangle RectangleFromCvRect(CvRect target) {
-        return new Rectangle(target.x(), target.y(), target.width(),
+        return new Rectangle(target.x(),
+                             target.y(),
+                             target.width(),
                              target.height());
     }
 }

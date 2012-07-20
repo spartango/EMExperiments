@@ -1,6 +1,7 @@
 package edu.harvard.mcb.leschziner.particlesource;
 
 import java.awt.Rectangle;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
 import com.googlecode.javacv.cpp.opencv_core;
@@ -64,11 +65,11 @@ public class TemplatePickingTask extends DistributedPickingTask {
         double padding = boxSize / 2.0;
 
         // Find Blobs
-        Rectangle[] blobs = blobExtractor.extract(filteredMat);
+        Collection<Rectangle> blobs = blobExtractor.extract(filteredMat);
         System.out.println("["
                            + this.getClass().getSimpleName()
                            + "]: "
-                           + blobs.length
+                           + blobs.size()
                            + " blobs");
         for (Rectangle blob : blobs) {
             // Pull the match blob
