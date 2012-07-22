@@ -25,7 +25,9 @@ public class PCAClassifier extends DistributedClassifier {
         super();
         targets = new Vector<Particle>();
         pcAnalyzer = new CvPrincipalComponentAnalyzer(principalComponents);
-        clusterer = new KMeansClusterer(classCount, classAccuracy, iterations,
+        clusterer = new KMeansClusterer(classCount,
+                                        classAccuracy,
+                                        iterations,
                                         attempts);
     }
 
@@ -40,14 +42,14 @@ public class PCAClassifier extends DistributedClassifier {
         // Run PCA
         PrincipalComponents pComponents = pcAnalyzer.analyze(targets);
         if (pComponents != null) {
-            System.out.print("[" + this.getClass().getSimpleName()
+            System.out.print("["
+                             + this.getClass().getSimpleName()
                              + "]: Eigenvalues: ");
 
             // Some info about the principal components
             for (int i = 0; i < pComponents.componentCount(); i++) {
                 System.out.print(pComponents.getEigenValue(i) + " ");
-                Particle eigenParticle = new Particle(
-                                                      pComponents.getEigenImage(i));
+                Particle eigenParticle = new Particle(pComponents.getEigenImage(i));
 
                 // write the eigenParticle
                 try {
@@ -59,9 +61,19 @@ public class PCAClassifier extends DistributedClassifier {
             System.out.println();
 
             // Run Clustering
-            System.out.println("[" + this.getClass().getSimpleName()
+            System.out.println("["
+                               + this.getClass().getSimpleName()
                                + "]: Clustering classes");
             Clusters clusters = clusterer.cluster(pComponents.getSubSpace());
+
+            for (int i = 0; i < clusters.clusterCount(); i++) {
+                System.out.println("["
+                                   + this.getClass().getSimpleName()
+                                   + "]: Cluster "
+                                   + i
+                                   + "-> compactness: "
+                                   + clusters.getClusterCompactness(i));
+            }
 
             // Group the original images
             for (int i = 0; i < targets.size(); i++) {
@@ -76,7 +88,8 @@ public class PCAClassifier extends DistributedClassifier {
 
             }
 
-            System.out.println("[" + this.getClass().getSimpleName()
+            System.out.println("["
+                               + this.getClass().getSimpleName()
                                + "]: Completed Clustering");
 
         }

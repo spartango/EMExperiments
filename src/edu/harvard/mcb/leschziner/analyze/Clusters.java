@@ -48,10 +48,15 @@ public class Clusters {
     }
 
     public CvMat getClusterCenter(int clusterIndex) {
-        CvMat center = CvMat.createHeader(1, clusterCenters.cols(),
+        CvMat center = CvMat.createHeader(1,
+                                          clusterCenters.cols(),
                                           opencv_core.CV_32FC1);
         opencv_core.cvGetRow(clusterCenters, center, clusterIndex);
         return center;
+    }
+
+    public double getClusterCompactness(int clusterIndex) {
+        return compactness[clusterIndex];
     }
 
 }
