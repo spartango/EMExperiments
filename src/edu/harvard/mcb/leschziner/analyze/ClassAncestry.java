@@ -37,8 +37,9 @@ public class ClassAncestry {
      * 
      * @return
      */
-    public Collection<Particle> intersection(Collection<Particle> firstClass,
-                                             Collection<Particle> secondClass) {
+    public static Collection<Particle>
+            intersection(Collection<Particle> firstClass,
+                         Collection<Particle> secondClass) {
         LinkedList<Particle> intersect = new LinkedList<>();
 
         for (Particle first : firstClass) {
@@ -60,8 +61,9 @@ public class ClassAncestry {
      * @param secondClass
      * @return
      */
-    public Collection<Particle> difference(Collection<Particle> firstClass,
-                                           Collection<Particle> secondClass) {
+    public static Collection<Particle>
+            difference(Collection<Particle> firstClass,
+                       Collection<Particle> secondClass) {
         HashSet<Particle> intersect = new HashSet<>();
         for (Particle first : firstClass) {
             for (Particle second : secondClass) {
