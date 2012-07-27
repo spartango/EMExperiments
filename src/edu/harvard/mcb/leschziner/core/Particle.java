@@ -53,12 +53,18 @@ public class Particle implements Serializable, Cloneable {
     private final int              size;
     private final int              depth;
 
+    // Particle ancestry info
+    private long                   sourceId;
+    private final int              generation;
+
     // Stack of reversible transformation operations performed on this particle
     private Stack<AffineTransform> transforms;
 
-    private Particle(int size, int depth) {
+    private Particle(int size, int depth, long sourceId, int generation) {
         this.size = size;
         this.depth = depth;
+        this.sourceId = sourceId;
+        this.generation = generation;
         transforms = new Stack<AffineTransform>();
     }
 
@@ -68,7 +74,16 @@ public class Particle implements Serializable, Cloneable {
      * @param image
      */
     public Particle(BufferedImage image) {
-        this(image.getWidth(), 8);
+        this(image, (long) (Long.MAX_VALUE * Math.random()), 0);
+    }
+
+    /**
+     * Builds a particle from a square image
+     * 
+     * @param image
+     */
+    public Particle(BufferedImage image, long sourceId, int generation) {
+        this(image.getWidth(), 8, sourceId, generation);
         IplImage tempImage = IplImage.createFrom(image);
 
         // Grayscale this image
@@ -81,9 +96,34 @@ public class Particle implements Serializable, Cloneable {
      * @param image
      */
     public Particle(IplImage image) {
-        this(image.width(), image.depth());
+        this(image, (long) (Long.MAX_VALUE * Math.random()), 0);
+    }
+
+    /**
+     * Builds a particle from a square image
+     * 
+     * @param image
+     */
+    public Particle(IplImage image, long sourceId, int generation) {
+        this(image.width(), image.depth(), sourceId, generation);
         // Grayscale this image
         setImage(image);
+    }
+
+    public long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public int nextGeneration() {
+        return generation + 1;
     }
 
     /**
@@ -207,7 +247,9 @@ public class Particle implements Serializable, Cloneable {
      * Provides a clone of this particle
      */
     @Override public Particle clone() {
-        Particle result = new Particle(image.clone());
+        Particle result = new Particle(image.clone(),
+                                       sourceId,
+                                       nextGeneration());
         return result;
     }
 
@@ -254,7 +296,7 @@ public class Particle implements Serializable, Cloneable {
         // Unset the roi
         opencv_core.cvResetImageROI(image);
 
-        return new Particle(dst);
+        return new Particle(dst, sourceId, nextGeneration());
     }
 
     /**
@@ -282,7 +324,9 @@ public class Particle implements Serializable, Cloneable {
     }
 
     public Particle createCompatible() {
-        return new Particle(IplImage.createCompatible(image));
+        return new Particle(IplImage.createCompatible(image),
+                            sourceId,
+                            nextGeneration());
     }
 
     public IplImage getImage() {
@@ -382,7 +426,7 @@ public class Particle implements Serializable, Cloneable {
 
         // Apply the transform
         opencv_imgproc.cvWarpAffine(target.image, dst, kernel);
-        return new Particle(dst);
+        return new Particle(dst, target.sourceId, target.nextGeneration());
     }
 
     /**
@@ -433,7 +477,7 @@ public class Particle implements Serializable, Cloneable {
                                   dst,
                                   kernel,
                                   new CvPoint(-1, -1));
-        return new Particle(dst);
+        return new Particle(dst, target.sourceId, target.nextGeneration());
     }
 
     /**
@@ -448,7 +492,7 @@ public class Particle implements Serializable, Cloneable {
     public static Particle scale(Particle target, float scaleFactor) {
         IplImage dst = IplImage.createCompatible(target.image);
         opencv_core.cvScale(target.image, dst, scaleFactor, 0);
-        return new Particle(dst);
+        return new Particle(dst, target.sourceId, target.nextGeneration());
     }
 
     /**
@@ -463,7 +507,7 @@ public class Particle implements Serializable, Cloneable {
     public static Particle addScalar(Particle target, float offset) {
         IplImage dst = IplImage.createCompatible(target.image);
         opencv_core.cvScale(target.image, dst, 1.0, offset);
-        return new Particle(dst);
+        return new Particle(dst, target.sourceId, target.nextGeneration());
     }
 
     public static Particle subtract(Particle firstParticle,
