@@ -11,7 +11,7 @@ import edu.harvard.mcb.leschziner.core.Particle;
 
 public class PCAClassifier extends DistributedClassifier {
 
-    public static int                          iterations = 50;
+    public static int                          iterations = 100;
     public static int                          attempts   = 1;
 
     private final Vector<Particle>             targets;

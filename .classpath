@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/javacv-windows-x86.jar"/>
 	<classpathentry kind="lib" path="lib/javacv.jar"/>
 	<classpathentry kind="lib" path="lib/loci_tools.jar"/>
+	<classpathentry kind="lib" path="lib/vertx-core-1.2.2.final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
