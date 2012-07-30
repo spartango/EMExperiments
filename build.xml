@@ -9,6 +9,9 @@
         <pathelement path="lib/javacv-linux-x86_64.jar"/>
         <pathelement path="lib/javacv-linux-x86.jar"/>
         <pathelement path="lib/jedis-2.1.0.jar"/>
+        <pathelement path="lib/vertx-core-1.2.2.final.jar"/>
+    	<pathelement path="lib/jackson-core-2.0.5.jar"/>
+    	<pathelement path="lib/jackson-databind-2.0.5.jar"/>
     </path>
 
     <target name="clearresults">
