@@ -66,15 +66,6 @@ public class PCAClassifier extends DistributedClassifier {
                                + "]: Clustering classes");
             Clusters clusters = clusterer.cluster(pComponents.getSubSpace());
 
-            for (int i = 0; i < clusters.clusterCount(); i++) {
-                System.out.println("["
-                                   + this.getClass().getSimpleName()
-                                   + "]: Cluster "
-                                   + i
-                                   + "-> compactness: "
-                                   + clusters.getClusterCompactness(i));
-            }
-
             // Group the original images
             for (int i = 0; i < targets.size(); i++) {
                 // Get the particle

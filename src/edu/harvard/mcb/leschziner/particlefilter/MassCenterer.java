@@ -78,8 +78,11 @@ public class MassCenterer implements ParticleFilter {
             }
         }
 
-        System.out.println("[MassCenterer]: Center at (" + massCenterX + ", "
-                           + massCenterY + ")");
+        System.out.println("[MassCenterer]: Center at ("
+                           + massCenterX
+                           + ", "
+                           + massCenterY
+                           + ")");
         Shifter shift = new Shifter((target.getSize() / 2) - massCenterX,
                                     (target.getSize() / 2) - massCenterY);
 

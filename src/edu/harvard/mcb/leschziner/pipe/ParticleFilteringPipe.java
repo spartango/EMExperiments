@@ -21,8 +21,10 @@ public class ParticleFilteringPipe extends ParticlePipe {
 
     @Override public void processParticle(final Particle particle) {
         // Queuing a request
-        execute(new FilteringPipeTask(particle, stages, processedQueueName,
-                                       executorName));
+        execute(new FilteringPipeTask(particle,
+                                      stages,
+                                      processedQueueName,
+                                      executorName));
     }
 
 }

@@ -38,16 +38,23 @@ public class DoGParticlePicker extends DistributedParticlePicker {
     @Override public void processMicrograph(final BufferedImage image) {
         // Queuing a request to pick particles
         Particle target = new Particle(image);
-        execute(new DoGPickingTask(target, lowFilter, highFilter,
-                                   thresholdFilter, blobExtractor, boxSize,
-                                   particleQueueName, executorName));
+        processMicrograph(target);
     }
 
     @Override public void processMicrograph(final IplImage image) {
         Particle target = new Particle(image);
-        execute(new DoGPickingTask(target, lowFilter, highFilter,
-                                   thresholdFilter, blobExtractor, boxSize,
-                                   particleQueueName, executorName));
+        processMicrograph(target);
+    }
+
+    @Override public void processMicrograph(Particle target) {
+        execute(new DoGPickingTask(target,
+                                   lowFilter,
+                                   highFilter,
+                                   thresholdFilter,
+                                   blobExtractor,
+                                   boxSize,
+                                   particleQueueName,
+                                   executorName));
     }
 
 }

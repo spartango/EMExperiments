@@ -28,4 +28,12 @@ public interface ParticlePicker extends ParticleSource {
      *            to find particles in
      */
     public void processMicrograph(IplImage image);
+
+    /**
+     * Isolate all the particles in the target image
+     * 
+     * @param micrograph
+     *            to find particles in
+     */
+    public void processMicrograph(Particle image);
 }

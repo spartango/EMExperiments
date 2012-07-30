@@ -37,8 +37,12 @@ public class GaussianFilter implements ParticleFilter {
         Particle result = target.createCompatible();
 
         // The kernel is separable, so we'll use 1D kernels
-        opencv_imgproc.cvSmooth(target.getImage(), result.getImage(),
-                                opencv_imgproc.CV_GAUSSIAN, radius, radius, 0,
+        opencv_imgproc.cvSmooth(target.getImage(),
+                                result.getImage(),
+                                opencv_imgproc.CV_GAUSSIAN,
+                                radius,
+                                radius,
+                                0,
                                 0);
 
         return result;

@@ -17,7 +17,8 @@ public class CrossCorrelator {
      *            Particle
      * @return the correlation between the two Particles, between 0.0 and 1.0
      */
-    public static double compare(Particle firstParticle, Particle secondParticle) {
+    public static double
+            compare(Particle firstParticle, Particle secondParticle) {
         CvMat result = matchTemplate(firstParticle, secondParticle);
         double[] maxValues = new double[1];
         opencv_core.cvMinMaxLoc(result, new double[1], maxValues);
@@ -27,9 +28,11 @@ public class CrossCorrelator {
 
     public static CvMat matchTemplate(Particle target, Particle template) {
         int resultSize = target.getSize() - template.getSize() + 1;
-        CvMat result = CvMat.create(resultSize, resultSize,
+        CvMat result = CvMat.create(resultSize,
+                                    resultSize,
                                     opencv_core.CV_32FC1);
-        opencv_imgproc.cvMatchTemplate(target.getImage(), template.getImage(),
+        opencv_imgproc.cvMatchTemplate(target.getImage(),
+                                       template.getImage(),
                                        result,
                                        opencv_imgproc.CV_TM_CCOEFF_NORMED);
         return result;

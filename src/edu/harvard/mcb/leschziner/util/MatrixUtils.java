@@ -9,7 +9,10 @@ public class MatrixUtils {
         double[] flattened = new double[matrixWidth * matrixHeight];
         // Copy over the kernel contents
         for (int i = 0; i < matrixHeight; i++) {
-            System.arraycopy(matrix[i], 0, flattened, i * matrixWidth,
+            System.arraycopy(matrix[i],
+                             0,
+                             flattened,
+                             i * matrixWidth,
                              matrixWidth);
         }
         return flattened;
@@ -22,7 +25,10 @@ public class MatrixUtils {
         float[] flattened = new float[matrixWidth * matrixHeight];
         // Copy over the kernel contents
         for (int i = 0; i < matrixHeight; i++) {
-            System.arraycopy(matrix[i], 0, flattened, i * matrixWidth,
+            System.arraycopy(matrix[i],
+                             0,
+                             flattened,
+                             i * matrixWidth,
                              matrixWidth);
         }
         return flattened;
@@ -35,7 +41,10 @@ public class MatrixUtils {
         int[] flattened = new int[matrixWidth * matrixHeight];
         // Copy over the kernel contents
         for (int i = 0; i < matrixHeight; i++) {
-            System.arraycopy(matrix[i], 0, flattened, i * matrixWidth,
+            System.arraycopy(matrix[i],
+                             0,
+                             flattened,
+                             i * matrixWidth,
                              matrixWidth);
         }
         return flattened;

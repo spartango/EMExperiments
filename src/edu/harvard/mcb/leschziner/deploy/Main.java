@@ -2,9 +2,7 @@ package edu.harvard.mcb.leschziner.deploy;
 
 import java.io.IOException;
 
-import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_highgui;
-
+import loci.formats.FormatException;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
@@ -59,7 +57,7 @@ public class Main {
 
         generator = new ParticleGeneratingPipe();
         // Setup some particle generators
-        generator.addStage(new RotationGenerator(10));
+        generator.addStage(new RotationGenerator(90));
         // generator.addStage(new ShiftGenerator(6, 6));
 
         // Setup a pipe full of filters to be applied to picked particles
@@ -70,7 +68,7 @@ public class Main {
         processor.addStage(new Binner(2));
 
         // Setup a classifier to sort the picked, filtered particles
-        classifier = new PCAClassifier(12, 180, .001);
+        classifier = new PCAClassifier(12, 8, .001);
 
         // Attach the generator to the picker
         generator.addParticleSource(picker);
@@ -82,16 +80,20 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 1; i++) {
             String filename = "raw/rib_10fold_49kx_" + i + ".png";
 
             // BufferedImage micrograph = ImageIO.read(new File(filename));
-            IplImage micrograph = opencv_highgui.cvLoadImage(filename, 0);
+            // IplImage micrograph = opencv_highgui.cvLoadImage(filename, 0);
 
-            System.out.println("[Main]: Processing Micrograph "
-                               + micrograph.hashCode());
+            // System.out.println("[Main]: Processing Micrograph "
+            // + micrograph.hashCode());
             // Pick particles
-            picker.processMicrograph(micrograph);
+            try {
+                picker.processMicrograph(Particle.fromFile(filename));
+            } catch (FormatException e) {
+                e.printStackTrace();
+            }
         }
     }
 

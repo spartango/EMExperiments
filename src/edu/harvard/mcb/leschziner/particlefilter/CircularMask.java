@@ -67,8 +67,10 @@ public class CircularMask implements ParticleFilter {
             for (int y = 0; y < size; y++) {
                 // Radius Check
 
-                double distanceSquared = (x - xShift) * (x - xShift)
-                                         + (y - yShift) * (y - yShift);
+                double distanceSquared = (x - xShift)
+                                         * (x - xShift)
+                                         + (y - yShift)
+                                         * (y - yShift);
                 if (distanceSquared > (radius * radius)) {
                     filteredParticle.setPixel(x, y, BLACK);
                 }

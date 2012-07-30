@@ -42,7 +42,9 @@ public class MaskThresholdFilter implements ParticleFilter {
         Particle filteredParticle = target.createCompatible();
 
         opencv_imgproc.cvThreshold(target.getImage(),
-                                   filteredParticle.getImage(), threshold, 255,
+                                   filteredParticle.getImage(),
+                                   threshold,
+                                   255,
                                    opencv_imgproc.CV_THRESH_TOZERO);
 
         return filteredParticle;

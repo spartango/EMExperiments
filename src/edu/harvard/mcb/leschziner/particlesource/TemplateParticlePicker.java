@@ -32,31 +32,12 @@ public class TemplateParticlePicker extends DistributedParticlePicker {
 
     @Override public void processMicrograph(final BufferedImage image) {
         Particle target = new Particle(image);
-        for (Particle template : templates) {
-            execute(new TemplatePickingTask(target,
-                                            template,
-                                            boxSize,
-                                            matchThreshold,
-                                            blobExtractor,
-                                            particleQueueName,
-                                            executorName));
-        }
-
+        processMicrograph(target);
     }
 
     @Override public void processMicrograph(final IplImage image) {
         Particle target = new Particle(image);
-
-        for (Particle template : templates) {
-            execute(new TemplatePickingTask(target,
-                                            template,
-                                            boxSize,
-                                            matchThreshold,
-                                            blobExtractor,
-                                            particleQueueName,
-                                            executorName));
-        }
-
+        processMicrograph(target);
     }
 
     public void addTemplate(Particle template) {
@@ -65,5 +46,17 @@ public class TemplateParticlePicker extends DistributedParticlePicker {
 
     public void addTemplates(Collection<Particle> templates) {
         this.templates.addAll(templates);
+    }
+
+    @Override public void processMicrograph(Particle target) {
+        for (Particle template : templates) {
+            execute(new TemplatePickingTask(target,
+                                            template,
+                                            boxSize,
+                                            matchThreshold,
+                                            blobExtractor,
+                                            particleQueueName,
+                                            executorName));
+        }
     }
 }

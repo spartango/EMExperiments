@@ -15,7 +15,9 @@ public class ParticleGeneratingPipe extends ParticlePipe {
     }
 
     @Override public void processParticle(Particle particle) {
-        execute(new GeneratingPipeTask(particle, stages, processedQueueName,
+        execute(new GeneratingPipeTask(particle,
+                                       stages,
+                                       processedQueueName,
                                        executorName));
     }
 

@@ -62,6 +62,10 @@ public abstract class DistributedProcessingTask implements
                             .incrementAndGet();
     }
 
+    protected void markError() {
+        // TODO
+    }
+
     /**
      * Mark this task complete
      */

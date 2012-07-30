@@ -30,20 +30,26 @@ public class KMeansClusterer implements Serializable {
     private final int         clusters;
 
     public Clusters cluster(CvMat data) {
-        CvTermCriteria terminationCriteria = new CvTermCriteria(
-                                                                opencv_core.CV_TERMCRIT_EPS
+        CvTermCriteria terminationCriteria = new CvTermCriteria(opencv_core.CV_TERMCRIT_EPS
                                                                         + opencv_core.CV_TERMCRIT_ITER,
                                                                 iterations,
                                                                 epsilon);
 
         CvMat clusterLabels = CvMat.create(data.rows(), 1, opencv_core.CV_32SC1);
-        CvMat clusterCenters = CvMat.create(clusters, data.cols(),
+        CvMat clusterCenters = CvMat.create(clusters,
+                                            data.cols(),
                                             opencv_core.CV_32FC1);
         double[] compactness = new double[attempts];
         // Run a clusterer on the eigenimages
-        opencv_core.cvKMeans2(data, clusters, clusterLabels,
-                              terminationCriteria, attempts, new CvRNG(null),
-                              0, clusterCenters, compactness);
+        opencv_core.cvKMeans2(data,
+                              clusters,
+                              clusterLabels,
+                              terminationCriteria,
+                              attempts,
+                              new CvRNG(null),
+                              0,
+                              clusterCenters,
+                              compactness);
         return new Clusters(clusterLabels, clusterCenters, compactness);
     }
 }

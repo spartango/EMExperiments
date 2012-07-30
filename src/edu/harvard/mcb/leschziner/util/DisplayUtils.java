@@ -27,11 +27,18 @@ public class DisplayUtils {
     }
 
     public static void displayMat(CvMat target, String label) {
-        CvMat normalized = CvMat.create(target.rows(), target.cols(),
+        CvMat normalized = CvMat.create(target.rows(),
+                                        target.cols(),
                                         target.type());
-        opencv_core.cvNormalize(target, normalized, 0, 1,
-                                opencv_core.CV_MINMAX, null);
-        IplImage image = IplImage.create(target.cols(), target.rows(), 8,
+        opencv_core.cvNormalize(target,
+                                normalized,
+                                0,
+                                1,
+                                opencv_core.CV_MINMAX,
+                                null);
+        IplImage image = IplImage.create(target.cols(),
+                                         target.rows(),
+                                         8,
                                          target.channels());
         opencv_core.cvConvertScale(normalized, image, 255, 0);
         displayImage(image.getBufferedImage(), label);
