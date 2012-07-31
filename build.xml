@@ -10,12 +10,17 @@
         <pathelement path="lib/javacv-linux-x86.jar"/>
         <pathelement path="lib/jedis-2.1.0.jar"/>
         <pathelement path="lib/vertx-core-1.2.2.final.jar"/>
-
+    	<pathelement path="lib/vertx-lang-java-1.2.2.final.jar"/>
+    	<pathelement path="lib/netty-3.5.0.Final.jar"/>
+    	<pathelement path="lib/jackson-mapper-asl-1.9.4.jar"/>
+    	<pathelement path="lib/jackson-core-asl-1.9.4.jar"/>
     </path>
 
     <target name="clearresults">
         <delete dir="processed"/>
         <mkdir dir="processed" />
+    	<delete dir="download" />
+        <mkdir dir="download" />
     </target>
 
     <target name="clean" depends="clearresults">

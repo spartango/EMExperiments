@@ -26,7 +26,6 @@ public class ImageLoaderTask extends DistributedProcessingTask {
 
     private final String       targetPath;
     private final String       imageQueueName;
-
     private transient Boolean  completed;
 
     public ImageLoaderTask(String target,
@@ -42,11 +41,13 @@ public class ImageLoaderTask extends DistributedProcessingTask {
      */
     private static final long serialVersionUID = 2452347990745320758L;
 
-    @Override public void process() {
-        completed = false;
+    private static final long POLL_TIME        = 100;                 // ms
+
+    @Override public synchronized void process() {
         final BlockingQueue<Particle> loadedImages = DefaultStorageEngine.getStorageEngine()
                                                                          .getQueue(imageQueueName);
 
+        completed = false;
         try {
             final URL url = new URL(targetPath);
 
@@ -62,7 +63,8 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                 final AsyncFile asyncFile = ar.result;
                                                 // Pump from the request
                                                 HttpClient client = vertx.createHttpClient()
-                                                                         .setPort(url.getPort())
+                                                                         .setPort(url.getPort() > 0 ? url.getPort()
+                                                                                                   : url.getDefaultPort())
                                                                          .setHost(url.getHost())
                                                                          .setKeepAlive(false);
                                                 client.getNow(targetPath,
@@ -83,13 +85,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                           @Override public void
                                                                                   handle(Void arg0) {
                                                                               asyncFile.close();
-                                                                              // Make
-                                                                              // a
-                                                                              // particle
-                                                                              // out
-                                                                              // of
-                                                                              // the
-                                                                              // file
+
                                                                               Particle newParticle;
                                                                               try {
                                                                                   newParticle = Particle.fromFile(filename);
@@ -100,7 +96,6 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                                             e);
                                                                               }
                                                                               completed = true;
-                                                                              completed.notifyAll();
                                                                           }
 
                                                                       });
@@ -114,7 +109,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                     });
             // Wait for completion
             while (!completed) {
-                completed.wait();
+                Thread.sleep(POLL_TIME);
             }
         } catch (MalformedURLException | InterruptedException e) {
             markError("Could not use URL because it is malformed", e);

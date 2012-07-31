@@ -95,6 +95,7 @@ public abstract class DistributedProcessingTask implements
      * Mark this task complete
      */
     private void markComplete() {
+        // TODO send out event
         StorageEngine storage = DefaultStorageEngine.getStorageEngine();
         storage.getAtomicNumber(executorName + PENDING_SUFFIX)
                .decrementAndGet();

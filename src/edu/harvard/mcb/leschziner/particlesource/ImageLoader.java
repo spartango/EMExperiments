@@ -18,7 +18,6 @@ public class ImageLoader extends DistributedTaskHandler implements
 
     public ImageLoader() {
         super();
-
         imagePaths = new Vector<>();
 
         imageQueueName = "LoadedImages_" + this.hashCode();

@@ -2,7 +2,6 @@ package edu.harvard.mcb.leschziner.deploy;
 
 import java.io.IOException;
 
-import loci.formats.FormatException;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
@@ -11,6 +10,7 @@ import edu.harvard.mcb.leschziner.particlefilter.Cropper;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
+import edu.harvard.mcb.leschziner.particlesource.ImageLoader;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 
@@ -18,6 +18,7 @@ public class Main {
 
     public static final int               POLL_RATE = 2000; // ms
 
+    private static ImageLoader            loader;
     private static DoGParticlePicker      picker;
     private static ParticleFilteringPipe  processor;
     private static ParticleGeneratingPipe generator;
@@ -52,6 +53,9 @@ public class Main {
     private static void initPipeline() throws IOException {
         System.out.println("[Main]: Preparing pipeline");
 
+        // Setup the image Loader
+        loader = new ImageLoader();
+
         // Setup the Particle picker
         picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);
 
@@ -70,6 +74,9 @@ public class Main {
         // Setup a classifier to sort the picked, filtered particles
         classifier = new PCAClassifier(12, 8, .001);
 
+        // Attach the picker to the loader
+        picker.addParticleSource(loader);
+
         // Attach the generator to the picker
         generator.addParticleSource(picker);
 
@@ -80,21 +87,9 @@ public class Main {
         classifier.addParticleSource(processor);
 
         System.out.println("[Main]: Loading Images");
-        for (int i = 1; i <= 1; i++) {
-            String filename = "raw/rib_10fold_49kx_" + i + ".png";
+        loader.addImagePath("http://www.filepicker.io/api/file/JIHhJ1NSR9SqOe2bAIGt");
 
-            // BufferedImage micrograph = ImageIO.read(new File(filename));
-            // IplImage micrograph = opencv_highgui.cvLoadImage(filename, 0);
-
-            // System.out.println("[Main]: Processing Micrograph "
-            // + micrograph.hashCode());
-            // Pick particles
-            try {
-                picker.processMicrograph(Particle.fromFile(filename));
-            } catch (FormatException e) {
-                e.printStackTrace();
-            }
-        }
+        loader.start();
     }
 
     private static void awaitCompletion() {
@@ -156,7 +151,8 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while (picker.isActive()
+        } while (loader.isActive()
+                 || picker.isActive()
                  || processor.isActive()
                  || generator.isActive()
                  || classifier.isActive());

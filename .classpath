@@ -14,5 +14,9 @@
 	<classpathentry kind="lib" path="lib/javacv.jar"/>
 	<classpathentry kind="lib" path="lib/loci_tools.jar"/>
 	<classpathentry kind="lib" path="lib/vertx-core-1.2.2.final.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/netty-3.5.0.Final.jar"/>
+	<classpathentry kind="lib" path="lib/vertx-lang-java-1.2.2.final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
