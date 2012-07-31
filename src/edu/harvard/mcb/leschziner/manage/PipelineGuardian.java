@@ -114,9 +114,7 @@ public class PipelineGuardian {
     }
 
     private static boolean validateGeneratorParams(JsonObject generatorParams) {
-        return generatorParams.getNumber("rotationAngle") != null
-               && generatorParams.getInteger("shiftDistance") != null
-               && generatorParams.getInteger("shiftIncrement") != null;
+        return generatorParams.getNumber("rotationAngle") != null;
     }
 
     private void initGeneratorPipe(JsonObject generationParams) {
@@ -130,10 +128,13 @@ public class PipelineGuardian {
             }
 
             // Shift generator (if needed)
-            int shiftDistance = generationParams.getInteger("shiftDistance");
-            int shiftIncrement = generationParams.getInteger("shiftIncrement");
+            Integer shiftDistance = generationParams.getInteger("shiftDistance");
+            Integer shiftIncrement = generationParams.getInteger("shiftIncrement");
 
-            if (shiftDistance > 0 && shiftIncrement > 0) {
+            if (shiftDistance != null
+                && shiftIncrement != null
+                && shiftDistance > 0
+                && shiftIncrement > 0) {
                 generator.addStage(new ShiftGenerator(shiftDistance,
                                                       shiftIncrement));
             }
