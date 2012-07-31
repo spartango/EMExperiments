@@ -48,8 +48,6 @@ public class DoGPickingTask extends DistributedPickingTask {
         Particle thresholded = thresholdFilter.filter(highFiltered);
 
         // Debug visualization
-        // DisplayUtils.displayParticle(highFiltered);
-        // DisplayUtils.displayParticle(thresholded);
 
         // Find Blobs
         Rectangle[] blobs = blobExtractor.extract(thresholded);

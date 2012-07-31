@@ -6,9 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.SimpleHandler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.HttpServerResponse;
+import org.vertx.java.core.http.RouteMatcher;
 
 /**
  * A Manager serves as an API endpoint to handle requests for information or
@@ -19,96 +22,131 @@ import org.vertx.java.core.http.HttpServerResponse;
  * @author spartango
  * 
  */
-public class PipelineManager implements Handler<HttpServerRequest> {
+public class PipelineManager {
+    private static final Vertx                vertx        = Vertx.newVertx();
+
+    public static final int                   DEFAULT_PORT = 8082;
+
     private final Map<UUID, PipelineGuardian> guardians;
 
+    // HTTP Server
+    private final HttpServer                  server;
+    private final RouteMatcher                routeMatcher;
+
     public PipelineManager() {
+        this(DEFAULT_PORT);
+    }
+
+    public PipelineManager(int port) {
         guardians = new ConcurrentHashMap<UUID, PipelineGuardian>();
+        routeMatcher = new RouteMatcher();
+        server = vertx.createHttpServer();
+
+        setupRoutes();
+        setupServer(port);
     }
 
-    @Override public void handle(HttpServerRequest request) {
-        // Handle request types
-        if (request.method.equals("GET")) {
-            handleGet(request);
-        } else if (request.method.equals("POST")) {
-            handlePost(request);
-        }
-    }
-
-    private void handleGet(HttpServerRequest request) {
-        HttpServerResponse response = request.response;
-        if (request.uri.startsWith("/pipeline/")) {
-            // Request status information
-            // Pull out the id
-            UUID guardianId = parsePipelineUUID(request.uri);
-
-            if (guardianId != null && guardians.containsKey(guardianId)) {
-                PipelineGuardian guardian = guardians.get(guardianId);
-
-                if (request.uri.endsWith("/status")) {
-                    response.write(guardian.getStatusJSON());
-                } else if (request.uri.endsWith("/results")) {
-                    response.write(guardian.getResultsJSON());
-                } else {
-                    response.statusCode = 400;
-                    response.statusMessage = "Bad Request: No such operation";
-                }
-
-            } else {
-                response.statusCode = 404;
-                response.statusMessage = "Not Found: No such Pipeline";
+    private void setupRoutes() {
+        routeMatcher.get("/pipeline/:uuid/status",
+                         new Handler<HttpServerRequest>() {
+                             @Override public void
+                                     handle(HttpServerRequest arg0) {
+                                 handleStatus(arg0);
+                             }
+                         });
+        routeMatcher.get("/pipeline/:uuid/results",
+                         new Handler<HttpServerRequest>() {
+                             @Override public void
+                                     handle(HttpServerRequest arg0) {
+                                 handleResults(arg0);
+                             }
+                         });
+        routeMatcher.post("/pipeline/create", new Handler<HttpServerRequest>() {
+            @Override public void handle(HttpServerRequest arg0) {
+                handleCreate(arg0);
             }
-        } else {
+        });
+    }
+
+    private void setupServer(int port) {
+        server.requestHandler(routeMatcher).listen(port);
+    }
+
+    private void handleStatus(HttpServerRequest request) {
+        HttpServerResponse response = request.response;
+
+        String guardianId = request.params().get("uuid");
+        if (guardianId == null) {
             response.statusCode = 400;
-            response.statusMessage = "Bad Request: No such control domain";
+            response.end();
+            return;
         }
+
+        PipelineGuardian guardian = guardians.get(UUID.fromString(guardianId));
+
+        if (guardian == null) {
+            response.statusCode = 404;
+            response.end();
+            return;
+        }
+
+        response.write(guardian.getStatusJSON());
         response.end();
     }
 
-    private void handlePost(HttpServerRequest request) {
+    private void handleResults(HttpServerRequest request) {
         HttpServerResponse response = request.response;
-        if (request.uri.equals("/pipeline/create")) {
-            final Buffer body = new Buffer(0);
 
-            // Accumulate the body
-            request.bodyHandler(new Handler<Buffer>() {
-
-                @Override public void handle(Buffer buffer) {
-                    body.appendBuffer(buffer);
-                }
-            });
-
-            // Do something with it at the end
-            request.endHandler(new SimpleHandler() {
-
-                @Override protected void handle() {
-                    // Grab the body
-                    String bodyText = body.getString(0, body.length());
-                    // Allocate a guardian
-                    // Pass the pipeline parameters
-                    PipelineGuardian newGuardian = new PipelineGuardian();
-                    if (newGuardian.initialize(bodyText)) {
-                        // Give the client a guardian ID
-                        guardians.put(newGuardian.getUUID(), newGuardian);
-                    }
-                }
-            });
-        } else {
+        String guardianId = request.params().get("uuid");
+        if (guardianId == null) {
             response.statusCode = 400;
+            response.end();
+            return;
         }
+
+        PipelineGuardian guardian = guardians.get(UUID.fromString(guardianId));
+
+        if (guardian == null) {
+            response.statusCode = 404;
+            response.end();
+            return;
+        }
+
+        response.write(guardian.getResultsJSON());
         response.end();
     }
 
-    private static UUID parsePipelineUUID(String uri) {
-        String[] parts = uri.split("/");
-        if (parts.length > 2) {
-            try {
-                return UUID.fromString(parts[2]);
-            } catch (IllegalArgumentException e) {
-                System.err.println("Error parsing UUID from request");
+    private void handleCreate(HttpServerRequest request) {
+        HttpServerResponse response = request.response;
+        final Buffer body = new Buffer(0);
+
+        // Accumulate the body
+        request.bodyHandler(new Handler<Buffer>() {
+
+            @Override public void handle(Buffer buffer) {
+                body.appendBuffer(buffer);
             }
-        }
-        return null;
+        });
+
+        // Do something with it at the end
+        request.endHandler(new SimpleHandler() {
+
+            @Override protected void handle() {
+                // Grab the body
+                String bodyText = body.getString(0, body.length());
+                // Allocate a guardian
+                // Pass the pipeline parameters
+                PipelineGuardian newGuardian = new PipelineGuardian();
+                if (newGuardian.initialize(bodyText)) {
+                    // Give the client a guardian ID
+                    guardians.put(newGuardian.getUUID(), newGuardian);
+                }
+            }
+        });
+        response.end();
     }
 
+    public void close() {
+        server.close();
+    }
 }

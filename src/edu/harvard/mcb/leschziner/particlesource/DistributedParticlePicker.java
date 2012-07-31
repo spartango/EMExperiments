@@ -4,11 +4,13 @@ import java.util.concurrent.BlockingQueue;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticlePicker;
-import edu.harvard.mcb.leschziner.distributed.DistributedTaskHandler;
+import edu.harvard.mcb.leschziner.distributed.DistributedParticleConsumer;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
-public abstract class DistributedParticlePicker extends DistributedTaskHandler implements
-                                                                              ParticlePicker {
+public abstract class DistributedParticlePicker extends
+                                               DistributedParticleConsumer implements
+                                                                          ParticlePicker {
+
     // Size of area picked around particle
     protected final int                     boxSize;
 
@@ -34,4 +36,7 @@ public abstract class DistributedParticlePicker extends DistributedTaskHandler i
         return extractedParticles;
     }
 
+    @Override public void processParticle(Particle particle) {
+        processMicrograph(particle);
+    }
 }

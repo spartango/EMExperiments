@@ -39,7 +39,15 @@ public abstract class DistributedProcessingTask implements
      * when it finishes
      */
     @Override public void run() {
-        process();
+        try {
+            process();
+        } catch (Exception e) {
+            // Sandbox the processing
+            markError(e.getClass().getSimpleName()
+                              + " Thrown: "
+                              + e.getMessage(),
+                      e);
+        }
         markComplete();
     }
 
@@ -62,8 +70,25 @@ public abstract class DistributedProcessingTask implements
                             .incrementAndGet();
     }
 
-    protected void markError() {
-        // TODO
+    /**
+     * Report an error on this task
+     * 
+     * @param error
+     */
+    protected void markError(String error) {
+        // TODO Queue errors for aggregation
+        System.err.println("Error on " + this + ": " + error);
+    }
+
+    /**
+     * Report an error on this task, with the exception that caused it
+     * 
+     * @param error
+     * @param e
+     */
+    protected void markError(String error, Exception e) {
+        // TODO Queue errors for aggregation
+        System.err.println("Error on " + this + ": " + error + " with " + e);
     }
 
     /**
