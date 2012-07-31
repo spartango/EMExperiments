@@ -2,6 +2,7 @@ package edu.harvard.mcb.leschziner.manage;
 
 import java.util.UUID;
 
+import org.vertx.java.core.json.DecodeException;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -43,43 +44,56 @@ public class PipelineGuardian {
      * @return
      */
     public boolean initialize(String parameters) {
-        JsonObject json = new JsonObject(parameters);
-        // Check for the appropriate sections (validation)
-        if (validateParameters(json)) {
-            // Images
-            JsonArray images = json.getArray("images");
-            // Build an ImageLoader
-            initLoader(images);
+        try {
+            JsonObject json = new JsonObject(parameters);
 
-            // Picker
-            JsonObject pickerParams = json.getObject("picker");
-            // Build a Picker
-            initPicker(pickerParams);
+            // Check for the appropriate sections (validation)
+            if (validateParameters(json)) {
+                System.out.println("[Guardian "
+                                   + this.uuid.toString()
+                                   + "]: Building pipeline");
+                // Images
+                JsonArray images = json.getArray("images");
+                // Build an ImageLoader
+                initLoader(images);
 
-            // Filters
-            JsonObject filterParams = json.getObject("filter");
-            // Build a filter pipe
-            initFilterPipe(filterParams);
+                // Picker
+                JsonObject pickerParams = json.getObject("picker");
+                // Build a Picker
+                initPicker(pickerParams);
 
-            // Generation
-            JsonObject generationParams = json.getObject("generation");
-            // Build a generator pipe
-            initGeneratorPipe(generationParams);
+                // Filters
+                JsonObject filterParams = json.getObject("filter");
+                // Build a filter pipe
+                initFilterPipe(filterParams);
 
-            // Classification
-            JsonObject classifierParams = json.getObject("classifier");
-            // Build a classifier
-            initClassifier(classifierParams);
+                // Generation
+                JsonObject generationParams = json.getObject("generation");
+                // Build a generator pipe
+                initGeneratorPipe(generationParams);
 
-            // Check that everything got built
-            if (pipelineBuilt()) {
-                // Wire the pipes together
-                linkPipes();
-                // Start the loader
-                loader.start();
-                return true;
+                // Classification
+                JsonObject classifierParams = json.getObject("classifier");
+                // Build a classifier
+                initClassifier(classifierParams);
+
+                // Check that everything got built
+                if (pipelineBuilt()) {
+                    System.out.println("[Guardian "
+                                       + this.uuid.toString()
+                                       + "]: Starting pipeline");
+                    // Wire the pipes together
+                    linkPipes();
+                    // Start the loader
+                    loader.start();
+                    return true;
+                }
+
             }
-
+        } catch (DecodeException e) {
+            System.err.println("["
+                               + this.getClass().getSimpleName()
+                               + "]: Failed to decode body");
         }
         return false;
 

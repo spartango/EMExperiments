@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.vertx.java.core.Handler;
-import org.vertx.java.core.SimpleHandler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServer;
@@ -22,7 +21,7 @@ import org.vertx.java.core.http.RouteMatcher;
  * @author spartango
  * 
  */
-public class PipelineManager {
+public class GuardianManager {
     private static final Vertx                vertx        = Vertx.newVertx();
 
     public static final int                   DEFAULT_PORT = 8082;
@@ -33,11 +32,11 @@ public class PipelineManager {
     private final HttpServer                  server;
     private final RouteMatcher                routeMatcher;
 
-    public PipelineManager() {
+    public GuardianManager() {
         this(DEFAULT_PORT);
     }
 
-    public PipelineManager(int port) {
+    public GuardianManager(int port) {
         guardians = new ConcurrentHashMap<UUID, PipelineGuardian>();
         routeMatcher = new RouteMatcher();
         server = vertx.createHttpServer();
@@ -90,8 +89,7 @@ public class PipelineManager {
             return;
         }
 
-        response.write(guardian.getStatusJSON());
-        response.end();
+        response.end(guardian.getStatusJSON());
     }
 
     private void handleResults(HttpServerRequest request) {
@@ -112,38 +110,35 @@ public class PipelineManager {
             return;
         }
 
-        response.write(guardian.getResultsJSON());
-        response.end();
+        response.end(guardian.getResultsJSON());
     }
 
     private void handleCreate(HttpServerRequest request) {
-        HttpServerResponse response = request.response;
-        final Buffer body = new Buffer(0);
-
-        // Accumulate the body
-        request.bodyHandler(new Handler<Buffer>() {
-
-            @Override public void handle(Buffer buffer) {
-                body.appendBuffer(buffer);
-            }
-        });
+        final HttpServerResponse response = request.response;
 
         // Do something with it at the end
-        request.endHandler(new SimpleHandler() {
+        request.bodyHandler(new Handler<Buffer>() {
 
-            @Override protected void handle() {
+            @Override public void handle(Buffer body) {
                 // Grab the body
                 String bodyText = body.getString(0, body.length());
+                System.out.println("[BodyHandler]: Got "
+                                   + body.length()
+                                   + " bytes");
                 // Allocate a guardian
                 // Pass the pipeline parameters
                 PipelineGuardian newGuardian = new PipelineGuardian();
                 if (newGuardian.initialize(bodyText)) {
                     // Give the client a guardian ID
                     guardians.put(newGuardian.getUUID(), newGuardian);
+                    response.end(newGuardian.getUUID().toString());
+                } else {
+                    response.statusCode = 400;
+                    response.statusMessage = "Bad Pipeline Parameters";
+                    response.end();
                 }
             }
         });
-        response.end();
     }
 
     public void close() {

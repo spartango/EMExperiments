@@ -67,6 +67,16 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                                                    : url.getDefaultPort())
                                                                          .setHost(url.getHost())
                                                                          .setKeepAlive(false);
+                                                if (url.getProtocol()
+                                                       .equals("https")) {
+                                                    client.setSSL(true)
+                                                          .setTrustAll(true);
+                                                }
+                                                System.out.println("["
+                                                                   + this
+                                                                   + "]: Loading Image from "
+                                                                   + url.toString());
+
                                                 client.getNow(targetPath,
                                                               new Handler<HttpClientResponse>() {
 
@@ -111,5 +121,4 @@ public class ImageLoaderTask extends DistributedProcessingTask {
         }
 
     }
-
 }

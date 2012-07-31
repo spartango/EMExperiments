@@ -40,7 +40,10 @@ public class DoGPickingTask extends DistributedPickingTask {
     @Override public void process() {
         BlockingQueue<Particle> particleQueue = DefaultStorageEngine.getStorageEngine()
                                                                     .getQueue(particleQueueName);
-
+        System.out.println("["
+                           + this
+                           + "]: Picking particles from "
+                           + target.getSourceId());
         // Filter the image with each gaussian and then the threshold
         Particle lowFiltered = lowFilter.filter(target);
         Particle highFiltered = highFilter.filter(lowFiltered);
