@@ -51,7 +51,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
         try {
             final URL url = new URL(targetPath);
 
-            final String filename = UUID.randomUUID().toString();
+            final String filename = "download/" + UUID.randomUUID().toString();
 
             // Allocate a file for the path
             vertx.fileSystem().open(filename,

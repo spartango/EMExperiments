@@ -20,6 +20,8 @@ public abstract class DistributedTaskHandler {
     // Number of tasks either awaiting execution or being executed
     protected final AtomicNumber            pendingCount;
 
+    protected final AtomicNumber            totalRequests;
+
     /**
      * Constructs a task handler, prepping the distributed executor and task
      * tracker
@@ -31,6 +33,9 @@ public abstract class DistributedTaskHandler {
         pendingCount = DefaultStorageEngine.getStorageEngine()
                                            .getAtomicNumber(executorName
                                                             + DistributedProcessingTask.PENDING_SUFFIX);
+        totalRequests = DefaultStorageEngine.getStorageEngine()
+                                            .getAtomicNumber(executorName
+                                                             + "_totalreqs");
     }
 
     /**
@@ -40,6 +45,7 @@ public abstract class DistributedTaskHandler {
      *            to be executed
      */
     public void execute(DistributedProcessingTask command) {
+        totalRequests.incrementAndGet();
         command.markPending();
         executor.execute(command);
     }
@@ -68,5 +74,9 @@ public abstract class DistributedTaskHandler {
      */
     public long getPendingCount() {
         return pendingCount.get();
+    }
+
+    public long getTotalRequests() {
+        return totalRequests.get();
     }
 }

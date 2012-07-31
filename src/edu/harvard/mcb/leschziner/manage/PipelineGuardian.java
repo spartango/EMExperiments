@@ -6,8 +6,8 @@ import org.vertx.java.core.json.DecodeException;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import edu.harvard.mcb.leschziner.classify.DistributedClassifier;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
-import edu.harvard.mcb.leschziner.core.ParticleClassifier;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
@@ -32,7 +32,7 @@ public class PipelineGuardian {
     private DistributedParticlePicker picker;
     private ParticleFilteringPipe     filter;
     private ParticleGeneratingPipe    generator;
-    private ParticleClassifier        classifier;
+    private DistributedClassifier     classifier;
 
     public PipelineGuardian() {
         uuid = UUID.randomUUID();
@@ -207,12 +207,44 @@ public class PipelineGuardian {
 
     public String getStatusJSON() {
         // TODO Auto-generated method stub
-        return "";
+        JsonObject status = new JsonObject();
+
+        JsonObject loaderStatus = new JsonObject();
+        loaderStatus.putNumber("pending", loader.getPendingCount());
+        loaderStatus.putNumber("requests", loader.getTotalRequests());
+        status.putObject("loader", loaderStatus);
+
+        JsonObject pickerStatus = new JsonObject();
+        pickerStatus.putNumber("pending", picker.getPendingCount());
+        pickerStatus.putNumber("requests", picker.getTotalRequests());
+        status.putObject("picker", pickerStatus);
+
+        JsonObject filterStatus = new JsonObject();
+        filterStatus.putNumber("pending", filter.getPendingCount());
+        filterStatus.putNumber("requests", filter.getTotalRequests());
+        status.putObject("filter", filterStatus);
+
+        JsonObject generatorStatus = new JsonObject();
+        generatorStatus.putNumber("pending", generator.getPendingCount());
+        generatorStatus.putNumber("requests", generator.getTotalRequests());
+        status.putObject("generation", generatorStatus);
+
+        JsonObject classfierStatus = new JsonObject();
+        classfierStatus.putNumber("consumed", classifier.getParticlesConsumed());
+        classfierStatus.putNumber("classes", classifier.getClassIds().size());
+        status.putObject("classifier", classfierStatus);
+        return status.encode();
     }
 
     public String getResultsJSON() {
         // TODO Auto-generated method stub
-        return "";
+        JsonObject results = new JsonObject();
+        JsonObject classes = new JsonObject();
+        for (Long id : classifier.getClassIds()) {
+            classes.putNumber(id.toString(), classifier.getClass(id).size());
+        }
+        results.putObject("classes", classes);
+        return results.encode();
     }
 
     public UUID getUUID() {
