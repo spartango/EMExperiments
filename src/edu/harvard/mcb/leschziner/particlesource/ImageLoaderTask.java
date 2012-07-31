@@ -72,11 +72,6 @@ public class ImageLoaderTask extends DistributedProcessingTask {
 
                                                                   @Override public void
                                                                           handle(HttpClientResponse response) {
-                                                                      // Pump
-                                                                      // the
-                                                                      // body to
-                                                                      // the
-                                                                      // file
                                                                       Pump.createPump(response,
                                                                                       asyncFile.getWriteStream())
                                                                           .start();
