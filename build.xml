@@ -2,7 +2,7 @@
     <path id="project.class.path">
         <pathelement path="bin/"/>
         <pathelement path="lib/loci_tools.jar"/>
-        <pathelement path="lib/hazelcast-2.1.2.jar"/>
+        <pathelement path="lib/hazelcast-all-2.2.jar"/>
         <pathelement path="lib/javacpp.jar"/>
         <pathelement path="lib/javacv.jar"/>
         <pathelement path="lib/javacv-macosx-x86_64.jar"/>
