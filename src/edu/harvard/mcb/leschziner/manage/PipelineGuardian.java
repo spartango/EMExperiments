@@ -230,10 +230,12 @@ public class PipelineGuardian {
 
     private void initLoader(JsonArray images) {
         loader = new ImageLoader();
+        loaderCheckpoint = new Checkpoint();
         for (Object o : images) {
             // Hope this is a real string? else we'll choke later
             loader.addImagePath(o.toString());
         }
+        loaderCheckpoint.setExpectedCompletions(images.size());
     }
 
     public String getStatusJSON() {

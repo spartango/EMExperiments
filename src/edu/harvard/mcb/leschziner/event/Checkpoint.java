@@ -103,7 +103,7 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
             completions++;
             totalRuntime += completeEvent.getRunTime();
             totalOutput += completeEvent.getOutputCount();
-            if (completions >= expectedCompletions) {
+            if (expectedCompletions != 0 && completions >= expectedCompletions) {
                 onReached();
             }
         } else if (event instanceof ErrorEvent) {
