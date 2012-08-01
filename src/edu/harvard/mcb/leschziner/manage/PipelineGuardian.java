@@ -8,6 +8,8 @@ import org.vertx.java.core.json.JsonObject;
 
 import edu.harvard.mcb.leschziner.classify.DistributedClassifier;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
+import edu.harvard.mcb.leschziner.event.Checkpoint;
+import edu.harvard.mcb.leschziner.event.checkpoint.ClassifierLoadCheckpoint;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
@@ -28,11 +30,21 @@ import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 public class PipelineGuardian {
     private final UUID                uuid;
 
+    // Pipeline stages
+
     private ImageLoader               loader;
     private DistributedParticlePicker picker;
     private ParticleFilteringPipe     filter;
     private ParticleGeneratingPipe    generator;
     private DistributedClassifier     classifier;
+
+    // Checkpoints
+
+    private Checkpoint                loaderCheckpoint;
+    private Checkpoint                pickerCheckpoint;
+    private Checkpoint                filterCheckpoint;
+    private Checkpoint                generatorCheckpoint;
+    private ClassifierLoadCheckpoint  classifierCheckpoint;
 
     public PipelineGuardian() {
         uuid = UUID.randomUUID();
@@ -84,6 +96,10 @@ public class PipelineGuardian {
                                        + "]: Starting pipeline");
                     // Wire the pipes together
                     linkPipes();
+
+                    // Place the checkpoints between stages
+                    linkCheckpoints();
+
                     // Start the loader
                     loader.start();
                     return true;
@@ -97,6 +113,18 @@ public class PipelineGuardian {
         }
         return false;
 
+    }
+
+    private void linkCheckpoints() {
+        loaderCheckpoint.setEventSource(loader);
+        loaderCheckpoint.addDependent(pickerCheckpoint);
+        pickerCheckpoint.setEventSource(picker);
+        pickerCheckpoint.addDependent(filterCheckpoint);
+        filterCheckpoint.setEventSource(filter);
+        filterCheckpoint.addDependent(generatorCheckpoint);
+        generatorCheckpoint.setEventSource(generator);
+        generatorCheckpoint.addDependent(classifierCheckpoint);
+        classifierCheckpoint.setEventSource(classifier);
     }
 
     private void linkPipes() {
@@ -123,6 +151,7 @@ public class PipelineGuardian {
                                            pickerParams.getInteger("secondFilter"),
                                            pickerParams.getInteger("threshold"),
                                            pickerParams.getInteger("boxSize"));
+            pickerCheckpoint = new Checkpoint();
         }
 
     }
@@ -134,6 +163,7 @@ public class PipelineGuardian {
     private void initGeneratorPipe(JsonObject generationParams) {
         if (validateGeneratorParams(generationParams)) {
             generator = new ParticleGeneratingPipe();
+            generatorCheckpoint = new Checkpoint();
             // Rotation generator (if needed)
             double rotationAngle = generationParams.getNumber("rotationAngle")
                                                    .doubleValue();
@@ -164,7 +194,7 @@ public class PipelineGuardian {
     private void initFilterPipe(JsonObject filterParams) {
         if (validateFilterParams(filterParams)) {
             filter = new ParticleFilteringPipe();
-
+            filterCheckpoint = new Checkpoint();
             // Circular Mask
             filter.addStage(new CircularMask(filterParams.getInteger("maskSize")));
 
@@ -194,6 +224,7 @@ public class PipelineGuardian {
                                            classifierParams.getInteger("classCount"),
                                            classifierParams.getNumber("classAccuracy")
                                                            .doubleValue());
+            classifierCheckpoint = new ClassifierLoadCheckpoint(classifier);
         }
     }
 
@@ -206,33 +237,47 @@ public class PipelineGuardian {
     }
 
     public String getStatusJSON() {
-        // TODO Auto-generated method stub
         JsonObject status = new JsonObject();
 
         JsonObject loaderStatus = new JsonObject();
-        loaderStatus.putNumber("pending", loader.getPendingCount());
-        loaderStatus.putNumber("requests", loader.getTotalRequests());
+        loaderStatus.putNumber("completed", loaderCheckpoint.getCompletions());
+        loaderStatus.putNumber("rate", loaderCheckpoint.getCompletionRate());
+        loaderStatus.putNumber("errors", loaderCheckpoint.getErrorCount());
+        loaderStatus.putBoolean("done", loaderCheckpoint.isReached());
+
         status.putObject("loader", loaderStatus);
 
         JsonObject pickerStatus = new JsonObject();
-        pickerStatus.putNumber("pending", picker.getPendingCount());
-        pickerStatus.putNumber("requests", picker.getTotalRequests());
+        pickerStatus.putNumber("completed", pickerCheckpoint.getCompletions());
+        pickerStatus.putNumber("rate", pickerCheckpoint.getCompletionRate());
+        pickerStatus.putBoolean("done", pickerCheckpoint.isReached());
+
         status.putObject("picker", pickerStatus);
 
         JsonObject filterStatus = new JsonObject();
-        filterStatus.putNumber("pending", filter.getPendingCount());
-        filterStatus.putNumber("requests", filter.getTotalRequests());
+        filterStatus.putNumber("completed", filterCheckpoint.getCompletions());
+        filterStatus.putNumber("rate", filterCheckpoint.getCompletionRate());
+        filterStatus.putBoolean("done", filterCheckpoint.isReached());
+
         status.putObject("filter", filterStatus);
 
         JsonObject generatorStatus = new JsonObject();
-        generatorStatus.putNumber("pending", generator.getPendingCount());
-        generatorStatus.putNumber("requests", generator.getTotalRequests());
+        generatorStatus.putNumber("completed",
+                                  generatorCheckpoint.getCompletions());
+        generatorStatus.putNumber("rate",
+                                  generatorCheckpoint.getCompletionRate());
+        generatorStatus.putBoolean("done", generatorCheckpoint.isReached());
+
         status.putObject("generation", generatorStatus);
 
-        JsonObject classfierStatus = new JsonObject();
-        classfierStatus.putNumber("consumed", classifier.getParticlesConsumed());
-        classfierStatus.putNumber("classes", classifier.getClassIds().size());
-        status.putObject("classifier", classfierStatus);
+        JsonObject classifierStatus = new JsonObject();
+        classifierStatus.putNumber("completed",
+                                   classifierCheckpoint.getCompletions());
+        classifierStatus.putNumber("rate",
+                                   classifierCheckpoint.getCompletionRate());
+        classifierStatus.putBoolean("done", classifierCheckpoint.isReached());
+
+        status.putObject("classifier", classifierStatus);
         return status.encode();
     }
 

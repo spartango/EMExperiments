@@ -93,4 +93,8 @@ public class CrossCorClassifier extends DistributedClassifier {
         return templates.values();
     }
 
+    @Override public void classifyAll() {
+        // Doesn't do anything, due to streaming classification
+    }
+
 }

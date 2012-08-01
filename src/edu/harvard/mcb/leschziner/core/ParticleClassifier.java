@@ -19,4 +19,6 @@ public interface ParticleClassifier extends ParticleConsumer {
 
     public void processParticle(Particle target);
 
+    public void classifyAll();
+
 }

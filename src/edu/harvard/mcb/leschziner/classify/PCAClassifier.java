@@ -5,6 +5,8 @@ import java.util.concurrent.BlockingQueue;
 import edu.harvard.mcb.leschziner.analyze.CvPrincipalComponentAnalyzer;
 import edu.harvard.mcb.leschziner.analyze.KMeansClusterer;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
+import edu.harvard.mcb.leschziner.event.CompletionEvent;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class PCAClassifier extends DistributedClassifier {
@@ -34,9 +36,15 @@ public class PCAClassifier extends DistributedClassifier {
 
     @Override public void processParticle(Particle particle) {
         targets.add(particle);
+        DefaultStorageEngine.getStorageEngine()
+                            .getBufferedQueue(executorName
+                                              + DistributedProcessingTask.EVENT_SUFFIX)
+                            .add(new CompletionEvent(this.getClass().getName(),
+                                                     0,
+                                                     0));
     }
 
-    public void classifyAll() {
+    @Override public void classifyAll() {
         execute(new PCAClassifierTask(targetQueueName,
                                       pcAnalyzer,
                                       clusterer,

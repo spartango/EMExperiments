@@ -2,6 +2,8 @@ package edu.harvard.mcb.leschziner.distributed;
 
 import com.hazelcast.core.AtomicNumber;
 
+import edu.harvard.mcb.leschziner.event.BufferedQueue;
+import edu.harvard.mcb.leschziner.event.ProcessingEvent;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 /**
@@ -78,5 +80,11 @@ public abstract class DistributedTaskHandler {
 
     public long getTotalRequests() {
         return totalRequests.get();
+    }
+
+    public BufferedQueue<ProcessingEvent> getEventQueue() {
+        return DefaultStorageEngine.getStorageEngine()
+                                   .getBufferedQueue(executorName
+                                                     + DistributedProcessingTask.EVENT_SUFFIX);
     }
 }

@@ -32,6 +32,8 @@ public class GeneratingPipeTask extends ParticlePipeTask {
             generated = stage.generate(generated);
         }
         processedParticles.addAll(generated);
+
+        outputCount = generated.size();
     }
 
 }

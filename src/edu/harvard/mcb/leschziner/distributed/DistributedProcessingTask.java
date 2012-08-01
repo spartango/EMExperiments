@@ -18,6 +18,10 @@ public abstract class DistributedProcessingTask implements
     // SUFFIXES for counters of task activity
     public static final String PENDING_SUFFIX   = "_pending";
     public static final String ACTIVE_SUFFIX    = "_active";
+    public static final String EVENT_SUFFIX     = "_event";
+
+    // Number of objects produced by this task
+    protected long             outputCount      = 1;
 
     // Name of distributed executor which handles the task
     private final String       executorName;
@@ -78,7 +82,7 @@ public abstract class DistributedProcessingTask implements
     protected void markError(String error, int lineNumber) {
         System.err.println("Error on " + this + ": " + error);
         DefaultStorageEngine.getStorageEngine()
-                            .getBufferedQueue(executorName)
+                            .getBufferedQueue(executorName + EVENT_SUFFIX)
                             .add(new ErrorEvent(this.getClass().getName(),
                                                 error,
                                                 lineNumber));
@@ -94,7 +98,7 @@ public abstract class DistributedProcessingTask implements
         String errorString = error + ": " + e.getMessage();
         System.err.println(errorString);
         DefaultStorageEngine.getStorageEngine()
-                            .getBufferedQueue(executorName)
+                            .getBufferedQueue(executorName + EVENT_SUFFIX)
                             .add(new ErrorEvent(this.getClass().getName(),
                                                 errorString,
                                                 lineNumber,
@@ -111,8 +115,10 @@ public abstract class DistributedProcessingTask implements
         storage.getAtomicNumber(executorName + ACTIVE_SUFFIX).decrementAndGet();
 
         // Put an event on our event queue
-        storage.getBufferedQueue(executorName)
-               .add(new CompletionEvent(this.getClass().getName(), runtime));
+        storage.getBufferedQueue(executorName + EVENT_SUFFIX)
+               .add(new CompletionEvent(this.getClass().getName(),
+                                        runtime,
+                                        outputCount));
     }
 
 }
