@@ -277,8 +277,9 @@ public class PipelineGuardian {
                                    classifierCheckpoint.getCompletions());
         classifierStatus.putNumber("rate",
                                    classifierCheckpoint.getCompletionRate());
-        classifierStatus.putBoolean("done", classifierCheckpoint.isReached());
-
+        classifierStatus.putBoolean("ready", classifierCheckpoint.isReached());
+        classifierStatus.putBoolean("done",
+                                    classifierCheckpoint.hasClassified());
         status.putObject("classifier", classifierStatus);
         return status.encode();
     }
