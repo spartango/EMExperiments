@@ -1,6 +1,6 @@
 package edu.harvard.mcb.leschziner.analyze;
 
-import java.util.Vector;
+import java.util.Collection;
 
 import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
@@ -19,17 +19,18 @@ public class CvPrincipalComponentAnalyzer implements PrincipalComponentAnalyzer 
         this.principalComponentCount = principalComponentCount;
     }
 
-    @Override public PrincipalComponents analyze(Vector<Particle> targets) {
-        if (targets.size() > 0) {
-            int particleSize = targets.get(0).getSize();
+    @Override public PrincipalComponents analyze(Collection<Particle> targets) {
+        if (!targets.isEmpty()) {
+            int particleSize = targets.iterator().next().getSize();
             int particleArea = particleSize * particleSize;
             // Each row is an image, each column is a pixel
             CvMat targetMat = CvMat.create(targets.size(),
                                            particleArea,
                                            opencv_core.CV_32FC1);
+            int i = 0;
             // Reshape the targets for use in the matrix
-            for (int i = 0; i < targets.size(); i++) {
-                IplImage targetImage = targets.get(i).getImage();
+            for (Particle target : targets) {
+                IplImage targetImage = target.getImage();
                 // A single row containing all the pixels in the image
                 CvMat row = CvMat.createHeader(1,
                                                particleArea,
@@ -49,6 +50,7 @@ public class CvPrincipalComponentAnalyzer implements PrincipalComponentAnalyzer 
                 // Convert the image data row to 32 bit float, normalizing it to
                 // 0-1 scale
                 opencv_core.cvConvertScale(row, targetRow, 1 / 255.0, 0);
+                i++;
             }
 
             // Run PCA on the target matrix
