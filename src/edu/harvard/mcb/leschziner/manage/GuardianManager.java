@@ -71,7 +71,7 @@ public class GuardianManager {
         server.requestHandler(routeMatcher).listen(port);
     }
 
-    private void handleStatus(HttpServerRequest request) {
+    public void handleStatus(HttpServerRequest request) {
         HttpServerResponse response = request.response;
 
         String guardianId = request.params().get("uuid");
@@ -81,7 +81,7 @@ public class GuardianManager {
             return;
         }
 
-        PipelineGuardian guardian = guardians.get(UUID.fromString(guardianId));
+        PipelineGuardian guardian = getGuardians().get(UUID.fromString(guardianId));
 
         if (guardian == null) {
             response.statusCode = 404;
@@ -92,7 +92,7 @@ public class GuardianManager {
         response.end(guardian.getStatusJSON());
     }
 
-    private void handleResults(HttpServerRequest request) {
+    public void handleResults(HttpServerRequest request) {
         HttpServerResponse response = request.response;
 
         String guardianId = request.params().get("uuid");
@@ -102,7 +102,7 @@ public class GuardianManager {
             return;
         }
 
-        PipelineGuardian guardian = guardians.get(UUID.fromString(guardianId));
+        PipelineGuardian guardian = getGuardians().get(UUID.fromString(guardianId));
 
         if (guardian == null) {
             response.statusCode = 404;
@@ -113,7 +113,7 @@ public class GuardianManager {
         response.end(guardian.getResultsJSON());
     }
 
-    private void handleCreate(HttpServerRequest request) {
+    public void handleCreate(HttpServerRequest request) {
         final HttpServerResponse response = request.response;
 
         // Do something with it at the end
@@ -130,7 +130,7 @@ public class GuardianManager {
                 PipelineGuardian newGuardian = new PipelineGuardian();
                 if (newGuardian.initialize(bodyText)) {
                     // Give the client a guardian ID
-                    guardians.put(newGuardian.getUUID(), newGuardian);
+                    getGuardians().put(newGuardian.getUUID(), newGuardian);
                     response.end(newGuardian.getUUID().toString());
                 } else {
                     response.statusCode = 400;
@@ -143,5 +143,9 @@ public class GuardianManager {
 
     public void close() {
         server.close();
+    }
+
+    public Map<UUID, PipelineGuardian> getGuardians() {
+        return guardians;
     }
 }

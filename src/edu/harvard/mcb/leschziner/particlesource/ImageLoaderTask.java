@@ -6,8 +6,6 @@ import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
-import loci.formats.FormatException;
-
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.Handler;
@@ -22,11 +20,11 @@ import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class ImageLoaderTask extends DistributedProcessingTask {
-    private static final Vertx vertx = Vertx.newVertx();
+    public static final Vertx vertx = Vertx.newVertx();
 
-    private final String       targetPath;
-    private final String       imageQueueName;
-    private transient Boolean  completed;
+    private final String      targetPath;
+    private final String      imageQueueName;
+    public transient Boolean  completed;
 
     public ImageLoaderTask(String target,
                            String imageQueueName,
@@ -49,7 +47,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
 
         completed = false;
         try {
-            final URL url = new URL(targetPath);
+            final URL url = new URL(getTargetPath());
 
             final String filename = "download/" + UUID.randomUUID().toString();
 
@@ -63,7 +61,8 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                 final AsyncFile asyncFile = ar.result;
                                                 // Pump from the request
                                                 HttpClient client = vertx.createHttpClient()
-                                                                         .setPort(url.getPort() > 0 ? url.getPort()
+                                                                         .setPort(url.getPort() > 0
+                                                                                                   ? url.getPort()
                                                                                                    : url.getDefaultPort())
                                                                          .setHost(url.getHost())
                                                                          .setKeepAlive(false);
@@ -77,7 +76,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                    + "]: Loading Image from "
                                                                    + url.toString());
 
-                                                client.getNow(targetPath,
+                                                client.getNow(getTargetPath(),
                                                               new Handler<HttpClientResponse>() {
 
                                                                   @Override public void
@@ -95,8 +94,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                               try {
                                                                                   newParticle = Particle.fromFile(filename);
                                                                                   loadedImages.add(newParticle);
-                                                                              } catch (IOException
-                                                                                       | FormatException e) {
+                                                                              } catch (IOException e) {
                                                                                   markError("Could not read the downloaded image",
                                                                                             e);
                                                                               }
@@ -120,5 +118,9 @@ public class ImageLoaderTask extends DistributedProcessingTask {
             markError("Could not use URL because it is malformed", e);
         }
 
+    }
+
+    public String getTargetPath() {
+        return targetPath;
     }
 }

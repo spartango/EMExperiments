@@ -86,7 +86,7 @@ public abstract class DistributedProcessingTask implements
      * @param error
      * @param e
      */
-    protected void markError(String error, Exception e) {
+    public void markError(String error, Exception e) {
         // TODO Queue errors for aggregation
         System.err.println("Error on " + this + ": " + error + " with " + e);
     }

@@ -15,8 +15,6 @@ import java.util.Vector;
 
 import javax.imageio.ImageIO;
 
-import loci.formats.FormatException;
-
 import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
@@ -343,22 +341,21 @@ public class Particle implements Serializable, Cloneable {
         opencv_highgui.cvSaveImage(filename, image);
     }
 
-    /**
-     * Creates a new particle from an image file
-     * 
-     * @param filename
-     * @return new particle from image file
-     * @throws IOException
-     * @throws FormatException
-     */
-    public static Particle fromFile(String filename) throws IOException,
-                                                    FormatException {
-        return new Particle(AutoImageReader.readImage(filename));
+    public static Particle fromFile(String filename) throws IOException {
+        BufferedImage image = AutoImageReader.readImage(filename);
+        if (image == null) {
+            throw new IOException("Couldn't read image file: " + filename);
+        }
+        return new Particle(image);
     }
 
     public static Collection<Particle>
-            stackFromFile(String filename) throws FormatException, IOException {
+            stackFromFile(String filename) throws IOException {
         Collection<BufferedImage> images = AutoImageReader.readStack(filename);
+        if (images == null) {
+            throw new IOException("Couldn't read image stack: " + filename);
+        }
+
         Vector<Particle> particles = new Vector<>(images.size());
         for (BufferedImage image : images) {
             particles.add(new Particle(image));

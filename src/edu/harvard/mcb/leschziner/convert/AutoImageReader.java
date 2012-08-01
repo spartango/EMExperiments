@@ -11,37 +11,41 @@ import loci.formats.gui.BufferedImageReader;
 
 public class AutoImageReader {
 
-    public static Collection<BufferedImage>
-            readStack(String filename) throws FormatException, IOException {
-        ImageReader reader = new ImageReader();
-        reader.setId(filename);
+    public static Collection<BufferedImage> readStack(String filename) {
+        Vector<BufferedImage> images = null;
+        try (ImageReader reader = new ImageReader();
+             BufferedImageReader imageReader = new BufferedImageReader(reader)) {
+            reader.setId(filename);
 
-        BufferedImageReader imageReader = new BufferedImageReader(reader);
-        Vector<BufferedImage> images = new Vector<>(reader.getImageCount());
+            images = new Vector<>(reader.getImageCount());
 
-        for (int i = 0; i < reader.getImageCount(); i++) {
-            images.add(imageReader.openImage(0));
+            for (int i = 0; i < reader.getImageCount(); i++) {
+                images.add(imageReader.openImage(0));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (FormatException e) {
+            e.printStackTrace();
         }
-        imageReader.close();
-        reader.close();
-
         return images;
 
     }
 
-    public static BufferedImage
-            readImage(String filename) throws FormatException, IOException {
+    public static BufferedImage readImage(String filename) {
         BufferedImage image = null;
-        ImageReader reader = new ImageReader();
-        reader.setId(filename);
+        try (ImageReader reader = new ImageReader();
+             BufferedImageReader imageReader = new BufferedImageReader(reader)) {
+            reader.setId(filename);
 
-        BufferedImageReader imageReader = new BufferedImageReader(reader);
+            if (imageReader.getImageCount() > 0)
+                image = imageReader.openImage(0);
 
-        if (imageReader.getImageCount() > 0)
-            image = imageReader.openImage(0);
-
-        imageReader.close();
-        reader.close();
+        } catch (FormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return image;
     }
