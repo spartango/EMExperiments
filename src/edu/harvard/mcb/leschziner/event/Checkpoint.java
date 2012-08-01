@@ -119,12 +119,14 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
     public void onReached() {
         reached = true;
         System.out.println("["
-                           + this.getClass().getSimpleName()
-                           + "]: Reached Checkpoint "
-                           + this.completions
+                           + this
+                           + "]: Reached Checkpoint, producing "
+                           + totalOutput
+                           + " / "
+                           + expectedCompletions
                            + " at "
                            + getCompletionRate()
-                           + "/ms and "
+                           + "/ms with "
                            + getErrorCount()
                            + " errors");
         for (Checkpoint dependent : dependents) {

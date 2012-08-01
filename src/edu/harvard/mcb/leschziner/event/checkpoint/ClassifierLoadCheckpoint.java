@@ -13,6 +13,8 @@ public class ClassifierLoadCheckpoint extends Checkpoint {
     }
 
     @Override public void onReached() {
+        reached = true;
+        System.out.println("[" + this + "]: Classifying " + this.completions);
         classifier.classifyAll();
     }
 }

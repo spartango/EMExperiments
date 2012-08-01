@@ -38,6 +38,7 @@ public class DoGPickingTask extends DistributedPickingTask {
     }
 
     @Override public void process() {
+        outputCount = 0;
         BlockingQueue<Particle> particleQueue = DefaultStorageEngine.getStorageEngine()
                                                                     .getQueue(particleQueueName);
         System.out.println("["
@@ -74,9 +75,10 @@ public class DoGPickingTask extends DistributedPickingTask {
                                                         boxSize);
                 // Queue the particle
                 particleQueue.add(extracted);
-
+                outputCount += 1;
                 // Mark completed
             }
         }
+
     }
 }
