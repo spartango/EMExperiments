@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.hazelcast.core.AtomicNumber;
 import com.hazelcast.core.MultiMap;
 
+import edu.harvard.mcb.leschziner.event.BufferedQueue;
 import edu.harvard.mcb.leschziner.storage.localstorage.EventBlockingQueue;
 import edu.harvard.mcb.leschziner.storage.localstorage.HashMultiMap;
 import edu.harvard.mcb.leschziner.storage.localstorage.LocalAtomicNumber;
@@ -17,6 +18,7 @@ import edu.harvard.mcb.leschziner.storage.localstorage.LocalAtomicNumber;
 public class LocalMemStorage implements StorageEngine {
     private final Map<String, Map>           maps;
     private final Map<String, BlockingQueue> queues;
+    private final Map<String, BufferedQueue> bufferedQueues;
     private final Map<String, Set>           sets;
     private final Map<String, MultiMap>      multiMaps;
     private final Map<String, AtomicNumber>  atomicNumbers;
@@ -24,6 +26,7 @@ public class LocalMemStorage implements StorageEngine {
     public LocalMemStorage() {
         maps = new ConcurrentHashMap<String, Map>();
         queues = new ConcurrentHashMap<String, BlockingQueue>();
+        bufferedQueues = new ConcurrentHashMap<String, BufferedQueue>();
         sets = new ConcurrentHashMap<String, Set>();
         multiMaps = new ConcurrentHashMap<String, MultiMap>();
         atomicNumbers = new ConcurrentHashMap<String, AtomicNumber>();
@@ -86,6 +89,18 @@ public class LocalMemStorage implements StorageEngine {
             return newSet;
         } else {
             return sets.get(name);
+        }
+    }
+
+    @Override public <T> BufferedQueue<T> getBufferedQueue(String name) {
+        // Look the key up
+        if (!bufferedQueues.containsKey(name)) {
+            // If it doesnt exist, create a new one
+            BufferedQueue<T> newQueue = new BufferedQueue<>(name);
+            bufferedQueues.put(name, newQueue);
+            return newQueue;
+        } else {
+            return bufferedQueues.get(name);
         }
     }
 

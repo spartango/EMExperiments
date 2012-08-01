@@ -1,4 +1,5 @@
-package edu.harvard.mcb.leschziner.manage;
+package edu.harvard.mcb.leschziner.event;
+
 
 /**
  * Represents a point in a pipeline's progression, as measured by the posting of
@@ -8,5 +9,5 @@ package edu.harvard.mcb.leschziner.manage;
  * 
  */
 public abstract class Checkpoint {
-
+    // Fast queuing of events
 }

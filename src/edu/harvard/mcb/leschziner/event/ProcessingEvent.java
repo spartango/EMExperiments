@@ -1,4 +1,4 @@
-package edu.harvard.mcb.leschziner.manage;
+package edu.harvard.mcb.leschziner.event;
 
 /**
  * An event emitted by a processing stage when something notable occurs
