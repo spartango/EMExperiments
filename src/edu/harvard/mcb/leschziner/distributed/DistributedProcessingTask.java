@@ -2,6 +2,8 @@ package edu.harvard.mcb.leschziner.distributed;
 
 import java.io.Serializable;
 
+import edu.harvard.mcb.leschziner.event.CompletionEvent;
+import edu.harvard.mcb.leschziner.event.ErrorEvent;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
@@ -39,16 +41,14 @@ public abstract class DistributedProcessingTask implements
      * when it finishes
      */
     @Override public void run() {
+        long startTime = System.currentTimeMillis();
         try {
             process();
         } catch (Exception e) {
             // Sandbox the processing
-            markError(e.getClass().getSimpleName()
-                              + " Thrown: "
-                              + e.getMessage(),
-                      e);
+            markError("", e, 0);
         }
-        markComplete();
+        markComplete(System.currentTimeMillis() - startTime);
     }
 
     /**
@@ -75,9 +75,13 @@ public abstract class DistributedProcessingTask implements
      * 
      * @param error
      */
-    protected void markError(String error) {
-        // TODO Queue errors for aggregation
+    protected void markError(String error, int lineNumber) {
         System.err.println("Error on " + this + ": " + error);
+        DefaultStorageEngine.getStorageEngine()
+                            .getBufferedQueue(executorName)
+                            .add(new ErrorEvent(this.getClass().getName(),
+                                                error,
+                                                lineNumber));
     }
 
     /**
@@ -86,20 +90,29 @@ public abstract class DistributedProcessingTask implements
      * @param error
      * @param e
      */
-    public void markError(String error, Exception e) {
-        // TODO Queue errors for aggregation
-        System.err.println("Error on " + this + ": " + error + " with " + e);
+    public void markError(String error, Exception e, int lineNumber) {
+        String errorString = error + ": " + e.getMessage();
+        System.err.println(errorString);
+        DefaultStorageEngine.getStorageEngine()
+                            .getBufferedQueue(executorName)
+                            .add(new ErrorEvent(this.getClass().getName(),
+                                                errorString,
+                                                lineNumber,
+                                                e.getClass().getSimpleName()));
     }
 
     /**
      * Mark this task complete
      */
-    private void markComplete() {
-        // TODO send out event
+    private void markComplete(long runtime) {
         StorageEngine storage = DefaultStorageEngine.getStorageEngine();
         storage.getAtomicNumber(executorName + PENDING_SUFFIX)
                .decrementAndGet();
         storage.getAtomicNumber(executorName + ACTIVE_SUFFIX).decrementAndGet();
+
+        // Put an event on our event queue
+        storage.getBufferedQueue(executorName)
+               .add(new CompletionEvent(this.getClass().getName(), runtime));
     }
 
 }

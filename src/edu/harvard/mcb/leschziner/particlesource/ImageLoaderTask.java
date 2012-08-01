@@ -61,8 +61,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                 final AsyncFile asyncFile = ar.result;
                                                 // Pump from the request
                                                 HttpClient client = vertx.createHttpClient()
-                                                                         .setPort(url.getPort() > 0
-                                                                                                   ? url.getPort()
+                                                                         .setPort(url.getPort() > 0 ? url.getPort()
                                                                                                    : url.getDefaultPort())
                                                                          .setHost(url.getHost())
                                                                          .setKeepAlive(false);
@@ -96,7 +95,8 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                                                                                   loadedImages.add(newParticle);
                                                                               } catch (IOException e) {
                                                                                   markError("Could not read the downloaded image",
-                                                                                            e);
+                                                                                            e,
+                                                                                            99);
                                                                               }
                                                                               completed = true;
                                                                           }
@@ -115,7 +115,7 @@ public class ImageLoaderTask extends DistributedProcessingTask {
                 Thread.sleep(POLL_TIME);
             }
         } catch (MalformedURLException | InterruptedException e) {
-            markError("Could not use URL because it is malformed", e);
+            markError("Could not use URL because it is malformed", e, 118);
         }
 
     }
