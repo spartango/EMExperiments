@@ -42,6 +42,7 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
 
     public void setExpectedCompletions(long expectedCompletions) {
         this.expectedCompletions = expectedCompletions;
+        checkReached();
     }
 
     public long getCompletions() {
@@ -103,9 +104,7 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
             completions++;
             totalRuntime += completeEvent.getRunTime();
             totalOutput += completeEvent.getOutputCount();
-            if (expectedCompletions != 0 && completions >= expectedCompletions) {
-                onReached();
-            }
+            checkReached();
         } else if (event instanceof ErrorEvent) {
             // Save this event
             errors.add((ErrorEvent) event);
@@ -144,5 +143,13 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
 
     public boolean isReached() {
         return reached;
+    }
+
+    private synchronized void checkReached() {
+        if (!reached
+            && expectedCompletions != 0
+            && completions >= expectedCompletions) {
+            onReached();
+        }
     }
 }
