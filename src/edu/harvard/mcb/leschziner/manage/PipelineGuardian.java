@@ -275,6 +275,8 @@ public class PipelineGuardian {
         JsonObject classifierStatus = new JsonObject();
         classifierStatus.putNumber("completed",
                                    classifierCheckpoint.getCompletions());
+        classifierStatus.putNumber("expected",
+                                   classifierCheckpoint.getExpectedCompletions());
         classifierStatus.putNumber("rate",
                                    classifierCheckpoint.getCompletionRate());
         classifierStatus.putBoolean("ready", classifierCheckpoint.isReached());

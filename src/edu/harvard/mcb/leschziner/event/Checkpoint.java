@@ -78,7 +78,7 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
 
     public double getCompletionRate() {
         if (totalRuntime > 0)
-            return (double) (completions) / totalRuntime;
+            return 1000.0 * completions / totalRuntime;
         else
             return 0;
     }
