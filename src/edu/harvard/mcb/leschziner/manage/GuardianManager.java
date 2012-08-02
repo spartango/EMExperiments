@@ -60,6 +60,13 @@ public class GuardianManager {
                                  handleResults(arg0);
                              }
                          });
+        routeMatcher.post("/pipeline/:uuid/destroy",
+                          new Handler<HttpServerRequest>() {
+                              @Override public void
+                                      handle(HttpServerRequest arg0) {
+                                  handleDestroy(arg0);
+                              }
+                          });
         routeMatcher.post("/pipeline/create", new Handler<HttpServerRequest>() {
             @Override public void handle(HttpServerRequest arg0) {
                 handleCreate(arg0);
@@ -111,6 +118,26 @@ public class GuardianManager {
         }
 
         response.end(guardian.getResultsJSON());
+    }
+
+    public void handleDestroy(HttpServerRequest request) {
+        HttpServerResponse response = request.response;
+        String guardianId = request.params().get("uuid");
+        if (guardianId == null) {
+            response.statusCode = 400;
+            response.end();
+            return;
+        }
+        UUID gid = UUID.fromString(guardianId);
+        PipelineGuardian guardian = getGuardians().get(gid);
+        if (guardian == null) {
+            response.statusCode = 404;
+            response.end();
+            return;
+        }
+        guardian.destroy();
+        guardians.remove(gid);
+        response.end();
     }
 
     public void handleCreate(HttpServerRequest request) {

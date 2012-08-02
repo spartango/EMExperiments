@@ -232,7 +232,7 @@ public class PipelineGuardian {
             classifierCheckpoint = new ClassifierLoadCheckpoint(classifier);
             uploader = new ClassUploader(classifier, "EMPApp", this.getUUID()
                                                                    .toString());
-            uploadCheckpoint = new ClassifierRunCheckpoint(uploader);
+            uploadCheckpoint = new ClassifierRunCheckpoint(uploader, classifier);
         }
     }
 
@@ -325,6 +325,11 @@ public class PipelineGuardian {
                && filter != null
                && generator != null
                && classifier != null;
+    }
+
+    public void destroy() {
+        // TODO Auto-generated method stub
+
     }
 
 }

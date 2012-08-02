@@ -67,4 +67,8 @@ public abstract class DistributedClassifier extends DistributedParticleConsumer 
         return classes.keySet();
     }
 
+    public void clearClasses() {
+        classAverages.clear();
+        classes.clear();
+    }
 }
