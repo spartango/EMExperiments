@@ -4,6 +4,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -512,5 +513,11 @@ public class Particle implements Serializable, Cloneable {
         IplImage dst = IplImage.createCompatible(firstParticle.image);
         opencv_core.cvSub(firstParticle.image, secondParticle.image, dst, null);
         return new Particle(dst);
+    }
+
+    public byte[] toPng() throws IOException {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        ImageIO.write(image.getBufferedImage(), "png", outStream);
+        return outStream.toByteArray();
     }
 }

@@ -1,4 +1,4 @@
-package edu.harvard.mcb.leschziner.particlesource;
+package edu.harvard.mcb.leschziner.load;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,14 +19,14 @@ import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.distributed.DistributedProcessingTask;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
-public class ImageLoaderTask extends DistributedProcessingTask {
+public class ImageDownloaderTask extends DistributedProcessingTask {
     public static final Vertx vertx = Vertx.newVertx();
 
     private final String      targetPath;
     private final String      imageQueueName;
     public transient Boolean  completed;
 
-    public ImageLoaderTask(String target,
+    public ImageDownloaderTask(String target,
                            String imageQueueName,
                            String executorName) {
         super(executorName);

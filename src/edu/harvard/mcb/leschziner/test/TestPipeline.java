@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.core.Particle;
+import edu.harvard.mcb.leschziner.load.ImageDownloader;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.Cropper;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
 import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
-import edu.harvard.mcb.leschziner.particlesource.ImageLoader;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 
@@ -18,7 +18,7 @@ public class TestPipeline {
 
     public static final int               POLL_RATE = 2000; // ms
 
-    private static ImageLoader            loader;
+    private static ImageDownloader            loader;
     private static DoGParticlePicker      picker;
     private static ParticleFilteringPipe  processor;
     private static ParticleGeneratingPipe generator;
@@ -54,7 +54,7 @@ public class TestPipeline {
         System.out.println("[Main]: Preparing pipeline");
 
         // Setup the image Loader
-        loader = new ImageLoader();
+        loader = new ImageDownloader();
 
         // Setup the Particle picker
         picker = new DoGParticlePicker(80, 20, 45, 71, 120, 200);

@@ -1,4 +1,4 @@
-package edu.harvard.mcb.leschziner.particlesource;
+package edu.harvard.mcb.leschziner.load;
 
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
@@ -8,7 +8,7 @@ import edu.harvard.mcb.leschziner.core.ParticleSource;
 import edu.harvard.mcb.leschziner.distributed.DistributedTaskHandler;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
-public class ImageLoader extends DistributedTaskHandler implements
+public class ImageDownloader extends DistributedTaskHandler implements
                                                        ParticleSource {
     private final Vector<String>            imagePaths;
 
@@ -16,7 +16,7 @@ public class ImageLoader extends DistributedTaskHandler implements
     protected final String                  imageQueueName;
     protected final BlockingQueue<Particle> loadedImages;
 
-    public ImageLoader() {
+    public ImageDownloader() {
         super();
         imagePaths = new Vector<>();
 
@@ -32,7 +32,7 @@ public class ImageLoader extends DistributedTaskHandler implements
 
     public void start() {
         for (String path : imagePaths) {
-            execute(new ImageLoaderTask(path, imageQueueName, executorName));
+            execute(new ImageDownloaderTask(path, imageQueueName, executorName));
         }
     }
 

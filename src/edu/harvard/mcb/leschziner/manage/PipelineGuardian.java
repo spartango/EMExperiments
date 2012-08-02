@@ -10,6 +10,9 @@ import edu.harvard.mcb.leschziner.classify.DistributedClassifier;
 import edu.harvard.mcb.leschziner.classify.PCAClassifier;
 import edu.harvard.mcb.leschziner.event.Checkpoint;
 import edu.harvard.mcb.leschziner.event.checkpoint.ClassifierLoadCheckpoint;
+import edu.harvard.mcb.leschziner.event.checkpoint.ClassifierRunCheckpoint;
+import edu.harvard.mcb.leschziner.load.ClassUploader;
+import edu.harvard.mcb.leschziner.load.ImageDownloader;
 import edu.harvard.mcb.leschziner.particlefilter.Binner;
 import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
 import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
@@ -17,7 +20,6 @@ import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
 import edu.harvard.mcb.leschziner.particlegenerator.ShiftGenerator;
 import edu.harvard.mcb.leschziner.particlesource.DistributedParticlePicker;
 import edu.harvard.mcb.leschziner.particlesource.DoGParticlePicker;
-import edu.harvard.mcb.leschziner.particlesource.ImageLoader;
 import edu.harvard.mcb.leschziner.pipe.ParticleFilteringPipe;
 import edu.harvard.mcb.leschziner.pipe.ParticleGeneratingPipe;
 
@@ -32,19 +34,20 @@ public class PipelineGuardian {
 
     // Pipeline stages
 
-    private ImageLoader               loader;
+    private ImageDownloader           downloader;
     private DistributedParticlePicker picker;
     private ParticleFilteringPipe     filter;
     private ParticleGeneratingPipe    generator;
     private DistributedClassifier     classifier;
+    private ClassUploader             uploader;
 
     // Checkpoints
-
     private Checkpoint                loaderCheckpoint;
     private Checkpoint                pickerCheckpoint;
     private Checkpoint                filterCheckpoint;
     private Checkpoint                generatorCheckpoint;
     private ClassifierLoadCheckpoint  classifierCheckpoint;
+    private ClassifierRunCheckpoint   uploadCheckpoint;
 
     public PipelineGuardian() {
         uuid = UUID.randomUUID();
@@ -101,7 +104,7 @@ public class PipelineGuardian {
                     linkCheckpoints();
 
                     // Start the loader
-                    loader.start();
+                    downloader.start();
                     return true;
                 }
 
@@ -116,7 +119,7 @@ public class PipelineGuardian {
     }
 
     private void linkCheckpoints() {
-        loaderCheckpoint.setEventSource(loader);
+        loaderCheckpoint.setEventSource(downloader);
         loaderCheckpoint.addDependent(pickerCheckpoint);
         pickerCheckpoint.setEventSource(picker);
         pickerCheckpoint.addDependent(filterCheckpoint);
@@ -128,7 +131,7 @@ public class PipelineGuardian {
     }
 
     private void linkPipes() {
-        picker.addParticleSource(loader);
+        picker.addParticleSource(downloader);
         filter.addParticleSource(picker);
         generator.addParticleSource(filter);
         classifier.addParticleSource(generator);
@@ -225,15 +228,18 @@ public class PipelineGuardian {
                                            classifierParams.getNumber("classAccuracy")
                                                            .doubleValue());
             classifierCheckpoint = new ClassifierLoadCheckpoint(classifier);
+            uploader = new ClassUploader(classifier, "EMPApp");
+            uploadCheckpoint = new ClassifierRunCheckpoint(uploader);
+            classifierCheckpoint.setNextCheckpoint(uploadCheckpoint);
         }
     }
 
     private void initLoader(JsonArray images) {
-        loader = new ImageLoader();
+        downloader = new ImageDownloader();
         loaderCheckpoint = new Checkpoint();
         for (Object o : images) {
             // Hope this is a real string? else we'll choke later
-            loader.addImagePath(o.toString());
+            downloader.addImagePath(o.toString());
         }
         loaderCheckpoint.setExpectedCompletions(images.size());
     }
@@ -281,20 +287,16 @@ public class PipelineGuardian {
                                    classifierCheckpoint.getCompletionRate());
         classifierStatus.putBoolean("ready", classifierCheckpoint.isReached());
         classifierStatus.putBoolean("done",
-                                    classifierCheckpoint.hasClassified());
+                                    classifierCheckpoint.isClassifying());
         status.putObject("classifier", classifierStatus);
         return status.encode();
     }
 
     public String getResultsJSON() {
-        // TODO Auto-generated method stub
-        JsonObject results = new JsonObject();
-        JsonObject classes = new JsonObject();
-        for (Long id : classifier.getClassIds()) {
-            classes.putNumber(id.toString(), classifier.getClass(id).size());
-        }
-        results.putObject("classes", classes);
-        return results.encode();
+        if (uploadCheckpoint.hasUploaded())
+            return uploader.getResultsJson();
+        else
+            return "{}";
     }
 
     public UUID getUUID() {
@@ -310,7 +312,7 @@ public class PipelineGuardian {
     }
 
     private boolean pipelineBuilt() {
-        return loader != null
+        return downloader != null
                && picker != null
                && filter != null
                && generator != null

@@ -14,6 +14,11 @@
     	<pathelement path="lib/netty-3.5.0.Final.jar"/>
     	<pathelement path="lib/jackson-mapper-asl-1.9.4.jar"/>
     	<pathelement path="lib/jackson-core-asl-1.9.4.jar"/>
+    	<pathelement path="lib/commons-codec-1.4.jar"/>
+    	<pathelement path="lib/commons-logging-1.1.1.jar"/>
+    	<pathelement path="lib/httpclient-4.1.2.jar"/>
+    	<pathelement path="lib/httpcore-4.1.2.jar"/>
+    	<pathelement path="lib/java-xmlbuilder-0.4.jar"/>
     </path>
 
     <target name="clearresults">

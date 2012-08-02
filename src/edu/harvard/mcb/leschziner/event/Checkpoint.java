@@ -120,7 +120,7 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
         System.out.println("["
                            + this
                            + "]: Reached Checkpoint, producing "
-                           + totalOutput
+                           + completions
                            + " / "
                            + expectedCompletions
                            + " at "
@@ -128,8 +128,12 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
                            + "/ms with "
                            + getErrorCount()
                            + " errors");
+        setDependentExpectations(totalOutput);
+    }
+
+    protected void setDependentExpectations(long output) {
         for (Checkpoint dependent : dependents) {
-            dependent.setExpectedCompletions(totalOutput);
+            dependent.setExpectedCompletions(output);
         }
     }
 
@@ -145,10 +149,14 @@ public class Checkpoint implements ItemListener<ProcessingEvent> {
         return reached;
     }
 
+    protected boolean checkConditions() {
+        return !reached
+               && expectedCompletions != 0
+               && completions >= expectedCompletions;
+    }
+
     private synchronized void checkReached() {
-        if (!reached
-            && expectedCompletions != 0
-            && completions >= expectedCompletions) {
+        if (checkConditions()) {
             onReached();
         }
     }
