@@ -250,43 +250,49 @@ public class PipelineGuardian {
         JsonObject status = new JsonObject();
 
         JsonObject loaderStatus = new JsonObject();
-        loaderStatus.putNumber("completed", loaderCheckpoint.getCompletions());
-        loaderStatus.putNumber("rate", loaderCheckpoint.getCompletionRate());
+        loaderStatus.putNumber("progress", loaderCheckpoint.getCompletions());
+        loaderStatus.putNumber("expected",
+                               loaderCheckpoint.getExpectedCompletions());
         loaderStatus.putNumber("errors", loaderCheckpoint.getErrorCount());
         loaderStatus.putBoolean("done", loaderCheckpoint.isReached());
 
         status.putObject("loader", loaderStatus);
 
         JsonObject pickerStatus = new JsonObject();
-        pickerStatus.putNumber("completed", pickerCheckpoint.getCompletions());
-        pickerStatus.putNumber("rate", pickerCheckpoint.getCompletionRate());
+        pickerStatus.putNumber("progress", pickerCheckpoint.getCompletions());
+        pickerStatus.putNumber("expected",
+                               pickerCheckpoint.getExpectedCompletions());
+        pickerStatus.putNumber("errors", pickerCheckpoint.getErrorCount());
         pickerStatus.putBoolean("done", pickerCheckpoint.isReached());
 
         status.putObject("picker", pickerStatus);
 
         JsonObject filterStatus = new JsonObject();
-        filterStatus.putNumber("completed", filterCheckpoint.getCompletions());
-        filterStatus.putNumber("rate", filterCheckpoint.getCompletionRate());
+        filterStatus.putNumber("progress", filterCheckpoint.getCompletions());
+        filterStatus.putNumber("expected",
+                               filterCheckpoint.getExpectedCompletions());
+        filterStatus.putNumber("errors", filterCheckpoint.getErrorCount());
         filterStatus.putBoolean("done", filterCheckpoint.isReached());
 
         status.putObject("filter", filterStatus);
 
         JsonObject generatorStatus = new JsonObject();
-        generatorStatus.putNumber("completed",
+        generatorStatus.putNumber("progress",
                                   generatorCheckpoint.getCompletions());
-        generatorStatus.putNumber("rate",
-                                  generatorCheckpoint.getCompletionRate());
+        generatorStatus.putNumber("expected",
+                                  generatorCheckpoint.getExpectedCompletions());
+        generatorStatus.putNumber("errors", generatorCheckpoint.getErrorCount());
         generatorStatus.putBoolean("done", generatorCheckpoint.isReached());
 
         status.putObject("generation", generatorStatus);
 
         JsonObject classifierStatus = new JsonObject();
-        classifierStatus.putNumber("completed",
+        classifierStatus.putNumber("progress",
                                    classifierCheckpoint.getCompletions());
         classifierStatus.putNumber("expected",
                                    classifierCheckpoint.getExpectedCompletions());
-        classifierStatus.putNumber("rate",
-                                   classifierCheckpoint.getCompletionRate());
+        classifierStatus.putNumber("errors",
+                                   classifierCheckpoint.getErrorCount());
         classifierStatus.putBoolean("loaded", classifierCheckpoint.isReached());
         classifierStatus.putBoolean("classified", uploadCheckpoint.isReached());
         classifierStatus.putBoolean("uploaded", uploadCheckpoint.hasUploaded());
