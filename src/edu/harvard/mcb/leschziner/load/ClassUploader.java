@@ -23,6 +23,7 @@ public class ClassUploader {
     private final ParticleClassifier     classifier;
 
     private final String                 targetBucket;
+    private final String                 pipelineId;
     private final String                 classMapName;
     private final MultiMap<Long, String> uploadedClasses;
     private final String                 averageMapName;
@@ -30,7 +31,9 @@ public class ClassUploader {
 
     private S3Service                    s3Service;
 
-    public ClassUploader(ParticleClassifier classifier, String bucket) {
+    public ClassUploader(ParticleClassifier classifier,
+                         String bucket,
+                         String pipelineId) {
         super();
         this.classifier = classifier;
         classMapName = "UploadedClasses_" + this.hashCode();
@@ -40,6 +43,8 @@ public class ClassUploader {
         uploadedAverages = DefaultStorageEngine.getStorageEngine()
                                                .getMap(averageMapName);
         targetBucket = bucket;
+        this.pipelineId = pipelineId;
+
         initS3Connection();
     }
 
@@ -94,7 +99,7 @@ public class ClassUploader {
 
         // Prep the particle for putting
         try {
-            String filename = uuid.toString() + ".png";
+            String filename = pipelineId + "/" + uuid.toString() + ".png";
             String url = "https://s3.amazonaws.com/"
                          + targetBucket
                          + "/"
@@ -140,6 +145,7 @@ public class ClassUploader {
             }
             classResults.putArray("particles", classParticles);
             classResults.putString("average", uploadedAverages.get(classId));
+            classResults.putNumber("count", uploadedClasses.get(classId).size());
             results.putObject(classId.toString(), classResults);
         }
 

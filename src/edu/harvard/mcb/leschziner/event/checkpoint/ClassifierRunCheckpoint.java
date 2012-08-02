@@ -18,6 +18,8 @@ public class ClassifierRunCheckpoint extends Checkpoint {
         System.out.println("[" + this + "]: Uploading Classes");
         uploader.uploadAll();
         uploaded = true;
+        System.out.println("[" + this + "]: Upload complete");
+
     }
 
     public boolean hasUploaded() {

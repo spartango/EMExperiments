@@ -6,7 +6,6 @@ import edu.harvard.mcb.leschziner.event.Checkpoint;
 public class ClassifierLoadCheckpoint extends Checkpoint {
 
     protected DistributedClassifier classifier;
-    protected Checkpoint            runCheckpoint;
     protected boolean               classifying;
 
     public ClassifierLoadCheckpoint(DistributedClassifier classifier) {
@@ -18,12 +17,7 @@ public class ClassifierLoadCheckpoint extends Checkpoint {
     @Override public void onReached() {
         reached = true;
         setDependentExpectations(1);
-
-        if (runCheckpoint != null) {
-            // Tell the run checkpoint to start listening for completion events
-            runCheckpoint.setEventSource(classifier);
-        }
-
+        classifier.getEventQueue().removeItemListener(this);
         System.out.println("[" + this + "]: Classifying " + this.completions);
         // Start the classification
         classifier.classifyAll();
@@ -35,7 +29,4 @@ public class ClassifierLoadCheckpoint extends Checkpoint {
         return classifying;
     }
 
-    public void setNextCheckpoint(Checkpoint runCheckpoint) {
-        this.runCheckpoint = runCheckpoint;
-    }
 }

@@ -128,6 +128,8 @@ public class PipelineGuardian {
         generatorCheckpoint.setEventSource(generator);
         generatorCheckpoint.addDependent(classifierCheckpoint);
         classifierCheckpoint.setEventSource(classifier);
+        classifierCheckpoint.addDependent(uploadCheckpoint);
+        uploadCheckpoint.setEventSource(classifier);
     }
 
     private void linkPipes() {
@@ -228,9 +230,9 @@ public class PipelineGuardian {
                                            classifierParams.getNumber("classAccuracy")
                                                            .doubleValue());
             classifierCheckpoint = new ClassifierLoadCheckpoint(classifier);
-            uploader = new ClassUploader(classifier, "EMPApp");
+            uploader = new ClassUploader(classifier, "EMPApp", this.getUUID()
+                                                                   .toString());
             uploadCheckpoint = new ClassifierRunCheckpoint(uploader);
-            classifierCheckpoint.setNextCheckpoint(uploadCheckpoint);
         }
     }
 
@@ -285,9 +287,9 @@ public class PipelineGuardian {
                                    classifierCheckpoint.getExpectedCompletions());
         classifierStatus.putNumber("rate",
                                    classifierCheckpoint.getCompletionRate());
-        classifierStatus.putBoolean("ready", classifierCheckpoint.isReached());
-        classifierStatus.putBoolean("done",
-                                    classifierCheckpoint.isClassifying());
+        classifierStatus.putBoolean("loaded", classifierCheckpoint.isReached());
+        classifierStatus.putBoolean("classified", uploadCheckpoint.isReached());
+        classifierStatus.putBoolean("uploaded", uploadCheckpoint.hasUploaded());
         status.putObject("classifier", classifierStatus);
         return status.encode();
     }
