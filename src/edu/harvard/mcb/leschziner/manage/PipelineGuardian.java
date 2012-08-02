@@ -329,7 +329,7 @@ public class PipelineGuardian {
 
     public void destroy() {
         // TODO Auto-generated method stub
-
+        classifier.clearClasses();
     }
 
 }
