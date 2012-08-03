@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Vector;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
+import org.jets3t.service.model.StorageObject;
+import org.jets3t.service.multi.SimpleThreadedStorageService;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
@@ -65,32 +69,66 @@ public class ClassUploader {
         if (s3Service == null && !initS3Connection()) {
             return;
         }
-
+        SimpleThreadedStorageService simpleMulti = new SimpleThreadedStorageService(s3Service);
+        Vector<S3Object> averageObjects = new Vector<S3Object>(classifier.getClassIds()
+                                                                         .size());
         // For each class
         for (Long classId : classifier.getClassIds()) {
             System.out.println("["
                                + this.getClass().getSimpleName()
                                + "]: Uploading class "
                                + classId);
-            // Upload each of the particles
-            for (Particle target : classifier.getClass(classId)) {
-                String url = s3Put(target);
-                if (url != null) {
-                    uploadedClasses.put(classId, url);
-                }
-            }
-            // Upload the class average
-            String averageUrl = s3Put(classifier.getClassAverage(classId));
-            if (averageUrl != null) {
-                uploadedAverages.put(classId, averageUrl);
+
+            UUID uuid = UUID.randomUUID();
+
+            // Prep the class average
+            String filename = pipelineId + "/" + uuid.toString() + ".png";
+            String url = "https://s3.amazonaws.com/"
+                         + targetBucket
+                         + "/"
+                         + filename;
+            S3Object object;
+            try {
+                object = new S3Object(filename,
+                                      classifier.getClassAverage(classId)
+                                                .toPng());
+                averageObjects.add(object);
+
+                uploadedAverages.put(classId, url);
                 System.out.println("["
                                    + this.getClass().getSimpleName()
                                    + "]: Put average, "
-                                   + averageUrl
+                                   + url
                                    + " in S3");
+            } catch (NoSuchAlgorithmException | IOException e) {
+                e.printStackTrace();
             }
+
+        }
+        try {
+            StorageObject[] createdObjects = simpleMulti.putObjects(targetBucket,
+                                                                    averageObjects.toArray(new S3Object[averageObjects.size()]));
+        } catch (ServiceException e) {
+            e.printStackTrace();
         }
 
+        for (Long classId : classifier.getClassIds()) {
+            // Write the particles to disk in their own directory
+            String folder = "upload/" + classId + "/";
+            for (Particle target : classifier.getClass(classId)) {
+                UUID uuid = UUID.randomUUID();
+                try {
+                    target.toFile(folder + uuid);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Zip the directory
+            // Upload the zip
+            // Remove the directory
+            // Upload each of the particles
+
+        }
     }
 
     private String s3Put(Particle target) {
