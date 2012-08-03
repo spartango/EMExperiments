@@ -295,7 +295,7 @@ public class PipelineGuardian {
                                    classifierCheckpoint.getErrorCount());
         classifierStatus.putBoolean("loaded", classifierCheckpoint.isReached());
         classifierStatus.putBoolean("classified", uploadCheckpoint.isReached());
-        classifierStatus.putBoolean("uploaded", uploadCheckpoint.hasUploaded());
+        classifierStatus.putBoolean("done", uploadCheckpoint.hasUploaded());
         status.putObject("classifier", classifierStatus);
         return status.encode();
     }
@@ -304,7 +304,7 @@ public class PipelineGuardian {
         if (uploadCheckpoint.hasUploaded())
             return uploader.getResultsJson();
         else
-            return "{}";
+            return null;
     }
 
     public UUID getUUID() {

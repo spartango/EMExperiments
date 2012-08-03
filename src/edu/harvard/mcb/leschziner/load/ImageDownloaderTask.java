@@ -27,8 +27,8 @@ public class ImageDownloaderTask extends DistributedProcessingTask {
     public transient Boolean  completed;
 
     public ImageDownloaderTask(String target,
-                           String imageQueueName,
-                           String executorName) {
+                               String imageQueueName,
+                               String executorName) {
         super(executorName);
         this.targetPath = target;
         this.imageQueueName = imageQueueName;
@@ -92,6 +92,12 @@ public class ImageDownloaderTask extends DistributedProcessingTask {
                                                                               Particle newParticle;
                                                                               try {
                                                                                   newParticle = Particle.fromFile(filename);
+                                                                                  // Cleanup
+                                                                                  // the
+                                                                                  // file
+                                                                                  vertx.fileSystem()
+                                                                                       .delete(filename,
+                                                                                               null);
                                                                                   loadedImages.add(newParticle);
                                                                               } catch (IOException e) {
                                                                                   markError("Could not read the downloaded image",

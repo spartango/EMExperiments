@@ -117,7 +117,13 @@ public class GuardianManager {
             return;
         }
 
-        response.end(guardian.getResultsJSON());
+        String results = guardian.getResultsJSON();
+        if (results == null) {
+            response.statusCode = 403;
+            response.end("{}");
+            return;
+        }
+        response.end(results);
     }
 
     public void handleDestroy(HttpServerRequest request) {

@@ -18,7 +18,7 @@ public class TestPipeline {
 
     public static final int               POLL_RATE = 2000; // ms
 
-    private static ImageDownloader            loader;
+    private static ImageDownloader        loader;
     private static DoGParticlePicker      picker;
     private static ParticleFilteringPipe  processor;
     private static ParticleGeneratingPipe generator;
