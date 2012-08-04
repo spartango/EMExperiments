@@ -1,17 +1,21 @@
 package edu.harvard.mcb.leschziner.load;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
-import org.jets3t.service.model.StorageObject;
 import org.jets3t.service.multi.SimpleThreadedStorageService;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -70,8 +74,8 @@ public class ClassUploader {
             return;
         }
         SimpleThreadedStorageService simpleMulti = new SimpleThreadedStorageService(s3Service);
-        Vector<S3Object> averageObjects = new Vector<S3Object>(classifier.getClassIds()
-                                                                         .size());
+        Vector<S3Object> objects = new Vector<S3Object>(classifier.getClassIds()
+                                                                  .size());
         // For each class
         for (Long classId : classifier.getClassIds()) {
             System.out.println("["
@@ -92,7 +96,7 @@ public class ClassUploader {
                 object = new S3Object(filename,
                                       classifier.getClassAverage(classId)
                                                 .toPng());
-                averageObjects.add(object);
+                objects.add(object);
 
                 uploadedAverages.put(classId, url);
                 System.out.println("["
@@ -106,28 +110,58 @@ public class ClassUploader {
 
         }
         try {
-            StorageObject[] createdObjects = simpleMulti.putObjects(targetBucket,
-                                                                    averageObjects.toArray(new S3Object[averageObjects.size()]));
+            simpleMulti.putObjects(targetBucket,
+                                   objects.toArray(new S3Object[objects.size()]));
         } catch (ServiceException e) {
             e.printStackTrace();
         }
 
+        // Reuse the vector
+        objects.clear();
+        Vector<File> tempFiles = new Vector<>();
         for (Long classId : classifier.getClassIds()) {
-            // Write the particles to disk in their own directory
-            String folder = "upload/" + classId + "/";
-            for (Particle target : classifier.getClass(classId)) {
-                UUID uuid = UUID.randomUUID();
-                try {
-                    target.toFile(folder + uuid);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            // Zip the directory
-            // Upload the zip
-            // Remove the directory
-            // Upload each of the particles
+            String filename = "download/" + classId + ".zip";
+            File zipFile = new File(filename);
+            try (OutputStream buffer = new FileOutputStream(zipFile);
+                 ZipOutputStream zos = new ZipOutputStream(buffer)) {
+                for (Particle target : classifier.getClass(classId)) {
 
+                    UUID uuid = UUID.randomUUID();
+                    String path = classId + "/" + uuid + ".png";
+
+                    ZipEntry zipEntry = new ZipEntry(path);
+                    zos.putNextEntry(zipEntry);
+                    target.writeToStream(zos);
+                    zos.closeEntry();
+                }
+                // Keep track of the temporary file
+                tempFiles.add(zipFile);
+                // Upload the entire class
+                S3Object object = new S3Object(zipFile);
+                String key = pipelineId + "/" + filename;
+                String url = "https://s3.amazonaws.com/"
+                             + targetBucket
+                             + "/"
+                             + key;
+                object.setKey(key);
+                objects.add(object);
+
+                uploadedClasses.put(classId, url);
+            } catch (IOException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            simpleMulti.putObjects(targetBucket,
+                                   objects.toArray(new S3Object[objects.size()]));
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        }
+
+        // Clean up the files
+        for (File file : tempFiles) {
+            file.delete();
         }
     }
 

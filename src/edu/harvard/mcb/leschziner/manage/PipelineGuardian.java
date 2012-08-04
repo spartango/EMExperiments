@@ -253,13 +253,16 @@ public class PipelineGuardian {
         loaderStatus.putNumber("progress", loaderCheckpoint.getCompletions());
         loaderStatus.putNumber("expected",
                                loaderCheckpoint.getExpectedCompletions());
+        loaderStatus.putNumber("output", loaderCheckpoint.getTotalOutput());
+        loaderStatus.putNumber("runtime", loaderCheckpoint.getTotalRuntime());
         loaderStatus.putNumber("errors", loaderCheckpoint.getErrorCount());
         loaderStatus.putBoolean("done", loaderCheckpoint.isReached());
-
         status.putObject("loader", loaderStatus);
 
         JsonObject pickerStatus = new JsonObject();
         pickerStatus.putNumber("progress", pickerCheckpoint.getCompletions());
+        pickerStatus.putNumber("output", pickerCheckpoint.getTotalOutput());
+        pickerStatus.putNumber("runtime", pickerCheckpoint.getTotalRuntime());
         pickerStatus.putNumber("expected",
                                pickerCheckpoint.getExpectedCompletions());
         pickerStatus.putNumber("errors", pickerCheckpoint.getErrorCount());
@@ -269,6 +272,8 @@ public class PipelineGuardian {
 
         JsonObject filterStatus = new JsonObject();
         filterStatus.putNumber("progress", filterCheckpoint.getCompletions());
+        filterStatus.putNumber("output", filterCheckpoint.getTotalOutput());
+        filterStatus.putNumber("runtime", filterCheckpoint.getTotalRuntime());
         filterStatus.putNumber("expected",
                                filterCheckpoint.getExpectedCompletions());
         filterStatus.putNumber("errors", filterCheckpoint.getErrorCount());
@@ -282,6 +287,10 @@ public class PipelineGuardian {
         generatorStatus.putNumber("expected",
                                   generatorCheckpoint.getExpectedCompletions());
         generatorStatus.putNumber("errors", generatorCheckpoint.getErrorCount());
+        generatorStatus.putNumber("runtime",
+                                  generatorCheckpoint.getTotalRuntime());
+        generatorStatus.putNumber("output",
+                                  generatorCheckpoint.getTotalOutput());
         generatorStatus.putBoolean("done", generatorCheckpoint.isReached());
 
         status.putObject("generation", generatorStatus);
@@ -294,6 +303,8 @@ public class PipelineGuardian {
         classifierStatus.putNumber("errors",
                                    classifierCheckpoint.getErrorCount());
         classifierStatus.putBoolean("loaded", classifierCheckpoint.isReached());
+        classifierStatus.putNumber("runtime",
+                                   uploadCheckpoint.getTotalRuntime());
         classifierStatus.putBoolean("classified", uploadCheckpoint.isReached());
         classifierStatus.putBoolean("done", uploadCheckpoint.hasUploaded());
         status.putObject("classifier", classifierStatus);

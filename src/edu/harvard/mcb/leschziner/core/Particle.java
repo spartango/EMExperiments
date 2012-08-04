@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -342,6 +343,16 @@ public class Particle implements Serializable, Cloneable {
         opencv_highgui.cvSaveImage(filename, image);
     }
 
+    public byte[] toPng() throws IOException {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        writeToStream(outStream);
+        return outStream.toByteArray();
+    }
+
+    public void writeToStream(OutputStream outStream) throws IOException {
+        ImageIO.write(image.getBufferedImage(), "png", outStream);
+    }
+
     public static Particle fromFile(String filename) throws IOException {
         BufferedImage image = AutoImageReader.readImage(filename);
         if (image == null) {
@@ -515,9 +526,4 @@ public class Particle implements Serializable, Cloneable {
         return new Particle(dst);
     }
 
-    public byte[] toPng() throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ImageIO.write(image.getBufferedImage(), "png", outStream);
-        return outStream.toByteArray();
-    }
 }
