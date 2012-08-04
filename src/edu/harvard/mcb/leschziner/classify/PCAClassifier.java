@@ -52,4 +52,11 @@ public class PCAClassifier extends DistributedClassifier {
                                       executorName));
     }
 
+    @Override public void destroy() {
+        super.destroy();
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyBufferedQueue(executorName
+                                                  + DistributedProcessingTask.EVENT_SUFFIX);
+        DefaultStorageEngine.getStorageEngine().destroyQueue(targetQueueName);
+    }
 }

@@ -57,4 +57,31 @@ public class HazelcastStorage implements StorageEngine {
             return bufferedQueues.get(name);
         }
     }
+
+    @Override public void destroyAtomicNumber(String name) {
+        instance.getAtomicNumber(name).destroy();
+    }
+
+    @Override public void destroyMap(String name) {
+        instance.getMap(name).destroy();
+    }
+
+    @Override public void destroyMultiMap(String name) {
+        instance.getMultiMap(name).destroy();
+    }
+
+    @Override public void destroyQueue(String name) {
+        instance.getQueue(name).destroy();
+    }
+
+    @Override public void destroyBufferedQueue(String name) {
+        BufferedQueue queue = bufferedQueues.remove(name);
+        if (queue != null) {
+            queue.destroy();
+        }
+    }
+
+    @Override public void destroySet(String name) {
+        instance.getSet(name).destroy();
+    }
 }

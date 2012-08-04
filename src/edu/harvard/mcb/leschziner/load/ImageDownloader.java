@@ -9,7 +9,7 @@ import edu.harvard.mcb.leschziner.distributed.DistributedTaskHandler;
 import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
 
 public class ImageDownloader extends DistributedTaskHandler implements
-                                                       ParticleSource {
+                                                           ParticleSource {
     private final Vector<String>            imagePaths;
 
     // Queue of particles produced
@@ -38,5 +38,10 @@ public class ImageDownloader extends DistributedTaskHandler implements
 
     @Override public BlockingQueue<Particle> getParticleQueue() {
         return loadedImages;
+    }
+
+    @Override public void destroy() {
+        super.destroy();
+        DefaultStorageEngine.getStorageEngine().destroyQueue(imageQueueName);
     }
 }

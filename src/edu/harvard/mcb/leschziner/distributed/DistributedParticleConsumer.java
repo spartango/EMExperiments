@@ -68,7 +68,6 @@ public abstract class DistributedParticleConsumer extends
             queueFromEvent(ItemEvent<Particle> event) {
         String sourceName = event.getSource().toString();
         if (sourceName.startsWith("q:")) {
-
             String queueName = sourceName.substring(2);
             return DefaultStorageEngine.getStorageEngine().getQueue(queueName);
         } else {

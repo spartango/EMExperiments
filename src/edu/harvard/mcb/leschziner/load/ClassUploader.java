@@ -225,4 +225,11 @@ public class ClassUploader {
 
         return results.encode();
     }
+
+    public void destroy() {
+        DefaultStorageEngine.getStorageEngine().destroyMap(this.averageMapName);
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyMultiMap(this.classMapName);
+
+    }
 }

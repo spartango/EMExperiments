@@ -104,4 +104,28 @@ public class LocalMemStorage implements StorageEngine {
         }
     }
 
+    @Override public void destroyAtomicNumber(String name) {
+        atomicNumbers.remove(name);
+    }
+
+    @Override public void destroyMap(String name) {
+        maps.remove(name);
+    }
+
+    @Override public void destroyMultiMap(String name) {
+        multiMaps.remove(name);
+    }
+
+    @Override public void destroyQueue(String name) {
+        queues.remove(name);
+    }
+
+    @Override public void destroyBufferedQueue(String name) {
+        bufferedQueues.remove(name);
+    }
+
+    @Override public void destroySet(String name) {
+        sets.remove(name);
+    }
+
 }

@@ -39,4 +39,10 @@ public abstract class DistributedParticlePicker extends
     @Override public void processParticle(Particle particle) {
         processMicrograph(particle);
     }
+
+    @Override public void destroy() {
+        super.destroy();
+        DefaultStorageEngine.getStorageEngine().destroyQueue(particleQueueName);
+    }
+
 }

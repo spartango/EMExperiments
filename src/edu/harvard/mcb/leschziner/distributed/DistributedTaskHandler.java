@@ -87,4 +87,19 @@ public abstract class DistributedTaskHandler {
                                    .getBufferedQueue(executorName
                                                      + DistributedProcessingTask.EVENT_SUFFIX);
     }
+
+    public void destroy() {
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyAtomicNumber(executorName
+                                                 + DistributedProcessingTask.PENDING_SUFFIX);
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyAtomicNumber(executorName
+                                                 + DistributedProcessingTask.ACTIVE_SUFFIX);
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyAtomicNumber(executorName + "_totalreqs");
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyBufferedQueue(executorName
+                                                  + DistributedProcessingTask.EVENT_SUFFIX);
+
+    }
 }

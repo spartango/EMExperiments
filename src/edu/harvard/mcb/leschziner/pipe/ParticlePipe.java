@@ -29,4 +29,10 @@ public abstract class ParticlePipe extends DistributedParticleConsumer implement
         return processedQueueName;
     }
 
+    @Override public void destroy() {
+        super.destroy();
+        DefaultStorageEngine.getStorageEngine()
+                            .destroyQueue(processedQueueName);
+    }
+
 }

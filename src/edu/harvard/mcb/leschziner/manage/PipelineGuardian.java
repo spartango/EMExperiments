@@ -33,7 +33,6 @@ public class PipelineGuardian {
     private final UUID                uuid;
 
     // Pipeline stages
-
     private ImageDownloader           downloader;
     private DistributedParticlePicker picker;
     private ParticleFilteringPipe     filter;
@@ -339,8 +338,13 @@ public class PipelineGuardian {
     }
 
     public void destroy() {
-        // TODO Auto-generated method stub
         classifier.clearClasses();
+        downloader.destroy();
+        picker.destroy();
+        filter.destroy();
+        generator.destroy();
+        classifier.destroy();
+        uploader.destroy();
     }
 
 }

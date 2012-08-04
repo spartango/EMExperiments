@@ -71,4 +71,11 @@ public abstract class DistributedClassifier extends DistributedParticleConsumer 
         classAverages.clear();
         classes.clear();
     }
+
+    @Override public void destroy() {
+        super.destroy();
+        DefaultStorageEngine.getStorageEngine().destroyMap(averagesMapName);
+        DefaultStorageEngine.getStorageEngine().destroyMultiMap(classesMapName);
+    }
+
 }
