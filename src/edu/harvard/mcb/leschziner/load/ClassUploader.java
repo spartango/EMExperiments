@@ -134,6 +134,8 @@ public class ClassUploader {
                     zos.write(buffer);
                     zos.closeArchiveEntry();
                 }
+                zos.finish();
+
                 // Keep track of the temporary file
                 tempFiles.add(zipFile);
                 // Upload the entire class
