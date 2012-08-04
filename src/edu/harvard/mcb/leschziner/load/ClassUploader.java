@@ -1,16 +1,14 @@
 package edu.harvard.mcb.leschziner.load;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
@@ -120,19 +118,21 @@ public class ClassUploader {
         objects.clear();
         Vector<File> tempFiles = new Vector<>();
         for (Long classId : classifier.getClassIds()) {
-            String filename = "download/" + classId + ".zip";
-            File zipFile = new File(filename);
-            try (OutputStream buffer = new FileOutputStream(zipFile);
-                 ZipOutputStream zos = new ZipOutputStream(buffer)) {
+            String filename = classId + ".zip";
+            File zipFile = new File("download/" + filename);
+
+            try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(zipFile)) {
                 for (Particle target : classifier.getClass(classId)) {
-
+                    // Give the particle a filename
                     UUID uuid = UUID.randomUUID();
-                    String path = classId + "/" + uuid + ".png";
+                    String path = uuid + ".png";
 
-                    ZipEntry zipEntry = new ZipEntry(path);
-                    zos.putNextEntry(zipEntry);
-                    target.writeToStream(zos);
-                    zos.closeEntry();
+                    ZipArchiveEntry zipEntry = new ZipArchiveEntry(path);
+                    byte[] buffer = target.toPng();
+                    zipEntry.setSize(buffer.length);
+                    zos.putArchiveEntry(zipEntry);
+                    zos.write(buffer);
+                    zos.closeArchiveEntry();
                 }
                 // Keep track of the temporary file
                 tempFiles.add(zipFile);
