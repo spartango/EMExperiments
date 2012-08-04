@@ -217,7 +217,7 @@ public class ClassUploader {
             }
             classResults.putArray("particles", classParticles);
             classResults.putString("average", uploadedAverages.get(classId));
-            classResults.putNumber("count", uploadedClasses.get(classId).size());
+            classResults.putNumber("count", classifier.getClass(classId).size());
             results.putObject(classId.toString(), classResults);
         }
 
