@@ -1,12 +1,19 @@
 package edu.harvard.mcb.leschziner.core;
 
-import java.awt.image.BufferedImage;
+import java.util.concurrent.BlockingQueue;
 
+/**
+ * Generates particles to be processed by consumers
+ * 
+ * @author spartango
+ * 
+ */
 public interface ParticleSource {
 
-    public void addListener(ParticleSourceListener p);
-
-    public void removeListener(ParticleSourceListener p);
-
-    public void processMicrograph(BufferedImage image);
+    /**
+     * Get the queue in which particles that are built can be found
+     * 
+     * @return the particle queue from which the consumer should take
+     */
+    public BlockingQueue<Particle> getParticleQueue();
 }

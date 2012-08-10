@@ -9,18 +9,23 @@ import edu.harvard.mcb.leschziner.particlefilter.Shifter;
 
 public class ShiftGenerator implements ParticleGenerator {
 
-    private Vector<Shifter> shifters;
+    /**
+     * 
+     */
+    private static final long     serialVersionUID = -2017066268978441033L;
+    private final Vector<Shifter> shifters;
 
     public ShiftGenerator(int maxShift, int deltaShift) {
-        for (int x = -maxShift; x < maxShift; x += deltaShift) {
-            for (int y = -maxShift; y < maxShift; y += deltaShift) {
+        shifters = new Vector<Shifter>();
+
+        for (int x = -maxShift; x <= maxShift; x += deltaShift) {
+            for (int y = -maxShift; y <= maxShift; y += deltaShift) {
                 shifters.add(new Shifter(x, y));
             }
         }
     }
 
-    @Override
-    public Collection<Particle> generate(Particle seed) {
+    @Override public Collection<Particle> generate(Particle seed) {
         // Apply each rotator to the particle
         Vector<Particle> shifted = new Vector<Particle>(shifters.size());
         for (Shifter shifter : shifters) {
@@ -29,8 +34,7 @@ public class ShiftGenerator implements ParticleGenerator {
         return shifted;
     }
 
-    @Override
-    public Collection<Particle> generate(Collection<Particle> seeds) {
+    @Override public Collection<Particle> generate(Collection<Particle> seeds) {
         Vector<Particle> shifted = new Vector<Particle>(seeds.size()
                                                         * shifters.size());
         for (Particle seed : seeds) {

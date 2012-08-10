@@ -1,65 +1,50 @@
 package edu.harvard.mcb.leschziner.particlefilter;
 
-import java.awt.image.Kernel;
+import com.googlecode.javacv.cpp.opencv_imgproc;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
 
+/**
+ * Applies a gaussian filter to a particle
+ * 
+ * @author spartango
+ * 
+ */
 public class GaussianFilter implements ParticleFilter {
 
-    private Kernel xKernel;
-    private Kernel yKernel;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5419594820002104375L;
 
+    // Radius of the filtering kernel
+    private final int         radius;
+
+    /**
+     * Builds a gaussian filter
+     * 
+     * @param radius
+     */
     public GaussianFilter(int radius) {
-        xKernel = generateXKernel(radius);
-        yKernel = generateYKernel(radius);
+        this.radius = radius;
     }
 
-    @Override
-    public Particle filter(Particle target) {
-        // Apply each 1D filter
-        Particle filtered = Particle.convolve(target, xKernel);
-        filtered = Particle.convolve(filtered, yKernel);
-        return filtered;
-    }
+    /**
+     * Applies a gaussian blur to the particle
+     */
+    @Override public Particle filter(Particle target) {
+        Particle result = target.createCompatible();
 
-    private static Kernel generateXKernel(int radius) {
-        float[] xDistribution = generateGaussian(radius);
-        return new Kernel(xDistribution.length, 1, xDistribution);
-    }
+        // The kernel is separable, so we'll use 1D kernels
+        opencv_imgproc.cvSmooth(target.getImage(),
+                                result.getImage(),
+                                opencv_imgproc.CV_GAUSSIAN,
+                                radius,
+                                radius,
+                                0,
+                                0);
 
-    private static Kernel generateYKernel(int radius) {
-        float[] yDistribution = generateGaussian(radius);
-        return new Kernel(1, yDistribution.length, yDistribution);
-    }
-
-    private static float[] generateGaussian(int radius) {
-        // Build kernel
-        int rCeil = (int) Math.ceil(radius);
-        int rows = rCeil * 2 + 1;
-        float[] basis = new float[rows];
-        float sigma = radius / 3;
-        float sigma2sq = 2 * sigma * sigma;
-        float sigmaPi2 = (float) (2 * Math.PI * sigma);
-        float sqrtSigmaPi2 = (float) Math.sqrt(sigmaPi2);
-        float radiusSq = radius * radius;
-        float total = 0;
-        int index = 0;
-        for (int row = -rCeil; row <= rCeil; row++) {
-            float distance = row * row;
-            if (distance > radiusSq) {
-                basis[index] = 0;
-            } else {
-                basis[index] = (float) Math.exp(-distance / sigma2sq)
-                               / sqrtSigmaPi2;
-            }
-            total += basis[index];
-            index++;
-        }
-        for (int i = 0; i < rows; i++) {
-            basis[i] /= total;
-        }
-
-        return basis;
+        return result;
     }
 }

@@ -1,18 +1,22 @@
 package edu.harvard.mcb.leschziner.analyze;
 
-import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Iterator;
 
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
 
 public class ClassAverager {
 
-    private static final int RED_OFFSET   = 0;
-    private static final int GREEN_OFFSET = 1;
-    private static final int BLUE_OFFSET  = 2;
-
+    /**
+     * Averages a set of particles to generate an average, summing each pixel
+     * location across all particles, then dividing by the number of images.
+     * Average does segregate colorchannels. Returns null if the particle set is
+     * empty
+     * 
+     * @param particles
+     *            : to be averaged
+     * @return A single average particle
+     */
     public static Particle average(Collection<Particle> particles) {
         Iterator<Particle> iter = particles.iterator();
         int particleCount = particles.size();
@@ -23,42 +27,28 @@ public class ClassAverager {
             int size = particle.getSize();
 
             // Allocate a sum buffer
-            long[] sums = new long[3 * size * size];
-
+            long[] sums = new long[size * size];
             for (; iter.hasNext(); particle = iter.next()) {
                 // Get the pixels (RGB) from the image
-                int[] pixelBuffer = particle.getPixelBuffer();
-                for (int i = 0; i < sums.length - 3; i += 3) {
-                    // For each pixel
-                    // Extract each color and add it to the sums
-                    int pixel = pixelBuffer[i / 3];
-                    sums[i + RED_OFFSET] += ColorUtils.extractRed(pixel);
-                    sums[i + GREEN_OFFSET] += ColorUtils.extractGreen(pixel);
-                    sums[i + BLUE_OFFSET] += ColorUtils.extractBlue(pixel);
+                int i = 0;
+                for (int x = 0; x < size; x++) {
+                    for (int y = 0; y < size; y++) {
+                        sums[i] += particle.getPixel(x, y);
+                        i++;
+                    }
                 }
             }
 
-            // Divide sums by the number of images
-            int[] avgBuffer = new int[size * size];
-            for (int i = 0; i < sums.length - 3; i += 3) {
-                avgBuffer[i / 3] = ColorUtils.buildColor((int) (sums[i
-                                                                     + RED_OFFSET] / particleCount),
-                                                         (int) (sums[i
-                                                                     + GREEN_OFFSET] / particleCount),
-                                                         (int) (sums[i
-                                                                     + BLUE_OFFSET] / particleCount));
+            Particle average = particle.createCompatible();
+            int i = 0;
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    average.setPixel(x, y, (int) (sums[i] / particleCount));
+
+                    i++;
+                }
             }
 
-            BufferedImage avgImage = new BufferedImage(
-                                                       size,
-                                                       size,
-                                                       particle.asBufferedImage()
-                                                               .getType());
-
-            // Copy in a pixel buffer
-            avgImage.setRGB(0, 0, size, size, avgBuffer, 0, size);
-
-            Particle average = new Particle(avgImage);
             return average;
         } else {
             return null;

@@ -1,144 +1,100 @@
 package edu.harvard.mcb.leschziner.classify;
 
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
-import edu.harvard.mcb.leschziner.analyze.ClassAverager;
-import edu.harvard.mcb.leschziner.analyze.PearsonCorrelator;
+import com.hazelcast.core.AtomicNumber;
+
 import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.ParticleClassifier;
-import edu.harvard.mcb.leschziner.core.ParticleSourceListener;
+import edu.harvard.mcb.leschziner.storage.DefaultStorageEngine;
+import edu.harvard.mcb.leschziner.storage.StorageEngine;
 
-public class CrossCorClassifier implements ParticleClassifier,
-                               ParticleSourceListener {
-    public static int                                                    CORE_POOL  = 8;
-    public static int                                                    MAX_POOL   = 8;
-    public static int                                                    KEEP_ALIVE = 1000;
+/**
+ * A Classifier that compares particles to a set of template particles, sorting
+ * them into classes by greatest similarity (determined by Pearson cross
+ * correlation).
+ * 
+ * @author spartango
+ * 
+ */
+public class CrossCorClassifier extends DistributedClassifier {
 
-    private ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>> classes;
-
-    // This is a cache of calculated classAverages
-    private ConcurrentHashMap<Particle, Particle>                        classAverages;
-
-    private ThreadPoolExecutor                                           threadPool;
-    private BlockingQueue<Runnable>                                      classifyQueue;
+    // The set of templates keyed by UUID
+    private final String              templateSetName;
+    private final AtomicNumber        currentTemplateId;
+    private final Map<Long, Particle> templates;
 
     // Gates classification with a minimum correlation
-    private double                                                       matchThreshold;
+    private final double              matchThreshold;
 
-    // Defaults to trying to classify all particles
+    /**
+     * Builds a Cross Correlating Classifier with no minimum correlation
+     * required for sorting
+     */
     public CrossCorClassifier() {
         this(0.0);
     }
 
+    /**
+     * Builds a Cross Correlating Classifier that only adds a particle to a
+     * class when its correlation to the template is above a certain value
+     * 
+     * @param minimumCorrelation
+     *            : minimum score necessary to sort a particle
+     */
     public CrossCorClassifier(double minimumCorrelation) {
+        super();
         matchThreshold = minimumCorrelation;
-        classes = new ConcurrentHashMap<Particle, ConcurrentLinkedQueue<Particle>>();
-        classAverages = new ConcurrentHashMap<Particle, Particle>();
-        classifyQueue = new LinkedBlockingQueue<Runnable>();
-        threadPool = new ThreadPoolExecutor(CORE_POOL, MAX_POOL, KEEP_ALIVE,
-                                            TimeUnit.MILLISECONDS,
-                                            classifyQueue);
+
+        templateSetName = "ClassTemplates_" + this.hashCode();
+
+        StorageEngine storage = DefaultStorageEngine.getStorageEngine();
+        currentTemplateId = storage.getAtomicNumber(templateSetName);
+        templates = storage.getMap(templateSetName);
     }
 
-    @Override
-    public Collection<Particle> getClassForTemplate(Particle template) {
-        return classes.get(template);
-    }
-
-    @Override
-    public Particle getAverageForTemplate(Particle template) {
-        // Checks the cache for a class average
-        if (classAverages.containsKey(template)) {
-            return classAverages.get(template);
-        } else {
-            // Otherwise calculates a new one, which is a bit costly
-            Particle average = ClassAverager.average(classes.get(template));
-            if (average != null) {
-                classAverages.put(template, average);
-            }
-            return average;
-        }
-    }
-
-    private void handleParticle(Particle target) {
-        // Iterate through the templates, scoring pearson correlation.
-        double bestCorrelation = 0;
-        Particle bestTemplate = null;
-        for (Particle template : classes.keySet()) {
-            double score = PearsonCorrelator.compare(target, template);
-            if (score > bestCorrelation) {
-                bestCorrelation = score;
-                bestTemplate = template;
-            }
-        }
-        // Add to closest match, if there is one at all
-        if (bestTemplate != null && bestCorrelation >= matchThreshold) {
-            // System.out.println("[CrossCorClassifier " +
-            // Thread.currentThread()
-            // + "]: Classifying " + target.hashCode()
-            // + " with " + bestTemplate.hashCode() + " -> "
-            // + bestCorrelation);
-            addToClass(bestTemplate, target);
-        }
-    }
-
-    @Override
-    public void classify(final Particle target) {
-        // Do this asynchronously
-        threadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                handleParticle(target);
-            }
-        });
+    /**
+     * Classifies a particle
+     */
+    @Override public void processParticle(final Particle target) {
+        // Classify the particle asynchronously in a distributed way
+        execute(new CrossCorClassifierTask(target,
+                                           matchThreshold,
+                                           classesMapName,
+                                           averagesMapName,
+                                           templateSetName,
+                                           executorName));
 
     }
 
-    private void addToClass(Particle template, Particle target) {
-        classes.get(template).add(target);
-        // Invalidates class average cache
-        classAverages.remove(template);
-    }
-
-    @Override
+    /**
+     * Adds a template to compare particles against
+     */
     public void addTemplate(Particle template) {
-        System.out.println("[CrossCorClassifier]: Added Template "
-                           + template.hashCode());
-        classes.put(template, new ConcurrentLinkedQueue<Particle>());
+        long id = currentTemplateId.incrementAndGet();
+        templates.put(id, template);
     }
 
+    /**
+     * Add a bunch of templates to compare particles against
+     * 
+     * @param templates
+     */
     public void addTemplates(Collection<Particle> templates) {
         for (Particle template : templates) {
             addTemplate(template);
         }
     }
 
-    @Override
+    /**
+     * Get all the templates being used for classification
+     */
     public Collection<Particle> getTemplates() {
-        return classes.keySet();
+        return templates.values();
     }
 
-    @Override
-    public void onNewParticle(Particle p) {
-        // Try to classify incoming particles
-        classify(p);
+    @Override public void classifyAll() {
+        // Doesn't do anything, due to streaming classification
     }
 
-    public void stop() {
-        threadPool.shutdown();
-    }
-
-    public int getPendingCount() {
-        return classifyQueue.size();
-    }
-
-    public boolean isActive() {
-        return threadPool.getActiveCount() > 0;
-    }
 }

@@ -1,45 +1,31 @@
 package edu.harvard.mcb.leschziner.particlefilter;
 
-import java.awt.image.BufferedImage;
+import com.googlecode.javacv.cpp.opencv_core.CvSize;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_imgproc;
 
 import edu.harvard.mcb.leschziner.core.Particle;
 import edu.harvard.mcb.leschziner.core.ParticleFilter;
-import edu.harvard.mcb.leschziner.util.ColorUtils;
-import edu.harvard.mcb.leschziner.util.MatrixUtils;
 
 public class Binner implements ParticleFilter {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 851119644112631863L;
+    private final double      binningFactor;
 
-    private int binSize;
-
-    public Binner(int size) {
-        binSize = size;
+    public Binner(double binningFactor) {
+        super();
+        this.binningFactor = binningFactor;
     }
 
-    @Override
-    public Particle filter(Particle target) {
-        int targetSize = target.getSize();
-        int resultSize = targetSize / binSize;
-        Particle result = new Particle(
-                                       new BufferedImage(
-                                                         resultSize,
-                                                         resultSize,
-                                                         target.asBufferedImage()
-                                                               .getType()));
-        // For each bin
-        for (int y = 0; y < targetSize - binSize; y += binSize) {
-            for (int x = 0; x < targetSize - binSize; x += binSize) {
-                // Get all the pixels in the bin
-                int[] binPixels = ColorUtils.extractRed(result.getRegionBuffer(x,
-                                                                               y,
-                                                                               binSize,
-                                                                               binSize));
-                // Average them
-                int average = (int) MatrixUtils.average(binPixels);
-                // Assign them to a pixel
-                result.setPixel(x, y, average);
-            }
-        }
-
+    @Override public Particle filter(Particle target) {
+        int newSize = (int) Math.round(target.getSize() / binningFactor);
+        Particle result = new Particle(IplImage.create(new CvSize(newSize,
+                                                                  newSize),
+                                                       target.getDepth(),
+                                                       target.getChannels()));
+        opencv_imgproc.cvResize(target.getImage(), result.getImage());
         return result;
     }
 }
