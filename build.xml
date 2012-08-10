@@ -1,52 +1,87 @@
 <project name="EMExperiments" default="help" basedir=".">
-	<target name="clearresults">
-		<delete dir="processed"/>
-		<mkdir dir="processed" />
-	</target>
+    <path id="project.class.path">
+        <pathelement path="bin/"/>
+        <pathelement path="lib/loci_tools.jar"/>
+        <pathelement path="lib/hazelcast-all-2.2.jar"/>
+        <pathelement path="lib/javacpp.jar"/>
+        <pathelement path="lib/javacv.jar"/>
+        <pathelement path="lib/javacv-macosx-x86_64.jar"/>
+        <pathelement path="lib/javacv-linux-x86_64.jar"/>
+        <pathelement path="lib/javacv-linux-x86.jar"/>
+        <pathelement path="lib/jedis-2.1.0.jar"/>
+        <pathelement path="lib/vertx-core-1.2.2.final.jar"/>
+    	<pathelement path="lib/vertx-lang-java-1.2.2.final.jar"/>
+    	<pathelement path="lib/netty-3.5.0.Final.jar"/>
+    	<pathelement path="lib/jackson-mapper-asl-1.9.4.jar"/>
+    	<pathelement path="lib/jackson-core-asl-1.9.4.jar"/>
+    	<pathelement path="lib/commons-codec-1.4.jar"/>
+    	<pathelement path="lib/commons-logging-1.1.1.jar"/>
+    	<pathelement path="lib/httpclient-4.1.2.jar"/>
+    	<pathelement path="lib/httpcore-4.1.2.jar"/>
+    	<pathelement path="lib/java-xmlbuilder-0.4.jar"/>
+    	<pathelement path="lib/jets3t-0.9.0.jar"/> 
+    	<pathelement path="lib/commons-compress-1.4.1.jar"/>
+    </path>
 
-	<target name="clean" depends="clearresults">
-	    <delete dir="bin" />
-	</target>
+    <target name="clearresults">
+        <delete dir="processed"/>
+        <mkdir dir="processed" />
+    	<delete dir="download" />
+        <mkdir dir="download" />
+    </target>
 
-	<target name="javadoc">
-	    <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
+    <target name="clean" depends="clearresults">
+        <delete dir="bin" />
+    </target>
 
-	        <packageset dir="src" defaultexcludes="yes">
-	            <include name="edu/**" />
-	        </packageset>
+    <target name="javadoc">
+        <javadoc destdir="docs" author="true" version="true" use="true" windowtitle="EMProcessing API">
+            <classpath refid="project.class.path"/>
+            <packageset dir="src" defaultexcludes="yes">
+                <include name="edu/**" />
+            </packageset>
+            <doctitle>
+                <![CDATA[<h1>EMExperiments Javadoc</h1>]]></doctitle>
+        <bottom>
+        </bottom>
 
-	        <doctitle>
-	            <![CDATA[<h1>EMExperiments Javadoc</h1>]]></doctitle>
-	    <bottom>
-	    </bottom>
+        </javadoc>
+    </target>
 
-		</javadoc>
-	</target>
+    <target name="compile">
+        <mkdir dir="bin/" />
+        <javac srcdir="src" destdir="bin" debug="on">
+            <classpath refid="project.class.path"/>
+        </javac>
+    </target>
 
-	<target name="compile">
-	    <mkdir dir="bin/" />
-	    <javac srcdir="src" destdir="bin" classpath="lib/"/>
-	</target>
+    <target name="jar" depends="compile">
+        <mkdir dir="jar" />
+        <jar destfile="jar/EMExperiments.jar" basedir="bin">
+        </jar>
+    </target>
 
-	<target name="jar" depends="compile">
-	    <mkdir dir="jar" />
-	    <jar destfile="jar/EMExperiments.jar" basedir="bin">
-	    </jar>
-	</target>
+    <target name="run" depends="compile">
+        <java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.deploy.Main">
+            <classpath refid="project.class.path"/>
+        </java>
+    </target>
 
-	<target name="run" depends="compile">
-		<java fork="yes" maxmemory="3100m" classname="edu.harvard.mcb.leschziner.deploy.Main" classpath="bin/">
-		</java>
-	</target>
-
-	<target name="help">
-	    <echo> - EMExperiments Project Build System - ${line.separator}</echo>
-	    <echo>ant help: Get this list ${line.separator}</echo>
-	    <echo>ant compile: Compile the project ${line.separator}</echo>
-	    <echo>ant clearresults: clear the processed results ${line.separator}</echo>
-	    <echo>ant clean: clear the compiled class files ${line.separator}</echo>
-	    <echo>ant run: run the image test ${line.separator}</echo>
-	    <echo>ant jar: create a jar with the compiled classes ${line.separator}</echo>
-	    <echo>ant javadoc: generate a javadoc for this project</echo>
-	</target>
+    <target name="runremote" depends="compile">
+        <java fork="yes" maxmemory="4096m" classname="edu.harvard.mcb.leschziner.remote.RemoteMain">
+            <classpath refid="project.class.path"/>
+        </java>
+    </target>   
+    
+    <target name="help">
+        <echo> - EMExperiments Project Build System - ${line.separator}</echo>
+        <echo>ant help: Get this list ${line.separator}</echo>
+        <echo>ant compile: Compile the project ${line.separator}</echo>
+        <echo>ant clearresults: Clear the processed results ${line.separator}</echo>
+        <echo>ant clean: Clear the compiled class files ${line.separator}</echo>
+        <echo>ant run: Run the image test ${line.separator}</echo>
+        <echo>ant jar: Create a jar with the compiled classes ${line.separator}</echo>
+        <echo>ant javadoc: Generate a javadoc for this project</echo>
+        <echo>ant runremote: Start a mindless cluster process </echo>
+    </target>
 </project>

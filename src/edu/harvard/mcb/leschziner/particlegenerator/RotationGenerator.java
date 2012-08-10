@@ -9,7 +9,11 @@ import edu.harvard.mcb.leschziner.particlefilter.Rotator;
 
 public class RotationGenerator implements ParticleGenerator {
 
-    private Vector<Rotator> rotators;
+    /**
+     * 
+     */
+    private static final long     serialVersionUID = 2320805008859786796L;
+    private final Vector<Rotator> rotators;
 
     public RotationGenerator(double deltaTheta) {
         rotators = new Vector<Rotator>();
@@ -18,8 +22,7 @@ public class RotationGenerator implements ParticleGenerator {
         }
     }
 
-    @Override
-    public Collection<Particle> generate(Particle seed) {
+    @Override public Collection<Particle> generate(Particle seed) {
         // Apply each rotator to the particle
         Vector<Particle> rotated = new Vector<Particle>(rotators.size());
         for (Rotator rotator : rotators) {
@@ -28,8 +31,7 @@ public class RotationGenerator implements ParticleGenerator {
         return rotated;
     }
 
-    @Override
-    public Collection<Particle> generate(Collection<Particle> seeds) {
+    @Override public Collection<Particle> generate(Collection<Particle> seeds) {
         Vector<Particle> rotated = new Vector<Particle>(seeds.size()
                                                         * rotators.size());
         for (Particle seed : seeds) {

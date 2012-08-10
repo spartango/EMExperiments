@@ -2,15 +2,23 @@ package edu.harvard.mcb.leschziner.core;
 
 import java.util.Collection;
 
-public interface ParticleClassifier {
+/**
+ * Classifies particles into groups, each associated by similarity to a single
+ * template
+ * 
+ * @author spartango
+ * 
+ */
+public interface ParticleClassifier extends ParticleConsumer {
 
-    public Collection<Particle> getClassForTemplate(Particle template);
+    public Collection<Particle> getClass(long classId);
 
-    public Particle getAverageForTemplate(Particle template);
+    public Particle getClassAverage(long templateId);
 
-    public Collection<Particle> getTemplates();
+    public Collection<Long> getClassIds();
 
-    public void classify(Particle target);
+    public void processParticle(Particle target);
 
-    public void addTemplate(Particle template);
+    public void classifyAll();
+
 }

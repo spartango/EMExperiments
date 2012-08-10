@@ -1,96 +1,26 @@
 package edu.harvard.mcb.leschziner.deploy;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
-import edu.harvard.mcb.leschziner.classify.CrossCorClassifier;
-import edu.harvard.mcb.leschziner.core.Particle;
-import edu.harvard.mcb.leschziner.core.ParticleProcessingPipe;
-import edu.harvard.mcb.leschziner.particlefilter.CircularMask;
-import edu.harvard.mcb.leschziner.particlefilter.GaussianFilter;
-import edu.harvard.mcb.leschziner.particlefilter.LowPassFilter;
-import edu.harvard.mcb.leschziner.particlegenerator.RotationGenerator;
-import edu.harvard.mcb.leschziner.particlesource.DoGParticleSource;
+import edu.harvard.mcb.leschziner.manage.GuardianManager;
 
 public class Main {
 
-    /**
-     * @param args
-     */
+    private static GuardianManager manager;
+
     public static void main(String[] args) {
-        try {
-            // Load the particle
-            System.out.println("[Main]: Preparing pipeline");
-            RotationGenerator templateRotator = new RotationGenerator(5);
+        System.out.println("[Main]: Starting Manager");
 
-            // Setup the Particle Builder
-            DoGParticleSource picker = new DoGParticleSource(80, 20, 22, 30,
-                                                             181, 200);
+        // Spin up a Manager
+        manager = new GuardianManager();
 
-            ParticleProcessingPipe processor = new ParticleProcessingPipe();
-            processor.addStage(new CircularMask(80));
-            //processor.addStage(new LowPassFilter(3));
-            //processor.addStage(new GaussianFilter(3));
+        System.out.println("[Main]: Manager Ready");
 
-            CrossCorClassifier classifier = new CrossCorClassifier(.961);
-
-            // Load up templates
-            for (int i = 16; i <= 19; i++) {
-                classifier.addTemplates(templateRotator.generate(Particle.fromFile("templates/rib_"
-                                                                                   + i
-                                                                                   + ".png")));
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.err.println("[Main]: Interrupted main, dying");
+                System.exit(0);
             }
-
-            picker.addListener(processor);
-            processor.addListener(classifier);
-
-            System.out.println("[Main]: Loading Images");
-            for (int i = 1; i <= 20; i++) {
-                BufferedImage micrograph = ImageIO.read(new File(
-                                                                 "/Volumes/allab/agupta/Raw/rib_10fold_49kx_"
-                                                                         + i
-                                                                         + ".png"));
-                System.out.println("[Main]: Processing Micrograph "
-                                   + micrograph.hashCode());
-                picker.processMicrograph(micrograph);
-            }
-
-            do {
-                System.out.println("[Main]: " + picker.getPendingCount()
-                                   + " micrographs and "
-                                   + classifier.getPendingCount()
-                                   + " unclassified particles waiting");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } while (picker.isActive() || classifier.isActive());
-
-            System.out.println("[Main]: Writing Class Averages");
-            for (Particle template : classifier.getTemplates()) {
-                Particle average = classifier.getAverageForTemplate(template);
-                if (average != null) {
-                    int matches = classifier.getClassForTemplate(template)
-                                            .size();
-                    System.out.println("[Main]: Template "
-                                       + template.hashCode() + " -> "
-                                       + average.hashCode() + " with "
-                                       + matches);
-                    if (matches > 3)
-                        average.toFile("processed/avg" + template.hashCode()
-                                       + "_" + matches + ".png");
-                }
-            }
-
-            System.out.println("[Main]: Complete");
-            System.exit(0);
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
     }
