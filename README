@@ -1,5 +1,50 @@
 EMExperiments
+=============
+A Framework and sandbox for distributed, pipelined processing of single particle electron micrographs. 
 
-(c) Anand Gupta, Harvard University, 2012
+--------------
+
+EMExperiments provides a bunch of processing primitives that can be used to easily manipulate single particles, 
+such as images of proteins, in the quest for 3D structure. These include filtering and transformation operations,
+blob extraction, principal component extraction, clustering, and matching/correlation.
+
+Beyond the primitives, EMExperiments includes multiple classes for common single particle EM tasks, such as
+particle picking (by template or contrast), alignment, and classification (reference-based or -free). 
+
+In addition, EMExperiments includes infrastructure to compose processing operations into pipelines, automatically 
+handling the distribution and parallelization of pipelined tasks over many cores or machines. 
+
+EMExperiments also provides management infrastructure to keep track of distributed pipeline progress and errors.
+
+An EMExperiments pipeline serves as the processing backend for EMPApp, a cloud-based alignment and classification 
+system, which can be found at http://www.getemapp.com/
+
+EMExperiments can handle raw micrographs or partially processed particle stacks in nearly any format, 
+including SPIDER, IMAGIC, and Gatan/FEI. 
+
+--------------
+You'll need:
+
+- the Oracle JDK 7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- OpenCV (v. >2.3) (http://opencv.willowgarage.com/wiki/)
+- Apache Ant (http://ant.apache.org)
+
+to use EMExperiments.
+--------------
 
 type 'ant' to begin
+
+--------------
+
+EMExperiments also makes use of:
+
+- Vert.x (http://vertx.io) as an HTTP Server for API endpoint
+- Hazelcast (http://hazelcast.com) for distributed execution and storage
+- Bio-Formats (http://loci.wisc.edu/software/bio-formats) for image import
+- Apache commons (Logging, Codec) (http://commons.apache.org) 
+- JetS3t (http://www.jets3t.org) for S3 storage
+- JavaCV (http://code.google.com/p/javacv/) for image processing
+
+These dependencies are packaged in the lib/ directory with their respective licenses. 
+--------------
+(c) Anand Gupta, Harvard University, 2012
