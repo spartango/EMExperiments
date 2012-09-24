@@ -20,7 +20,7 @@ public class AutoImageReader {
             images = new Vector<>(reader.getImageCount());
 
             for (int i = 0; i < reader.getImageCount(); i++) {
-                images.add(imageReader.openImage(0));
+                images.add(imageReader.openImage(i));
             }
 
         } catch (IOException e) {
